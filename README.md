@@ -24,7 +24,7 @@ By running merge_kernel immediately after split_kernel, you should get a fatbina
 
 Usage:
 ```
-./merger_kernel
+./merge_kernel
 ```
 ## edit_kernel
 
