@@ -10,7 +10,7 @@ This tool reads the elf header of a given amdgpu fat binary, and extract the ker
 
 A meta_data file named "fmeta_data.txt" will be generated with the name of the original fat binary, number of kernels, and offset and size of each kernel.
 
-## merge_kerenl
+## merge_kernel
 
 This tool reads the info in "fmeta_data.txt", merge the splitted kernels with a copy of the original fatbinary to create a new version of fatbinary that consists of (potentially) modified kernels, named <original_name>.new.  
 
