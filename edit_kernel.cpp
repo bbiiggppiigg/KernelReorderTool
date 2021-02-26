@@ -1,0 +1,268 @@
+#include <elf.h>
+#include <vector>
+#include <iostream>
+#include "CodeObject.h"
+#include "InstructionDecoder.h"
+using namespace std;
+using namespace Dyninst;
+using namespace ParseAPI;
+
+using namespace InstructionAPI;
+
+
+#define ElfW Elf64_Ehdr
+#define Shdr Elf64_Shdr
+void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
+    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
+    fread(shdr,sizeof(Shdr),1,f);
+}
+
+char * read_section(FILE * f, Shdr * shdr) {
+    int offset = shdr->sh_offset;
+    int size = shdr->sh_size;
+    fseek(f,offset,SEEK_SET);
+    char * ret = (char * ) malloc(size + 1 ) ;
+    fread(ret,size,1,f);
+    return ret;
+}
+
+
+char *  get_text(FILE * f, long long int &offset , long long int &size){
+    ElfW header;
+    fread(&header,sizeof(header),1,f);
+
+    Shdr strtable_header; 
+    read_shdr(&strtable_header,f,&header,header.e_shstrndx);
+    char * strtable = read_section(f,&strtable_header);
+
+    Shdr tmp_hdr;
+    int fatbin_index = -1;
+    for (unsigned int i = 1; i < header.e_shnum ; i ++){
+        read_shdr(&tmp_hdr,f,&header,i);
+        char * sh_name = strtable+tmp_hdr.sh_name;
+        if(0==strcmp(sh_name,".text")){
+            printf("found text!\n");
+            fatbin_index = i;
+            break;
+        }
+    }
+    if(fatbin_index == -1)
+        assert(0 && "failed");
+    free(strtable);
+    Shdr text_header;
+    read_shdr(&text_header,f,&header,fatbin_index);
+    char * text_section = read_section(f,&text_header);
+    offset = text_header.sh_offset;
+    size = text_header.sh_size;
+    printf("offset = %llx, size = %lld\n",offset,size);
+    return text_section;
+}
+
+
+class MyInsn {
+    public:
+        unsigned char * ptr;
+        unsigned int size;
+        string _pretty;
+        MyInsn( unsigned char * _ptr , unsigned int _size, string pretty) : ptr(_ptr) , size(_size), _pretty(pretty) {
+
+        };
+
+};
+class MyFunc {
+    public:
+        vector<MyInsn> myInsns;
+        unsigned int offset; 
+        Address _start ;
+        Address _end;
+        InstructionDecoder & _dec;
+
+        MyFunc(char * buffer  , Function * f, long long int offset ,InstructionDecoder & decoder):_dec(decoder) {
+            _start = f->addr();
+            auto fbl = f->blocks().end();
+            fbl--;
+            Block *b = *fbl;
+            _end = b->last();
+            _end += _dec.decode( (unsigned char *)buffer + _end - offset).size();
+            Address crtAddr = _start;
+            unsigned char * decode_target;
+            while(crtAddr < _end ){
+                decode_target = (unsigned char *) buffer + crtAddr - offset;
+                Instruction instr = _dec.decode(decode_target);
+                append(decode_target , instr.size() , instr.format() );
+                crtAddr += instr.size();
+            }
+        };
+
+        void append(MyInsn insn){
+            myInsns.push_back(insn);
+        }
+
+        void append(unsigned char * ptr, unsigned int size, string pretty){
+            myInsns.push_back(MyInsn(ptr,size,pretty));
+        }
+
+        void format(){
+            printf("\n\noutputing for function starting at address : %08lx\n",_start);
+            Address curAddr = _start;
+            for (size_t i =0; i < myInsns.size() ; i++){
+                printf("%lu:%08lx: %s \n",i,curAddr, myInsns[i]._pretty.c_str() );
+                curAddr += myInsns[i].size;
+            }
+
+        } 
+
+
+        void move_before( int target , int dst ){
+            if( target < dst ){
+                printf("move before require target: %d > dst : %d\n",target,dst);
+                return ;
+            }
+            for (int i = target ; dst < i ; i--){
+                std::swap(myInsns[i],myInsns[i-1]);
+            }
+
+        }
+        void move_after( int target , int dst ){
+            if( target > dst ){
+                printf("move before require target: %d < dst : %d\n",target,dst);
+                return ;
+            }
+            for (int i = target ; dst > i ; i++){
+                std::swap(myInsns[i],myInsns[i+1]);
+            }
+
+        }
+
+        char * serialize(){
+            char * ret = (char * ) malloc(_end-_start);
+            printf("size of ret = %lu\n",_end-_start);
+            int offset = 0;
+            for (auto &insn : myInsns){
+                memcpy(ret+offset, (char *) insn.ptr, insn.size );
+                offset += insn.size;
+            }
+            return ret; 
+        }
+};
+
+
+int main(int argc, char **argv){
+
+
+
+    if(argc != 2){
+        printf("Usage: %s <binary path>\n", argv[0]);
+        return -1;
+    }
+    char *binaryPath = argv[1];
+
+    FILE * fp = fopen(binaryPath,"rb");
+    long long int offset; // offset to the text section
+    long long int size; // size of the section
+    char * buffer = get_text(fp,offset,size);
+
+    fclose(fp);
+    SymtabCodeSource *sts;
+    CodeObject *co;
+    Instruction instr; //mod
+    SymtabAPI::Symtab *symTab;
+    std::string binaryPathStr(binaryPath);
+    bool isParsable = SymtabAPI::Symtab::openFile(symTab, binaryPathStr);
+    if(isParsable == false){
+        const char *error = "error: file can not be parsed";
+        cout << error;
+        return - 1;
+    }
+    sts = new SymtabCodeSource(binaryPath);
+    co = new CodeObject(sts);
+    //parse the binary given as a command line arg
+    co->parse();
+
+    //get list of all functions in the binary
+    const CodeObject::funclist &all = co->funcs();
+    if(all.size() == 0){
+        const char *error = "error: no functions in file";
+        cout << error;
+        return - 1;
+    }
+    auto fit = all.begin();
+
+    Function *f = *fit;
+    InstructionDecoder decoder(f->isrc()->getPtrToInstruction(f->addr()),
+            InstructionDecoder::maxInstructionLength,
+            f->region()->getArch());
+
+    vector<MyFunc> myfuncs;
+
+    for(;fit != all.end(); ++fit){
+        Function *f = *fit;
+        myfuncs.push_back(MyFunc(buffer,f,offset,decoder)); 
+    }
+
+
+    int mode; 
+    char cmd[100];
+   
+    printf("waiting for input :\n");
+    puts("commands: list , edit , quit ");
+    printf("waiting for input :\n");
+    while(~scanf("%s",cmd)){
+        if(strcmp(cmd,"quit")==0){
+            break;
+        }else if(strcmp(cmd,"list")==0){
+            printf("Number of funcs :%lu \n",myfuncs.size());
+            printf("Choose your target :\n");
+            int target ;
+            scanf("%d",&target);
+            myfuncs[target-1].format();
+
+        }else if (strcmp(cmd,"edit")==0){
+            printf("Number of funcs :%lu \n",myfuncs.size());
+            puts("Choose your target (starting from zero):");
+            int target , mov_target , mov_dst;
+            scanf("%d",&target);
+            target -=1 ;
+            puts("before or after ?"); 
+            scanf("%s",cmd);
+            if(strcmp(cmd,"before")==0){
+                scanf("%d%d",&mov_target,&mov_dst);
+                myfuncs[target].move_before(mov_target,mov_dst);
+            }
+            else if(strcmp(cmd,"after")==0){
+                scanf("%d%d",&mov_target,&mov_dst);
+                myfuncs[target].move_after(mov_target,mov_dst);
+            }
+            else{
+                puts("un supported");
+            }
+            myfuncs[target].format();
+
+        }else if (strcmp(cmd,"help")==0){
+            puts("Supported commands are : list, edit and quit ");
+        
+        }else{
+            printf("unsupported command %s:\n",cmd);
+        }
+        printf("waiting for input :\n");
+    }
+
+
+    fp = fopen(binaryPath,"rb+");
+
+    for (auto & myfunc  : myfuncs ){
+        char * new_kernel = myfunc.serialize();
+        fseek(fp,myfunc._start,SEEK_SET);
+        unsigned write_size = myfunc._end - myfunc._start;
+        fwrite(new_kernel,sizeof(char),write_size,fp);
+        free(new_kernel);
+        printf("writing to offset : %lx, size = %d(%x)\n",myfunc._start,write_size,write_size);
+    }
+
+    fclose(fp);
+
+}
+
+
+
+
