@@ -59,12 +59,13 @@ char *  get_text(FILE * f, long long int &offset , long long int &size){
 }
 
 
+const char * s_nop = "\x00\x00\x80\xbf";
 class MyInsn {
     public:
-        unsigned char * ptr;
+        const void * ptr;
         unsigned int size;
         string _pretty;
-        MyInsn( unsigned char * _ptr , unsigned int _size, string pretty) : ptr(_ptr) , size(_size), _pretty(pretty) {
+        MyInsn( const void * _ptr , unsigned int _size, string pretty) : ptr(_ptr) , size(_size), _pretty(pretty) {
 
         };
 
@@ -76,6 +77,19 @@ class MyFunc {
         Address _start ;
         Address _end;
         InstructionDecoder & _dec;
+
+        void replace_with_nop(int target){
+            MyInsn s_nop_insn = MyInsn(s_nop,4,"s_nop");
+            int target_size = myInsns[target].size;
+            int num_to_replace = (target_size  / 4) - 1;
+            myInsns[target] = s_nop_insn;
+            while(num_to_replace >0){
+                auto it = myInsns.begin()+target+1;
+                myInsns.insert( it , s_nop_insn);
+                num_to_replace -=1;
+            }
+            
+        } 
 
         MyFunc(char * buffer  , Function * f, long long int offset ,InstructionDecoder & decoder):_dec(decoder) {
             _start = f->addr();
@@ -205,9 +219,11 @@ int main(int argc, char **argv){
     char cmd[100];
    
     printf("waiting for input :\n");
-    puts("commands: list , edit , quit ");
+    puts("commands: list , edit , nop, quit ");
     printf("waiting for input :\n");
     while(~scanf("%s",cmd)){
+
+
         if(strcmp(cmd,"quit")==0){
             break;
         }else if(strcmp(cmd,"list")==0){
@@ -219,7 +235,7 @@ int main(int argc, char **argv){
 
         }else if (strcmp(cmd,"edit")==0){
             printf("Number of funcs :%lu \n",myfuncs.size());
-            puts("Choose your target (starting from zero):");
+            puts("Choose your target (starting from 1) :");
             int target , mov_target , mov_dst;
             scanf("%d",&target);
             target -=1 ;
@@ -234,13 +250,23 @@ int main(int argc, char **argv){
                 myfuncs[target].move_after(mov_target,mov_dst);
             }
             else{
-                puts("un supported");
+                puts("unsupported");
             }
             myfuncs[target].format();
 
         }else if (strcmp(cmd,"help")==0){
-            puts("Supported commands are : list, edit and quit ");
+            puts("Supported commands are : list, edit , nop and quit ");
         
+        }else if(strcmp(cmd,"nop")==0){
+            printf("Number of funcs :%lu \n",myfuncs.size());
+            puts("Choose your target function (starting from 1):");
+            int func_index, insn_index;
+            scanf("%d",&func_index);
+            func_index -= 1;
+            puts("Choose your target instruction");
+            scanf("%d",&insn_index);
+            myfuncs[func_index].replace_with_nop(insn_index);
+ 
         }else{
             printf("unsupported command %s:\n",cmd);
         }
