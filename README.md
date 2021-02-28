@@ -60,7 +60,14 @@ After you are done editing the kernel, you quit the interactive loop so the kern
 quit
 ```
 
+You can also replace an existing instruction with nop.
 
+The following sequence of commands replace the instruction indexed by 0 in the first function with an nop instruction, and if the instruction is longer than 4 bytes, it will be replaced by multiple nop instructions to keep alignment and binary size the same.
+```
+nop
+1
+0
+```
 
 
 
