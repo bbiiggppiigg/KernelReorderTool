@@ -34,7 +34,7 @@ int main(int argc, char ** argv){
     printf("number of kernels = %d\n",kernels.size());
     for (int i = 0; i < kernels.size() ; i++){
         printf("kernel %d : offset = %d , size = %d\n",i,kernels[i].first, kernels[i].second);
-        char * buffer = (char *) malloc(kernels[i].second+1); 
+        char * buffer = (char *) malloc(kernels[i].second); 
         char tmp_filename[1000];
         {
             sprintf(tmp_filename,"tmp_%02d.hsaco\0",i);
