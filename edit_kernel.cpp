@@ -9,7 +9,7 @@ using namespace ParseAPI;
 
 using namespace InstructionAPI;
 
-#define WAIT_CONST 10
+#define WAIT_CONST 14
 
 #define ElfW Elf64_Ehdr
 #define Shdr Elf64_Shdr
