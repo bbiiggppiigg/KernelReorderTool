@@ -49,12 +49,6 @@ int main(int argc, char ** argv){
         free(buffer);
     }
     fclose(f);
-    /*
-    initscr();
-    printw("Hello Wrold !!");
-    refresh();
-    getch();
-    endwin();*/
     return 0;
 
 }
