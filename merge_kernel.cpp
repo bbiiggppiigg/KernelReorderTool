@@ -21,7 +21,7 @@ int main(int argc, char ** argv){
     for ( int i =0; i < num_kernels; i++){
         long long int offset;
         long long int size ;
-        fscanf(fmeta,"%d %d\n",&offset,&size);
+        fscanf(fmeta,"%lld %lld\n",&offset,&size);
         kernels.push_back(make_pair(offset,size));
     }
     fclose(fmeta);
@@ -30,23 +30,25 @@ int main(int argc, char ** argv){
     system(cmd);
 
 
+    char tmp_filename[1000];
+
+    char * buffer;
+
     FILE * f = fopen(filename,"rb+");
     printf("number of kernels = %d\n",kernels.size());
     for (int i = 0; i < kernels.size() ; i++){
         printf("kernel %d : offset = %d , size = %d\n",i,kernels[i].first, kernels[i].second);
-        char * buffer = (char *) malloc(kernels[i].second); 
-        char tmp_filename[1000];
-        {
-            sprintf(tmp_filename,"tmp_%02d.hsaco\0",i);
-            FILE * tmpfile = fopen(tmp_filename,"rb");
-            fread(buffer,kernels[i].second,1,tmpfile);
-            fclose(tmpfile);
-        }
+        buffer = (char *) malloc(kernels[i].second); 
+        memset(buffer,0,kernels[i].second);
+        sprintf(tmp_filename,"tmp_%02d.hsaco\0",i);
+        FILE * tmpfile = fopen(tmp_filename,"rb");
+        fread(buffer,kernels[i].second,1,tmpfile);
+        fclose(tmpfile);
         fseek(f,kernels[i].first,SEEK_SET);
         fwrite(buffer,kernels[i].second,1,f);
         free(buffer);
     }
-    fclose(fmeta);
+    fclose(f);
     /*
     initscr();
     printw("Hello Wrold !!");
