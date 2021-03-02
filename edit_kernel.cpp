@@ -9,6 +9,7 @@ using namespace ParseAPI;
 
 using namespace InstructionAPI;
 
+#define WAIT_CONST 10
 
 #define ElfW Elf64_Ehdr
 #define Shdr Elf64_Shdr
@@ -70,6 +71,30 @@ class MyInsn {
         };
 
 };
+
+class MyWaitCntInsn : public MyInsn {
+    public:
+    uint32_t insn; 
+    MyWaitCntInsn (char * my_ptr , int vmcnt, int lgkmcnt , int expcnt = 0 ) : MyInsn(my_ptr,4, "s_waitcnt"){
+        this->insn = 0xbf8c0000;
+        uint16_t simm16 = 0 ;
+
+        uint16_t vm_low = vmcnt & 0xf;
+        uint16_t vm_high = (vmcnt & 0x30) >> 4;
+        uint16_t exp_cnt = expcnt & 0x7; 
+        uint16_t lgkm_cnt = lgkmcnt & 0xf;
+        simm16 = (vm_high << 14) | (lgkm_cnt << 8) | (exp_cnt << 4) | (vm_low);
+        insn |= simm16;
+        std::ostringstream oss; 
+        memcpy(my_ptr,&insn,32);
+
+        oss << "s_waitcnt  " << "vmcnt(" << vmcnt << ")" << " lgkmcnt(" << lgkmcnt << ")" << " expcnt(" << expcnt  << ")";
+        this->_pretty = oss.str();
+        printf("after constructing waitcnt insn, value = %x\n",insn);
+        
+    };
+};
+
 class MyFunc {
     public:
         vector<MyInsn> myInsns;
@@ -77,6 +102,18 @@ class MyFunc {
         Address _start ;
         Address _end;
         InstructionDecoder & _dec;
+      
+        void increase_waitcnt(char * my_ptr , int target, int vmcnt , int lgkmcnt ){
+            uint32_t insn = *((uint32_t *) myInsns[target].ptr);
+            //printf("target is : %x, result = %x\n",insn, insn & 0xffff0000);
+            if ((insn & 0xffff0000) != 0xbf8c0000){
+                puts("incorrect target for increasing waitcnt");
+                return;
+            }else{
+                //puts("correct target for increasing waitcnt");
+            }
+            myInsns[target] = MyWaitCntInsn(my_ptr, vmcnt,lgkmcnt,0);
+        } 
 
         void replace_with_nop(int target){
             MyInsn s_nop_insn = MyInsn(s_nop,4,"s_nop");
@@ -153,6 +190,9 @@ class MyFunc {
             printf("size of ret = %lu\n",_end-_start);
             int offset = 0;
             for (auto &insn : myInsns){
+                printf("copying instruction %s\n", insn._pretty.c_str()); 
+                printf("ptr value = %x , size = %d\n", *((uint32_t *) insn.ptr), insn.size);
+
                 memcpy(ret+offset, (char *) insn.ptr, insn.size );
                 offset += insn.size;
             }
@@ -215,11 +255,11 @@ int main(int argc, char **argv){
     }
 
 
-    int mode; 
     char cmd[100];
+    vector<char * > insn_pool;
    
     printf("waiting for input :\n");
-    puts("commands: list , edit , nop, quit ");
+    puts("commands: list , edit , nop, wait, quit ");
     printf("waiting for input :\n");
     while(~scanf("%s",cmd)){
 
@@ -255,7 +295,7 @@ int main(int argc, char **argv){
             myfuncs[target].format();
 
         }else if (strcmp(cmd,"help")==0){
-            puts("Supported commands are : list, edit , nop and quit ");
+            puts("Supported commands are : list, edit , nop , wait and quit ");
         
         }else if(strcmp(cmd,"nop")==0){
             printf("Number of funcs :%lu \n",myfuncs.size());
@@ -266,9 +306,21 @@ int main(int argc, char **argv){
             puts("Choose your target instruction");
             scanf("%d",&insn_index);
             myfuncs[func_index].replace_with_nop(insn_index);
- 
+         }else if(strcmp(cmd,"wait")==0){
+            printf("Number of funcs :%lu \n",myfuncs.size());
+            puts("Choose your target function (starting from 1):");
+            int func_index, insn_index;
+            scanf("%d",&func_index);
+            func_index -= 1;
+            puts("Choose your target instruction");
+            scanf("%d",&insn_index);
+            char * tmp_insn = (char * ) malloc(32);
+            myfuncs[func_index].increase_waitcnt(tmp_insn,insn_index,WAIT_CONST,WAIT_CONST);
+            insn_pool.push_back(tmp_insn);
+
         }else{
             printf("unsupported command %s:\n",cmd);
+            puts("Supported commands are : list, edit , nop , wait and quit ");
         }
         printf("waiting for input :\n");
     }
@@ -286,6 +338,9 @@ int main(int argc, char **argv){
     }
 
     fclose(fp);
+    for (auto & tmp_insn : insn_pool){
+        free(tmp_insn);
+    }
 
 }
 
