@@ -38,9 +38,12 @@ void extend_text(FILE * f){
     Shdr text_hdr;
     Shdr symtab_hdr;
     Shdr strtab_hdr;
+    Shdr dynsym_hdr;
+    Shdr dynstr_hdr;
 
     int text_index = -1;
     int symtab_index = -1;
+    int dynsym_index = -1;
     for (unsigned int i = 1; i < header.e_shnum ; i ++){
         read_shdr(&tmp_hdr,f,&header,i);
         char * sh_name = shstrtable+tmp_hdr.sh_name;
@@ -55,6 +58,14 @@ void extend_text(FILE * f){
         if(0==strcmp(sh_name,".strtab")){
             strtab_hdr = tmp_hdr;
         }
+        if(0==strcmp(sh_name,".dynstr")){
+            dynstr_hdr = tmp_hdr;
+        }
+
+        if(0==strcmp(sh_name,".dynsym")){
+            dynsym_hdr = tmp_hdr;
+        }
+
 
     }
 
@@ -72,6 +83,7 @@ void extend_text(FILE * f){
     fwrite(&text_hdr,sizeof(Shdr),1,f);
 
     char * strtab_content = read_section(f,&strtab_hdr);
+    char * dynstr_content = read_section(f,&dynstr_hdr);
     Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
 
     int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
@@ -87,6 +99,28 @@ void extend_text(FILE * f){
     Elf64_Sym * target_symbol = symtab_content + target_index;
     target_symbol -> st_size = 0x1000;
     fseek(f,symtab_hdr.sh_offset + target_index * sizeof(Elf64_Sym),SEEK_SET);
+    fwrite(target_symbol,sizeof(Elf64_Sym),1,f);
+
+
+
+    Elf64_Sym * dynsym_content = (Elf64_Sym *) read_section(f,&dynsym_hdr);
+
+    num_entries = dynsym_hdr.sh_size / dynsym_hdr.sh_entsize;
+    target_index = -1;
+    for (int i =0 ; i < num_entries ;i ++){
+        Elf64_Sym * symbol = dynsym_content+i;
+        char * symbol_name = dynstr_content + symbol -> st_name;
+        printf("symbol name = %s\n",symbol_name);
+        if(strcmp("_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj",symbol_name)==0){
+           printf("Hahaha , size = %d\n",symbol->st_size);
+           target_index =i ; 
+           break;
+        }
+    }
+
+    target_symbol = dynsym_content + target_index;
+    target_symbol -> st_size = 0x1000;
+    fseek(f,dynsym_hdr.sh_offset + target_index * sizeof(Elf64_Sym),SEEK_SET);
     fwrite(target_symbol,sizeof(Elf64_Sym),1,f);
 
 
