@@ -82,7 +82,7 @@ class MyWaitCntInsn : public MyInsn {
         uint16_t vm_low = vmcnt & 0xf;
         uint16_t vm_high = (vmcnt & 0x30) >> 4;
         uint16_t exp_cnt = expcnt & 0x7; 
-        uint16_t lgkm_cnt = lgkmcnt & 0xf;
+        uint16_t lgkm_cnt = lgkmcnt & 0x1f;
         simm16 = (vm_high << 14) | (lgkm_cnt << 8) | (exp_cnt << 4) | (vm_low);
         insn |= simm16;
         std::ostringstream oss; 
@@ -315,7 +315,7 @@ int main(int argc, char **argv){
             puts("Choose your target instruction");
             scanf("%d",&insn_index);
             char * tmp_insn = (char * ) malloc(32);
-            myfuncs[func_index].increase_waitcnt(tmp_insn,insn_index,WAIT_CONST,WAIT_CONST);
+            myfuncs[func_index].increase_waitcnt(tmp_insn,insn_index,WAIT_CONST,15);
             insn_pool.push_back(tmp_insn);
 
         }else{
