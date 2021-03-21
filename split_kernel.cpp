@@ -41,7 +41,7 @@ void setup(FILE * f, vector<pair<long long int, long long int >> &ret ){
     for (unsigned int i = 1; i < header.e_shnum ; i ++){
         read_shdr(&tmp_hdr,f,&header,i);
         char * sh_name = strtable+tmp_hdr.sh_name;
-        if(0==strcmp(sh_name,".hip_fatbin")){
+        if(0==strcmp(sh_name,".kernel") || 0==strcmp(sh_name,".hip_fatbin")){
             //printf("found !\n");
             fatbin_index = i;
             break;
@@ -78,8 +78,8 @@ void setup(FILE * f, vector<pair<long long int, long long int >> &ret ){
             fread(&size,8,1,f);
             fread(&triple_size,8,1,f);
             fread(triple,triple_size,1,f);
-
-            if(strncmp(triple,"hip",3)==0){
+	    printf("triple = %s\n",triple);
+            if(strncmp(triple,"hcc",3)==0 || strncmp(triple,"hip",3)==0){
                 //printf("\t bundle %d: offset=%d, size = %d, triple_size = %d, triple = %s\n",i,current_blob_offset+offset,size,triple_size,triple);
                 ret.push_back(make_pair(current_blob_offset + offset, size));
             }

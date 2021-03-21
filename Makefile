@@ -1,4 +1,6 @@
-all: split_kernel edit_kernel merge_kernel
+
+all: split_kernel edit_kernel merge_kernel mm
+HIPCC=/opt/rocm/hip/bin/hipcc
 
 #
 # A GNU Makefile
@@ -8,8 +10,11 @@ ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
 endif
 
-NCURSES_PATH=/home/wuxx1279/.local/
 
+mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication
+
+mm: $(mmpath)
+	cp ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication .
 
 edit_kernel: edit_kernel.o
 	 g++ edit_kernel.o  -g -L$(DYNINST_ROOT)/lib  \
