@@ -35,6 +35,13 @@ extend_symbol: extend_symbol.cpp
 	g++ -o extend_symbol extend_symbol.cpp
 
 
+set_register_usage: set_register_usage.cpp
+	g++ -o set_register_usage set_register_usage.cpp
+
+extend_text: extend_text.cpp
+	g++ -o extend_text extend_text.cpp
+
+
 
 split_kernel: split_kernel.cpp
 	g++ -o split_kernel split_kernel.cpp

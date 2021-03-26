@@ -34,9 +34,7 @@ char * read_section(FILE * f, Shdr * shdr) {
 void extend_text(FILE * f, int new_text_size){
     ElfW header;
     fread(&header,sizeof(header),1,f);
-
     
-
     Shdr shstrtable_header; 
     read_shdr(&shstrtable_header,f,&header,header.e_shstrndx);
     char * shstrtable = read_section(f,&shstrtable_header);
@@ -69,13 +67,10 @@ void extend_text(FILE * f, int new_text_size){
             tmp_phdr.p_memsz = new_text_size;
             fseek(f,header.e_phoff+sizeof(Phdr) * i , SEEK_SET);
             fwrite(&tmp_phdr,sizeof(Phdr),1,f);
-
             printf("patching text_size in program header at 0x%lx to %d\n",header.e_phoff+sizeof(Phdr)*i,new_text_size);
             break;
         }
     }
-
-
 }
 
 int main(int argc, char **argv){
@@ -90,7 +85,6 @@ int main(int argc, char **argv){
 
     FILE * fp = fopen(binaryPath,"rb+");
     extend_text(fp,atoi(argv[2]));
-
     fclose(fp);
 }
 
