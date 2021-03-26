@@ -87,6 +87,12 @@ uint32_t get_bits(uint32_t value, uint32_t hi , uint32_t low){
 
 }
 
+uint32_t set_bits(uint32_t old_bits, uint32_t hi, uint32_t low, uint32_t bits){
+    uint32_t ret = old_bits & (~(((1 << ( hi -low + 1 )) -1)  << low ));
+    ret &= (bits << low );
+    return ret;
+}
+
 class COMPUTE_PGM_RSRC1 {
 
     public:
@@ -125,6 +131,40 @@ uint32_t get_pgm_rsrc1 ( FILE* fp ,uint32_t kd_offset ){
     fseek(fp,kd_offset + 0x30 , SEEK_SET);
     fread((void *) &ret,4,1,fp);
     return ret;
+}
+
+void set_pgm_rsrc1 ( FILE* fp ,uint32_t kd_offset , uint32_t pgm_rsrc1_bits ){
+    fseek(fp,kd_offset + 0x30 , SEEK_SET);
+    fwrite((void *) &pgm_rsrc1_bits,4,1,fp);
+}
+
+uint32_t sgpr_count_to_bits(uint32_t count){
+    uint32_t ret = count / 8;
+    if(count %8) ret += 1;
+    ret -=1;
+    if(ret < 0)
+        ret = 0;
+    return ret;
+}
+
+uint32_t sgpr_bits_to_count(uint32_t bits){
+    uint32_t ret = bits+1; 
+    return ret * 8;
+}
+
+void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count ){
+    for (auto &p : kds ){
+        if(p.second == name ){
+            uint32_t old_bits = get_pgm_rsrc1(fp,p.first);
+            uint32_t sgpr_count = sgpr_bits_to_count(get_bits(old_bits,9,6));
+            if(sgpr_count > new_sgpr_count ){
+                puts("Can't lower the sgpr count ");
+                return;    
+            }
+            uint32_t new_bits = set_bits(old_bits,9,6,sgpr_count_to_bits(new_sgpr_count));
+            set_pgm_rsrc1(fp,p.first,new_bits);
+        }    
+    } 
 }
 
 int main(int argc, char **argv){
