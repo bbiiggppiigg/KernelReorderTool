@@ -1,5 +1,5 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
-all: split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol mm
+all: split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol mm insert_tramp
 
 #
 # A GNU Makefile
@@ -21,9 +21,16 @@ edit_kernel: edit_kernel.o
 		 -lboost_filesystem -lboost_system -o edit_kernel
 
 edit_kernel.o:  edit_kernel.cpp
-	g++ -g -Wall  -I/home/wuxx1279/spack/opt/spack/linux-ubuntu18.04-zen/gcc-7.5.0/boost-1.75.0-x6xb3ekqedmhn3sgslg24e5vyw44yf66/include \
-    -I/home/wuxx1279/spack/opt/spack/linux-ubuntu18.04-zen/gcc-7.5.0/intel-tbb-2020.3-ilm4ideiyh3avl5zdajneu25csygvwpt/include \
-    -I$(DYNINST_ROOT)/include -c edit_kernel.cpp
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -c edit_kernel.cpp
+
+insert_tramp: insert_tramp.o
+	 g++ insert_tramp.o  -g -L$(DYNINST_ROOT)/lib  \
+		 -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon \
+		 -lboost_filesystem -lboost_system -o insert_tramp
+
+insert_tramp.o:  insert_tramp.cpp
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -c insert_tramp.cpp
+
 
 set_register_usage: set_register_usage.cpp
 	g++ -o set_register_usage set_register_usage.cpp
@@ -33,14 +40,6 @@ extend_text: extend_text.cpp
 
 extend_symbol: extend_symbol.cpp
 	g++ -o extend_symbol extend_symbol.cpp
-
-
-set_register_usage: set_register_usage.cpp
-	g++ -o set_register_usage set_register_usage.cpp
-
-extend_text: extend_text.cpp
-	g++ -o extend_text extend_text.cpp
-
 
 
 split_kernel: split_kernel.cpp
