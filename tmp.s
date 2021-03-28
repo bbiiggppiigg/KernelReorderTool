@@ -5,7 +5,8 @@ tmp_00.hsaco:	file format elf64-amdgpu
 Disassembly of section .text:
 
 0000000000001000 <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local>:
-	s_load_dwordx4 s[12:15], s[6:7], 0x0                       // 000000001000: C00A0303 00000000
+	s_branch 407                                               // 000000001000: BF820197 <BB0_6+0x228>
+	v_cndmask_b32_e32 v0, s0, v0, vcc                          // 000000001004: 00000000
 	s_load_dwordx4 s[0:3], s[6:7], 0x10                        // 000000001008: C00A0003 00000010
 	s_load_dwordx2 s[6:7], s[6:7], 0x18                        // 000000001010: C0060183 00000018
 	s_waitcnt lgkmcnt(0)                                       // 000000001018: BF8C007F
@@ -280,4 +281,12 @@ Disassembly of section .text:
 	v_addc_u32_e32 v1, vcc, v2, v1, vcc                        // 0000000014D0: 38020302
 	flat_store_dwordx4 v[0:1], v[4:7]                          // 0000000014D4: DC7C0000 00000400
 	s_endpgm                                                   // 0000000014DC: BF810000
+		...
+	s_load_dwordx4 s[12:15], s[6:7], 0x0                       // 000000001660: C00A0303 00000000
+	s_load_dwordx4 s[0:3], s[6:7], 0x10                        // 000000001668: C00A0003 00000010
+	s_load_dwordx2 s[6:7], s[6:7], 0x18                        // 000000001670: C0060183 00000018
+	s_branch 65127                                             // 000000001678: BF82FE67 <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local+0x18>
+	s_store_dwordx4 s[12:15], s[6:7], 0x0                      // 00000000167C: C04A0303 00000000
+	s_store_dwordx4 s[0:3], s[6:7], 0x10                       // 000000001684: C04A0003 00000010
+	s_movk_i32 s0, 0x4000                                      // 00000000168C: B0004000
 		...
