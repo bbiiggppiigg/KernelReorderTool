@@ -93,39 +93,6 @@ uint32_t set_bits(uint32_t old_bits, uint32_t hi, uint32_t low, uint32_t bits){
     return ret;
 }
 
-class COMPUTE_PGM_RSRC1 {
-
-    public:
-    uint8_t granulated_workitem_vgpr_count;
-    uint8_t granulated_wavefront_sgpr_count;
-    uint8_t priority;
-    uint8_t flat_round_mode_32;
-    uint8_t float_round_mode_16_64;
-    uint8_t float_denorm_mode_32;
-    uint8_t float_denorm_mode_16_64;
-    uint8_t priv;
-    uint8_t enable_dx10_clamp;
-    uint8_t debug_mode;
-    uint8_t enable_ieee_mode;
-    uint8_t bulky;
-    uint8_t cdbg_user;
-    uint8_t f16_ovfl;
-    uint8_t wgp_mode;
-    uint8_t mem_ordered;
-    uint8_t fwd_progress;
-
-
-    COMPUTE_PGM_RSRC1 ( uint32_t reg_value ) {
-        granulated_workitem_vgpr_count = get_bits(reg_value,5,0);
-        granulated_wavefront_sgpr_count = get_bits(reg_value,9,6);
-        printf("vgpr_count = %u, sgpr_count = %u\n",granulated_workitem_vgpr_count,granulated_wavefront_sgpr_count);
-
-    }
-
-
-};
-
-
 uint32_t get_pgm_rsrc1 ( FILE* fp ,uint32_t kd_offset ){
     uint32_t ret;
     fseek(fp,kd_offset + 0x30 , SEEK_SET);
@@ -166,6 +133,40 @@ void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string nam
         }    
     } 
 }
+
+class COMPUTE_PGM_RSRC1 {
+
+    public:
+    uint8_t granulated_workitem_vgpr_count;
+    uint8_t granulated_wavefront_sgpr_count;
+    uint8_t priority;
+    uint8_t flat_round_mode_32;
+    uint8_t float_round_mode_16_64;
+    uint8_t float_denorm_mode_32;
+    uint8_t float_denorm_mode_16_64;
+    uint8_t priv;
+    uint8_t enable_dx10_clamp;
+    uint8_t debug_mode;
+    uint8_t enable_ieee_mode;
+    uint8_t bulky;
+    uint8_t cdbg_user;
+    uint8_t f16_ovfl;
+    uint8_t wgp_mode;
+    uint8_t mem_ordered;
+    uint8_t fwd_progress;
+
+
+    COMPUTE_PGM_RSRC1 ( uint32_t reg_value ) {
+        granulated_workitem_vgpr_count = get_bits(reg_value,5,0);
+        granulated_wavefront_sgpr_count = get_bits(reg_value,9,6);
+        printf("vgpr_count = %u, sgpr_count = %u\n",granulated_workitem_vgpr_count,
+            sgpr_bits_to_count(granulated_wavefront_sgpr_count));
+
+    }
+
+
+};
+
 
 int main(int argc, char **argv){
 

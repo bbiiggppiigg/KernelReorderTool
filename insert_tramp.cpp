@@ -54,6 +54,36 @@ class MyWaitCntInsn : public MyInsn {
 class InsnFactory {
     
 public:
+    static MyInsn create_s_nop( vector<char *> & insn_pool ){
+        uint32_t cmd = 0xbf800000;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_nop "));
+    }
+
+
+// 
+    static MyInsn create_s_wait_cnt( vector<char *> & insn_pool ){
+        uint32_t cmd = 0xbf8c007f;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_waitcnt_0 "));
+    }
+// VOP1
+
+    static MyInsn create_v_mov_b32(  uint32_t vdst, uint32_t src  , vector<char *> & insn_pool ){
+        uint32_t cmd = 0x7e000000;
+        uint32_t op = 1;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        cmd = ( cmd | (vdst << 17) | ( op << 9)  | src);
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("v_mov_b32 "));
+    }
+
+// SOPK
     static MyInsn create_s_movk_i32(  uint32_t target_sgpr, int16_t simm16  , vector<char *> & insn_pool ){
         uint32_t cmd = 0xb0000000;
         uint32_t op = 0x0;
@@ -64,7 +94,54 @@ public:
         insn_pool.push_back(cmd_ptr);
         return MyInsn(cmd_ptr,4,std::string("s_movk_i32 ")+std::to_string(simm16));
     }
+// SOP2
+   static MyInsn create_s_add_u32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0  , bool useImm , vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 0x4;
 
+        if(useImm){
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | 0xff );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            memcpy( cmd_ptr+4 ,&ssrc0,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,8,std::string("s_add_u32 "));
+
+            
+        }else{
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,4,std::string("s_add_u32 "));
+        }
+    }
+
+
+   static MyInsn create_s_addc_u32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0  , bool useImm , vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 0x4;
+
+        if(useImm){
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | 0xff );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            memcpy( cmd_ptr+4 ,&ssrc0,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,8,std::string("s_add_u32 "));
+
+            
+        }else{
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,4,std::string("s_add_u32 "));
+        }
+    }
+
+
+//
     static MyInsn create_s_branch( uint32_t pc , uint32_t target  , vector<char *> & insn_pool ){
         uint32_t cmd = 0xbf800000;
         uint32_t op = 0x2;
@@ -99,7 +176,6 @@ public:
         cmd_high = ( cmd_high | offset );
         memcpy( cmd_ptr ,&cmd_low,  4 );
         memcpy( cmd_ptr +4 ,&cmd_high,  4 );
-        printf("creating s_load_dwordx4 sgpr[%d:%d], sgpr[%d:%d], 0x%x:  %x%x\n",sgpr_target_pair,sgpr_addr_pair,offset,cmd_low,cmd_high); 
         insn_pool.push_back(cmd_ptr);
         return MyInsn(cmd_ptr,8,std::string("s_load_dwordx4 ")+std::to_string(sgpr_target_pair));
     }
@@ -114,12 +190,39 @@ public:
         cmd_high = ( cmd_high | offset );
         memcpy( cmd_ptr ,&cmd_low,  4 );
         memcpy( cmd_ptr +4 ,&cmd_high,  4 );
-        printf("creating s_load_dwordx4 sgpr[%d:%d], sgpr[%d:%d], 0x%x:  %x%x\n",sgpr_target_pair,sgpr_addr_pair,offset,cmd_low,cmd_high); 
         insn_pool.push_back(cmd_ptr);
         return MyInsn(cmd_ptr,8,std::string("s_load_dwordx4 ")+std::to_string(sgpr_target_pair));
     }
     
-      
+     static MyInsn create_s_store_dword_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+        uint32_t cmd_low = 0xc0000000;
+        uint32_t cmd_high = 0x0;
+        uint32_t op = 17;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+        uint32_t imm = 0;
+        cmd_low = ( cmd_low | (op << 18) | (imm << 17) |   s_data_pair << 6 | (s_base_pair >> 1) );
+
+        cmd_high = ( cmd_high | offset );
+        memcpy( cmd_ptr ,&cmd_low,  4 );
+        memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,8,std::string("s_store_dword_x2 "));
+    }
+    
+      static MyInsn create_flat_store_dword_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+        uint32_t cmd_low = 0xdc000000;
+        uint32_t cmd_high = 0x0;
+        uint32_t op = 29;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+        cmd_low = (cmd_low | (op<< 18 )  | offset );
+
+        cmd_high = ( cmd_high | s_data_pair << 8 | s_base_pair );
+        memcpy( cmd_ptr ,&cmd_low,  4 );
+        memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x4 "));
+    }
+     
 
 
 };
@@ -127,26 +230,61 @@ public:
 
 
 void insert_tramp( FILE * f, uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, vector<char *> & insn_pool){
+    // Read the block to patch in to a buffer
     void * buffer_block =  malloc(end_excluded-start_included);
     fseek(f,start_included,SEEK_SET);
     fread(buffer_block,1,end_excluded-start_included,f);
+
+
+
     MyInsn to_tramp = InsnFactory::create_s_branch(start_included,tramp_location, insn_pool );
-    MyInsn from_tramp = InsnFactory::create_s_branch(tramp_location + end_excluded-start_included, end_excluded, insn_pool);
+
     fseek(f,start_included,SEEK_SET);
     fwrite(to_tramp.ptr,to_tramp.size,1,f);
     fseek(f,tramp_location,SEEK_SET);
     fwrite(buffer_block,1,end_excluded-start_included,f);
+
+
+    vector<MyInsn> insns;
+
+    for ( int i =0 ; i < 18 ; i++){
+        insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+        insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010 + i * 8 ,true, insn_pool));
+        insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
+        insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
+        insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
+        insns.push_back(InsnFactory::create_s_memtime(10,insn_pool));
+        insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+        insns.push_back(InsnFactory::create_v_mov_b32( 21,11 , insn_pool));
+        insns.push_back(InsnFactory::create_v_mov_b32( 20,10 , insn_pool));
+        insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
+    }
+
+    unsigned int total_size = 0;
+    for ( auto &insn : insns){
+        insn.write(f);
+        total_size += insn.size;    
+    }
+/*
+
+    Using Flat_store_dword cause s_store_dword wouldn't work
+    s_add s10,s0,0x4010;
+    s_addc s11,s1,0;
+    // put address in v[18:19]
+    v_mov_b32_32 v19 , s11;
+    v_mov_b32_32 v18 , s10;
+    
+
+    s_memtime s[10:11]
+    // put timestemp in v[20:21]
+    v_mov_b32_e32 v21 , s11;
+    v_mov_b32_32 v20, s10;
+    flat_store_dword_x2 v[18:19] , vy[20:21]
+    
+*/
+
+    MyInsn from_tramp = InsnFactory::create_s_branch(tramp_location + total_size + end_excluded-start_included, end_excluded, insn_pool);
     fwrite(from_tramp.ptr,from_tramp.size,1,f);
-
-
-
-    MyInsn memtime = InsnFactory::create_s_store_dword_x4(12,6,0x0, insn_pool);
-    MyInsn memtime1 = InsnFactory::create_s_store_dword_x4(0,6,0x10, insn_pool);
-    memtime.write(f);
-    memtime1.write(f);
-    auto movk = InsnFactory::create_s_movk_i32(0,0x4000,insn_pool);
-    movk.write(f);
-     
 }
 
 
