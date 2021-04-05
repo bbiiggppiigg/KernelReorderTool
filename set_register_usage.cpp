@@ -118,6 +118,10 @@ uint32_t sgpr_bits_to_count(uint32_t bits){
     uint32_t ret = bits+1; 
     return ret * 8;
 }
+uint32_t vgpr_bits_to_count(uint32_t bits){
+    uint32_t ret = bits+1; 
+    return ret * 4;
+}
 
 void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count ){
     for (auto &p : kds ){
@@ -159,7 +163,10 @@ class COMPUTE_PGM_RSRC1 {
     COMPUTE_PGM_RSRC1 ( uint32_t reg_value ) {
         granulated_workitem_vgpr_count = get_bits(reg_value,5,0);
         granulated_wavefront_sgpr_count = get_bits(reg_value,9,6);
-        printf("vgpr_count = %u, sgpr_count = %u\n",granulated_workitem_vgpr_count,
+        printf("vgpr_count = %u, sgpr_count = %u\n",
+            vgpr_bits_to_count(
+                granulated_workitem_vgpr_count
+            ),
             sgpr_bits_to_count(granulated_wavefront_sgpr_count));
 
     }

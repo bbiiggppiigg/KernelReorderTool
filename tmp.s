@@ -5,7 +5,7 @@ tmp_00.hsaco:	file format elf64-amdgpu
 Disassembly of section .text:
 
 0000000000001000 <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local>:
-	s_branch 407                                               // 000000001000: BF820197 <BB0_6+0x228>
+	s_branch 322                                               // 000000001000: BF820142 <BB0_6+0xd4>
 	v_cndmask_b32_e32 v0, s0, v0, vcc                          // 000000001004: 00000000
 	s_load_dwordx4 s[0:3], s[6:7], 0x10                        // 000000001008: C00A0003 00000010
 	s_load_dwordx2 s[6:7], s[6:7], 0x18                        // 000000001010: C0060183 00000018
@@ -290,14 +290,9 @@ Disassembly of section .text:
 	v_mov_b32_e32 v4, s0                                       // 0000000014FC: 7E080200
 	flat_store_dwordx4 v[4:5], v[0:3]                          // 000000001500: DC7C0000 00000004
 	s_endpgm                                                   // 000000001508: BF810000
-		...
-	s_load_dwordx4 s[12:15], s[6:7], 0x0                       // 000000001660: C00A0303 00000000
-	s_load_dwordx4 s[0:3], s[6:7], 0x10                        // 000000001668: C00A0003 00000010
-	s_load_dwordx2 s[6:7], s[6:7], 0x18                        // 000000001670: C0060183 00000018
-	s_movk_i32 s18, 0x4000                                     // 000000001678: B0124000
-	s_memtime s[16:17]                                         // 00000000167C: C0900400 00000000
-	s_waitcnt lgkmcnt(0)                                       // 000000001684: BF8C007F
-	.long 0xdc7c4000                                           // 000000001688: DC7C4000
-	v_cndmask_b32_e32 v0, s0, v8, vcc                          // 00000000168C: 00001000
-	s_branch 65121                                             // 000000001690: BF82FE61 <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local+0x18>
+	s_load_dwordx4 s[12:15], s[6:7], 0x0                       // 00000000150C: C00A0303 00000000
+	s_load_dwordx4 s[0:3], s[6:7], 0x10                        // 000000001514: C00A0003 00000010
+	s_load_dwordx2 s[6:7], s[6:7], 0x18                        // 00000000151C: C0060183 00000018
+	s_mov_b64 s[16:17], s[0:1]                                 // 000000001524: BE900100
+	s_branch 65211                                             // 000000001528: BF82FEBB <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local+0x18>
 		...

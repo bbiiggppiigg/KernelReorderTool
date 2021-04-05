@@ -3,6 +3,7 @@
 #include <iostream>
 #include "CodeObject.h"
 #include "InstructionDecoder.h"
+#include "CFG.h"
 using namespace std;
 using namespace Dyninst;
 using namespace ParseAPI;
@@ -54,6 +55,20 @@ class MyWaitCntInsn : public MyInsn {
 class InsnFactory {
     
 public:
+// SOP1
+
+    static MyInsn create_s_mov_b64( uint32_t sdst, uint32_t ssrc0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0xbe800000;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        uint32_t op = 1;
+        cmd  = ( cmd | (sdst<< 16) | (op << 8) |ssrc0);
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_mov_b64 "));
+    }
+
+
+//
     static MyInsn create_s_nop( vector<char *> & insn_pool ){
         uint32_t cmd = 0xbf800000;
         char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
@@ -97,7 +112,7 @@ public:
 // SOP2
    static MyInsn create_s_add_u32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0  , bool useImm , vector<char *> & insn_pool ){
         uint32_t cmd = 0x80000000;
-        uint32_t op = 0x4;
+        uint32_t op = 0x0;
 
         if(useImm){
             char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
@@ -139,6 +154,51 @@ public:
             return MyInsn(cmd_ptr,4,std::string("s_add_u32 "));
         }
     }
+   static MyInsn create_s_sub_u32(  uint32_t sdst, uint32_t ssrc0, uint32_t ssrc1  , bool useImm , vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 0x1;
+
+        if(useImm){
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | 0xff );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            memcpy( cmd_ptr+4 ,&ssrc0,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,8,std::string("s_add_u32 "));
+
+            
+        }else{
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,4,std::string("s_sub_u32 "));
+        }
+    }
+
+
+   static MyInsn create_s_subb_u32(  uint32_t sdst, uint32_t ssrc0, uint32_t ssrc1  , bool useImm , vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 0x5;
+
+        if(useImm){
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | 0xff );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            memcpy( cmd_ptr+4 ,&ssrc0,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,8,std::string("s_subb_u32 "));
+
+            
+        }else{
+            char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+            cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+            memcpy( cmd_ptr ,&cmd,  4 );
+            insn_pool.push_back(cmd_ptr);
+            return MyInsn(cmd_ptr,4,std::string("s_add_u32 "));
+        }
+    }
+
 
 
 //
@@ -228,66 +288,80 @@ public:
 };
 
 
-
-void insert_tramp( FILE * f, uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, vector<char *> & insn_pool){
+uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & epilogues,uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, vector<char *> & insn_pool){
     // Read the block to patch in to a buffer
-    void * buffer_block =  malloc(end_excluded-start_included);
+    unsigned int bb_size = end_excluded - start_included;
+    void * buffer_block =  malloc(bb_size);
     fseek(f,start_included,SEEK_SET);
-    fread(buffer_block,1,end_excluded-start_included,f);
+    fread(buffer_block,1,bb_size,f);
 
-
-
-    MyInsn to_tramp = InsnFactory::create_s_branch(start_included,tramp_location, insn_pool );
-
+    // setup branch from original block to tramp
     fseek(f,start_included,SEEK_SET);
-    fwrite(to_tramp.ptr,to_tramp.size,1,f);
+    InsnFactory::create_s_branch(start_included,tramp_location, insn_pool ).write(f);
+
+    unsigned int f_index = 0;
     fseek(f,tramp_location,SEEK_SET);
-    fwrite(buffer_block,1,end_excluded-start_included,f);
-
-
-    vector<MyInsn> insns;
-
-    for ( int i =0 ; i < 18 ; i++){
-        insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-        insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010 + i * 8 ,true, insn_pool));
-        insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
-        insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
-        insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
-        insns.push_back(InsnFactory::create_s_memtime(10,insn_pool));
-        insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-        insns.push_back(InsnFactory::create_v_mov_b32( 21,11 , insn_pool));
-        insns.push_back(InsnFactory::create_v_mov_b32( 20,10 , insn_pool));
-        insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
-    }
-
-    unsigned int total_size = 0;
-    for ( auto &insn : insns){
+    for ( auto &insn : prologues ){
         insn.write(f);
-        total_size += insn.size;    
+        f_index += insn.size;    
     }
-/*
+    fwrite(buffer_block,1,bb_size,f);
+    f_index += bb_size;
 
-    Using Flat_store_dword cause s_store_dword wouldn't work
-    s_add s10,s0,0x4010;
-    s_addc s11,s1,0;
-    // put address in v[18:19]
-    v_mov_b32_32 v19 , s11;
-    v_mov_b32_32 v18 , s10;
-    
-
-    s_memtime s[10:11]
-    // put timestemp in v[20:21]
-    v_mov_b32_e32 v21 , s11;
-    v_mov_b32_32 v20, s10;
-    flat_store_dword_x2 v[18:19] , vy[20:21]
-    
-*/
-
-    MyInsn from_tramp = InsnFactory::create_s_branch(tramp_location + total_size + end_excluded-start_included, end_excluded, insn_pool);
-    fwrite(from_tramp.ptr,from_tramp.size,1,f);
+    for ( auto &insn : epilogues){
+        insn.write(f);
+        f_index += insn.size;    
+    }
+    InsnFactory::create_s_branch(tramp_location + f_index, end_excluded, insn_pool).write(f);
+    return tramp_location + f_index + 4;
 }
 
 
+void test_accumulation(FILE * f, vector<char *> &insn_pool){
+    // 1. Backup Address ( Prologue) 
+    // 2. 
+    //      a. Insert MemTime at start
+    //      b. 
+    //            i. Insert MemTime at end
+    //            ii. Peforme Subtraction
+    // 3. Write Back Resulti (Epilogue)
+    uint32_t avail_addr = 0;
+    vector<MyInsn> pro_1, ep_1;
+    ep_1.push_back(InsnFactory::create_s_mov_b64(16,0,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b64(22,128,insn_pool));
+    avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,insn_pool);
+
+
+
+    vector<MyInsn> pro_2, ep_2;
+    pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
+    ep_2.push_back(InsnFactory::create_s_memtime(20,insn_pool));
+    ep_2.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    ep_2.push_back(InsnFactory::create_s_sub_u32(18,20,18,false,insn_pool));
+    ep_2.push_back(InsnFactory::create_s_subb_u32(19,21,19,false,insn_pool));
+    ep_2.push_back(InsnFactory::create_s_add_u32(22,18,22,false,insn_pool));
+    ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));
+    avail_addr = insert_tramp(f,pro_2,ep_2,0x10f4,0x13d0,avail_addr,insn_pool);
+
+
+    
+    vector<MyInsn> pro_3, ep_3;
+    ep_3.push_back(InsnFactory::create_s_add_u32( 16,16 ,0x4010  ,true, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_addc_u32( 17, 17  , 128 , false , insn_pool));
+
+    ep_3.push_back(InsnFactory::create_v_mov_b32( 6,16 , insn_pool));
+    ep_3.push_back(InsnFactory::create_v_mov_b32( 7,17 , insn_pool));
+
+    ep_3.push_back(InsnFactory::create_v_mov_b32( 8,22 , insn_pool));
+    ep_3.push_back(InsnFactory::create_v_mov_b32( 9,23 , insn_pool));
+    ep_3.push_back(InsnFactory::create_flat_store_dword_x2(8,6,0x0,insn_pool ));
+
+    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,insn_pool);
+
+
+
+
+}
 
 
 int main(int argc, char **argv){
@@ -301,14 +375,94 @@ int main(int argc, char **argv){
     
     char *binaryPath = argv[1];
     FILE* fp = fopen(binaryPath,"rb+");
-    insert_tramp(fp,atoi(argv[2]),atoi(argv[3]),atoi(argv[4]),insn_pool);
+    vector<MyInsn> insns;
+    vector<MyInsn> empty;
+    
+    uint32_t start_included, end_excluded , tramp_location;
+
+    start_included = atoi(argv[2]);
+    end_excluded = atoi(argv[3]);
+    tramp_location = atoi(argv[4]);
+
+    //insert_tramp(fp,empty,insns,start_included,end_excluded,tramp_location,insn_pool);
+    test_accumulation(fp,insn_pool);
     fclose(fp);
 
     for (auto &p : insn_pool){
         free(p);    
     }
+   
+    /*map<Address,bool> seen;
+    vector<Function *> funcs;
+    SymtabCodeSource * sts;
+    CodeObject * co;
+    sts = new SymtabCodeSource( argv[1]);
+    co = new CodeObject( sts);
+    co -> parse();
+
+    const CodeObject::funclist & all = co->funcs();
+    auto fit = all.begin();
+    for (int i =0 ; fit != all.end(); fit++ , i++){
+        Function * f = * fit;
+        InstructionDecoder decode(f->isrc()->getPtrToInstruction(f->addr()),InstructionDecoder::maxInstructionLength,f->region()->getArch());
+
+        auto bit = f->blocks().begin();
+        for (; bit != f->blocks().end(); ++ bit){
+            Block * b = * bit;
+            if(seen.find(b->start()) != seen.end())
+                continue;
+            seen[b->start()] = true;
+
+            auto edges = b->targets().begin();
+            for ( ; edges != b->targets().end(); ++ edges){
+                if(!*edges) continue;
+            }
+        
+        }
+
+    }
+    std::cout <<"number of basic blocks " << seen.size() << std::endl;
+    */
+
+    return 0;
+
 }
 
 
 
 
+
+/*
+    insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010  ,true, insn_pool));
+    insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
+    insns.push_back(InsnFactory::create_s_memtime(16,insn_pool));
+    insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 21,17 , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 20,16 , insn_pool));
+    insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
+
+    insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010 + 8 ,true, insn_pool));
+    insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
+    insns.push_back(InsnFactory::create_s_memtime(18,insn_pool));
+    insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 21,19 , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 20,18 , insn_pool));
+    insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
+
+    insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010 + 16 ,true, insn_pool));
+    insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
+
+
+    insns.push_back(InsnFactory::create_s_sub_u32( 16 , 18, 16 , false, insn_pool));
+    insns.push_back(InsnFactory::create_s_subb_u32( 17, 19  , 17 , false , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 21,17 , insn_pool));
+    insns.push_back(InsnFactory::create_v_mov_b32( 20,16 , insn_pool));
+    insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
+*/

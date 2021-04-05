@@ -4,7 +4,7 @@ all: split_kernel edit_kernel merge_kernel set_register_usage extend_text extend
 #
 # A GNU Makefile
 #
-
+DYNINST_ROOT=/home/wuxx1279/bin/dyninst
 ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
 endif
