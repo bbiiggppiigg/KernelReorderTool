@@ -110,6 +110,17 @@ public:
         return MyInsn(cmd_ptr,4,std::string("s_movk_i32 ")+std::to_string(simm16));
     }
 // SOP2
+   static MyInsn create_s_and_b32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 12;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
+    }
+
+
    static MyInsn create_s_add_u32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0  , bool useImm , vector<char *> & insn_pool ){
         uint32_t cmd = 0x80000000;
         uint32_t op = 0x0;
@@ -288,7 +299,7 @@ public:
 };
 
 
-uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & epilogues,uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, uint32_t exec_store_index ,  vector<char *> & insn_pool){
+uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & epilogues,uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, uint32_t scc_store_index ,  vector<char *> & insn_pool){
     // Read the block to patch in to a buffer
     unsigned int bb_size = end_excluded - start_included;
     void * buffer_block =  malloc(bb_size);
@@ -300,21 +311,20 @@ uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & ep
     InsnFactory::create_s_branch(start_included,tramp_location, insn_pool ).write(f);
     
     
-    auto save_exec = InsnFactory::create_s_mov_b64(exec_store_index,126,insn_pool);
-    auto restore_exec = InsnFactory::create_s_mov_b64(126,exec_store_index,insn_pool);
-
+    auto save_scc = InsnFactory::create_s_mov_b64(scc_store_index,253,insn_pool);
+    auto restore_scc = InsnFactory::create_s_and_b32(scc_store_index,scc_store_index,scc_store_index,insn_pool);
 
     unsigned int f_index = 0;
     fseek(f,tramp_location,SEEK_SET);
     if ( prologues.size() != 0 ){
-        save_exec.write(f);
-        f_index+= save_exec.size;
+        save_scc.write(f);
+        f_index+= save_scc.size;
         for ( auto &insn : prologues ){
             insn.write(f);
             f_index += insn.size;    
         }
-        restore_exec.write(f);
-        f_index+= restore_exec.size;
+        restore_scc.write(f);
+        f_index+= restore_scc.size;
 
     }
 
@@ -322,15 +332,15 @@ uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & ep
     f_index += bb_size;
 
     if ( epilogues.size() != 0 ){
-        save_exec.write(f);
-        f_index+= save_exec.size;
+        save_scc.write(f);
+        f_index+= save_scc.size;
 
         for ( auto &insn : epilogues ){
             insn.write(f);
             f_index += insn.size;    
         }
-        restore_exec.write(f);
-        f_index+= restore_exec.size;
+        restore_scc.write(f);
+        f_index+= restore_scc.size;
 
 
     }
@@ -356,18 +366,17 @@ void test_accumulation(FILE * f, vector<char *> &insn_pool){
     ep_1.push_back(InsnFactory::create_s_mov_b64(22,128,insn_pool));
     avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,24,insn_pool);
 
-    // TODO: Save EXEC MASK
-/*
     vector<MyInsn> pro_2, ep_2;
-    pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
+    /*pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
     ep_2.push_back(InsnFactory::create_s_memtime(20,insn_pool));
     ep_2.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ep_2.push_back(InsnFactory::create_s_sub_u32(18,20,18,false,insn_pool));
     ep_2.push_back(InsnFactory::create_s_subb_u32(19,21,19,false,insn_pool));
     ep_2.push_back(InsnFactory::create_s_add_u32(22,18,22,false,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));
-    avail_addr = insert_tramp(f,pro_2,ep_2,0x10f4,0x13d0,avail_addr,insn_pool);
-*/
+    ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));*/
+
+    ep_2.push_back(InsnFactory::create_s_add_u32(22,22,1,true,insn_pool));
+    avail_addr = insert_tramp(f,pro_2,ep_2,0x10f4,0x13d0,avail_addr,24,insn_pool);
 
     
     vector<MyInsn> pro_3, ep_3;
