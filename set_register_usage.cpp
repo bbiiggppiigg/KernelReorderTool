@@ -88,8 +88,11 @@ uint32_t get_bits(uint32_t value, uint32_t hi , uint32_t low){
 }
 
 uint32_t set_bits(uint32_t old_bits, uint32_t hi, uint32_t low, uint32_t bits){
-    uint32_t ret = old_bits & (~(((1 << ( hi -low + 1 )) -1)  << low ));
-    ret &= (bits << low );
+    uint32_t mask = ~((( 1 << (hi-low + 1))-1)<< low);
+
+    printf("setting bits %x , mask = %x\n", bits,mask);
+    uint32_t ret = old_bits & mask;
+    ret |= (bits << low );
     return ret;
 }
 
@@ -126,6 +129,7 @@ uint32_t vgpr_bits_to_count(uint32_t bits){
 void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count ){
     for (auto &p : kds ){
         if(p.second == name ){
+            printf("preparing to set new count \n");
             uint32_t old_bits = get_pgm_rsrc1(fp,p.first);
             uint32_t sgpr_count = sgpr_bits_to_count(get_bits(old_bits,9,6));
             if(sgpr_count > new_sgpr_count ){
@@ -133,7 +137,10 @@ void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string nam
                 return;    
             }
             uint32_t new_bits = set_bits(old_bits,9,6,sgpr_count_to_bits(new_sgpr_count));
+            printf("old bits = %x , new bits = %x\n",old_bits,new_bits);
             set_pgm_rsrc1(fp,p.first,new_bits);
+            uint32_t written_bits = get_pgm_rsrc1(fp,p.first);
+            printf("reading own write, bits = %x\n",written_bits);
         }    
     } 
 }
@@ -185,12 +192,21 @@ int main(int argc, char **argv){
     }
     char *binaryPath = argv[1];
 
-    FILE * fp = fopen(binaryPath,"rb");
+    FILE * fp = fopen(binaryPath,"rb+");
     vector< pair<uint64_t,string>> kds;
     
     get_kds(fp,kds);
     uint32_t ret =get_pgm_rsrc1(fp,kds[0].first);
     auto tmp = COMPUTE_PGM_RSRC1(ret);
+
+    set_sgpr_usage( fp , kds , "_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj.kd" , 26);
+    //ret =get_pgm_rsrc1(fp,kds[0].first);
+    //tmp = COMPUTE_PGM_RSRC1(ret);
+    fclose(fp);
+}
+
+
+
     /*for ( auto & pa : kds) {
         cout << std::hex << pa.first  << " " << pa.second << endl;
     }
@@ -218,9 +234,4 @@ int main(int argc, char **argv){
         }
 
     }*/
-    fclose(fp);
-}
-
-
-
 

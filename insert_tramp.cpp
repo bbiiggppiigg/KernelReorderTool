@@ -288,7 +288,7 @@ public:
 };
 
 
-uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & epilogues,uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, vector<char *> & insn_pool){
+uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & epilogues,uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, uint32_t exec_store_index ,  vector<char *> & insn_pool){
     // Read the block to patch in to a buffer
     unsigned int bb_size = end_excluded - start_included;
     void * buffer_block =  malloc(bb_size);
@@ -298,20 +298,43 @@ uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & ep
     // setup branch from original block to tramp
     fseek(f,start_included,SEEK_SET);
     InsnFactory::create_s_branch(start_included,tramp_location, insn_pool ).write(f);
+    
+    
+    auto save_exec = InsnFactory::create_s_mov_b64(exec_store_index,126,insn_pool);
+    auto restore_exec = InsnFactory::create_s_mov_b64(126,exec_store_index,insn_pool);
+
 
     unsigned int f_index = 0;
     fseek(f,tramp_location,SEEK_SET);
-    for ( auto &insn : prologues ){
-        insn.write(f);
-        f_index += insn.size;    
+    if ( prologues.size() != 0 ){
+        save_exec.write(f);
+        f_index+= save_exec.size;
+        for ( auto &insn : prologues ){
+            insn.write(f);
+            f_index += insn.size;    
+        }
+        restore_exec.write(f);
+        f_index+= restore_exec.size;
+
     }
+
     fwrite(buffer_block,1,bb_size,f);
     f_index += bb_size;
 
-    for ( auto &insn : epilogues){
-        insn.write(f);
-        f_index += insn.size;    
+    if ( epilogues.size() != 0 ){
+        save_exec.write(f);
+        f_index+= save_exec.size;
+
+        for ( auto &insn : epilogues ){
+            insn.write(f);
+            f_index += insn.size;    
+        }
+        restore_exec.write(f);
+        f_index+= restore_exec.size;
+
+
     }
+
     InsnFactory::create_s_branch(tramp_location + f_index, end_excluded, insn_pool).write(f);
     return tramp_location + f_index + 4;
 }
@@ -327,12 +350,14 @@ void test_accumulation(FILE * f, vector<char *> &insn_pool){
     // 3. Write Back Resulti (Epilogue)
     uint32_t avail_addr = 0;
     vector<MyInsn> pro_1, ep_1;
+
+    ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ep_1.push_back(InsnFactory::create_s_mov_b64(16,0,insn_pool));
     ep_1.push_back(InsnFactory::create_s_mov_b64(22,128,insn_pool));
-    avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,insn_pool);
+    avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,24,insn_pool);
 
-
-
+    // TODO: Save EXEC MASK
+/*
     vector<MyInsn> pro_2, ep_2;
     pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
     ep_2.push_back(InsnFactory::create_s_memtime(20,insn_pool));
@@ -342,10 +367,15 @@ void test_accumulation(FILE * f, vector<char *> &insn_pool){
     ep_2.push_back(InsnFactory::create_s_add_u32(22,18,22,false,insn_pool));
     ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));
     avail_addr = insert_tramp(f,pro_2,ep_2,0x10f4,0x13d0,avail_addr,insn_pool);
-
+*/
 
     
     vector<MyInsn> pro_3, ep_3;
+
+    //ep_3.push_back(InsnFactory::create_s_memtime(22,insn_pool));
+    //ep_3.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+
+
     ep_3.push_back(InsnFactory::create_s_add_u32( 16,16 ,0x4010  ,true, insn_pool));
     ep_3.push_back(InsnFactory::create_s_addc_u32( 17, 17  , 128 , false , insn_pool));
 
@@ -356,7 +386,7 @@ void test_accumulation(FILE * f, vector<char *> &insn_pool){
     ep_3.push_back(InsnFactory::create_v_mov_b32( 9,23 , insn_pool));
     ep_3.push_back(InsnFactory::create_flat_store_dword_x2(8,6,0x0,insn_pool ));
 
-    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,insn_pool);
+    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,24,insn_pool);
 
 
 
@@ -377,14 +407,14 @@ int main(int argc, char **argv){
     FILE* fp = fopen(binaryPath,"rb+");
     vector<MyInsn> insns;
     vector<MyInsn> empty;
-    
+
+/*
     uint32_t start_included, end_excluded , tramp_location;
 
     start_included = atoi(argv[2]);
     end_excluded = atoi(argv[3]);
     tramp_location = atoi(argv[4]);
-
-    //insert_tramp(fp,empty,insns,start_included,end_excluded,tramp_location,insn_pool);
+*/
     test_accumulation(fp,insn_pool);
     fclose(fp);
 

@@ -1,5 +1,5 @@
 
-tmp_00.hsaco:	file format elf64-amdgpu
+./tmp_00.hsaco:	file format elf64-amdgpu
 
 
 Disassembly of section .text:
@@ -288,11 +288,27 @@ Disassembly of section .text:
 	v_mov_b32_e32 v2, v0                                       // 0000000014F4: 7E040300
 	v_mov_b32_e32 v3, v0                                       // 0000000014F8: 7E060300
 	v_mov_b32_e32 v4, s0                                       // 0000000014FC: 7E080200
-	flat_store_dwordx4 v[4:5], v[0:3]                          // 000000001500: DC7C0000 00000004
+	s_branch 14                                                // 000000001500: BF82000E <BB0_6+0x104>
+	v_cndmask_b32_e32 v0, s4, v0, vcc                          // 000000001504: 00000004
 	s_endpgm                                                   // 000000001508: BF810000
 	s_load_dwordx4 s[12:15], s[6:7], 0x0                       // 00000000150C: C00A0303 00000000
 	s_load_dwordx4 s[0:3], s[6:7], 0x10                        // 000000001514: C00A0003 00000010
 	s_load_dwordx2 s[6:7], s[6:7], 0x18                        // 00000000151C: C0060183 00000018
-	s_mov_b64 s[16:17], s[0:1]                                 // 000000001524: BE900100
-	s_branch 65211                                             // 000000001528: BF82FEBB <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local+0x18>
+	s_mov_b64 s[24:25], exec                                   // 000000001524: BE98017E
+	s_waitcnt lgkmcnt(0)                                       // 000000001528: BF8C007F
+	s_mov_b64 s[16:17], s[0:1]                                 // 00000000152C: BE900100
+	s_mov_b64 s[22:23], 0                                      // 000000001530: BE960180
+	s_mov_b64 exec, s[24:25]                                   // 000000001534: BEFE0118
+	s_branch 65207                                             // 000000001538: BF82FEB7 <_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj$local+0x18>
+	flat_store_dwordx4 v[4:5], v[0:3]                          // 00000000153C: DC7C0000 00000004
+	s_mov_b64 s[24:25], exec                                   // 000000001544: BE98017E
+	s_add_u32 s16, 0x4010, s16                                 // 000000001548: 801010FF 00004010
+	s_addc_u32 s17, 0, s17                                     // 000000001550: 82111180
+	v_mov_b32_e32 v6, s16                                      // 000000001554: 7E0C0210
+	v_mov_b32_e32 v7, s17                                      // 000000001558: 7E0E0211
+	v_mov_b32_e32 v8, s22                                      // 00000000155C: 7E100216
+	v_mov_b32_e32 v9, s23                                      // 000000001560: 7E120217
+	flat_store_dwordx2 v[6:7], v[8:9]                          // 000000001564: DC740000 00000806
+	s_mov_b64 exec, s[24:25]                                   // 00000000156C: BEFE0118
+	s_branch 65509                                             // 000000001570: BF82FFE5 <BB0_6+0xd0>
 		...
