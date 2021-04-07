@@ -367,15 +367,15 @@ void test_accumulation(FILE * f, vector<char *> &insn_pool){
     avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,24,insn_pool);
 
     vector<MyInsn> pro_2, ep_2;
-    /*pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
+    pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
     ep_2.push_back(InsnFactory::create_s_memtime(20,insn_pool));
     ep_2.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ep_2.push_back(InsnFactory::create_s_sub_u32(18,20,18,false,insn_pool));
     ep_2.push_back(InsnFactory::create_s_subb_u32(19,21,19,false,insn_pool));
     ep_2.push_back(InsnFactory::create_s_add_u32(22,18,22,false,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));*/
+    ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));
 
-    ep_2.push_back(InsnFactory::create_s_add_u32(22,22,1,true,insn_pool));
+    //ep_2.push_back(InsnFactory::create_s_add_u32(22,22,1,true,insn_pool));
     avail_addr = insert_tramp(f,pro_2,ep_2,0x10f4,0x13d0,avail_addr,24,insn_pool);
 
     
