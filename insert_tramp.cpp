@@ -10,8 +10,6 @@ using namespace ParseAPI;
 
 using namespace InstructionAPI;
 
-#define WAIT_CONST 14
-
 
 const char * s_nop = "\x00\x00\x80\xbf";
 class MyInsn {
@@ -28,7 +26,7 @@ class MyInsn {
 
 };
 
-class MyWaitCntInsn : public MyInsn {
+/*class MyWaitCntInsn : public MyInsn {
     public:
     uint32_t insn; 
     MyWaitCntInsn (char * my_ptr , int vmcnt, int lgkmcnt , int expcnt = 0 ) : MyInsn(my_ptr,4, "s_waitcnt"){
@@ -49,7 +47,7 @@ class MyWaitCntInsn : public MyInsn {
         printf("after constructing waitcnt insn, value = %x\n",insn);
         
     };
-};
+};*/
 
 
 class InsnFactory {
@@ -350,7 +348,45 @@ uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & ep
 }
 
 
-void test_accumulation(FILE * f, vector<char *> &insn_pool){
+void set_memtime_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t first_record_sgpr, uint32_t second_record_sgpr, uint32_t accum_sgpr,vector<char *> & insn_pool){
+    
+    pro.push_back(InsnFactory::create_s_memtime(first_record_sgpr,insn_pool));
+    epi.push_back(InsnFactory::create_s_memtime(second_record_sgpr,insn_pool));
+    epi.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    epi.push_back(InsnFactory::create_s_sub_u32(first_record_sgpr,second_record_sgpr,first_record_sgpr,false,insn_pool));
+    epi.push_back(InsnFactory::create_s_subb_u32(first_record_sgpr+1,second_record_sgpr+1,first_record_sgpr+1,false,insn_pool));
+    epi.push_back(InsnFactory::create_s_add_u32(accum_sgpr,first_record_sgpr,accum_sgpr,false,insn_pool));
+    epi.push_back(InsnFactory::create_s_addc_u32(accum_sgpr+1,first_record_sgpr+1,accum_sgpr+1,false,insn_pool));
+
+ 
+}
+
+void set_counter_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi ,  uint32_t accum_sgpr,vector<char *> & insn_pool){
+    
+    epi.push_back(InsnFactory::create_s_add_u32(accum_sgpr,accum_sgpr,129,false,insn_pool));
+    epi.push_back(InsnFactory::create_s_addc_u32(accum_sgpr+1,accum_sgpr+1,128,false,insn_pool));
+}
+
+
+void set_writeback_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t addr_sgpr,uint32_t addr_vgpr, uint32_t acc_sgpr, uint32_t acc_vgpr,vector<char *> & insn_pool){
+    
+    epi.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    epi.push_back(InsnFactory::create_s_add_u32( addr_sgpr,addr_sgpr ,136  ,false, insn_pool));
+    epi.push_back(InsnFactory::create_s_addc_u32( addr_sgpr +1 , addr_sgpr+1  , 128 , false , insn_pool));
+    epi.push_back(InsnFactory::create_v_mov_b32( addr_vgpr, addr_sgpr , insn_pool));
+    epi.push_back(InsnFactory::create_v_mov_b32( addr_vgpr+1, addr_sgpr+1 , insn_pool));
+    epi.push_back(InsnFactory::create_v_mov_b32( acc_vgpr,acc_sgpr , insn_pool));
+    epi.push_back(InsnFactory::create_v_mov_b32( acc_vgpr+1,acc_sgpr+1 , insn_pool));
+    epi.push_back(InsnFactory::create_flat_store_dword_x2(acc_vgpr,addr_vgpr,0x0,insn_pool ));
+}
+
+typedef struct bb{
+    uint32_t start_included;
+    uint32_t end_excluded;
+    uint32_t acc_sgpr;
+}bb;
+
+void test_acc(FILE * f, vector<bb> &bb_vec ,vector<char *> &insn_pool){
     // 1. Backup Address ( Prologue) 
     // 2. 
     //      a. Insert MemTime at start
@@ -358,49 +394,110 @@ void test_accumulation(FILE * f, vector<char *> &insn_pool){
     //            i. Insert MemTime at end
     //            ii. Peforme Subtraction
     // 3. Write Back Resulti (Epilogue)
+
+
+    /*
+        Reserve s16:17 address
+        Reserve s18:19 / s20:21 for storing mem_time value
+        Reserve s22:23 for storing scc value
+    */
+
+#define ADDR_SGPR 16
+#define MEMTIME_SGPR_1 18
+#define MEMTIME_SGPR_2 20
+#define SCC_SGPR 22
+#define ADDR_VGPR 6
+#define ACC_VGPR 8
+
+
     uint32_t avail_addr = 0;
     vector<MyInsn> pro_1, ep_1;
 
     ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b64(16,0,insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b64(22,128,insn_pool));
-    avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,24,insn_pool);
+    ep_1.push_back(InsnFactory::create_s_mov_b64(ADDR_SGPR,0,insn_pool));
+    for ( auto & b : bb_vec){
+        ep_1.push_back(InsnFactory::create_s_mov_b64(b.acc_sgpr,128,insn_pool));
+    }
 
-    vector<MyInsn> pro_2, ep_2;
-    pro_2.push_back(InsnFactory::create_s_memtime(18,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_memtime(20,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ep_2.push_back(InsnFactory::create_s_sub_u32(18,20,18,false,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_subb_u32(19,21,19,false,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_add_u32(22,18,22,false,insn_pool));
-    ep_2.push_back(InsnFactory::create_s_addc_u32(23,19,23,false,insn_pool));
+    avail_addr = insert_tramp(f,pro_1,ep_1,0x1000,0x1018,0x150c,SCC_SGPR,insn_pool);
 
-    //ep_2.push_back(InsnFactory::create_s_add_u32(22,22,1,true,insn_pool));
-    avail_addr = insert_tramp(f,pro_2,ep_2,0x10f4,0x13d0,avail_addr,24,insn_pool);
 
+    vector<MyInsn> pro_temp, epi_temp;
+    for ( auto & b : bb_vec) {
+       pro_temp.clear(); 
+       epi_temp.clear();
+       set_memtime_pro_ep(pro_temp,epi_temp,MEMTIME_SGPR_1,MEMTIME_SGPR_2,b.acc_sgpr,insn_pool);
+       avail_addr = insert_tramp(f,pro_temp,epi_temp,b.start_included,b.end_excluded,avail_addr,SCC_SGPR,insn_pool);
+    }
     
     vector<MyInsn> pro_3, ep_3;
 
-    //ep_3.push_back(InsnFactory::create_s_memtime(22,insn_pool));
-    //ep_3.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    ep_3.push_back(InsnFactory::create_s_add_u32( ADDR_SGPR,ADDR_SGPR ,0x4010  ,true, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_addc_u32( ADDR_SGPR +1 , ADDR_SGPR+1  , 128 , false , insn_pool));
 
+    for ( auto & b : bb_vec ){
+        set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,ADDR_VGPR,b.acc_sgpr,ACC_VGPR,insn_pool);
+    }
 
-    ep_3.push_back(InsnFactory::create_s_add_u32( 16,16 ,0x4010  ,true, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_addc_u32( 17, 17  , 128 , false , insn_pool));
-
-    ep_3.push_back(InsnFactory::create_v_mov_b32( 6,16 , insn_pool));
-    ep_3.push_back(InsnFactory::create_v_mov_b32( 7,17 , insn_pool));
-
-    ep_3.push_back(InsnFactory::create_v_mov_b32( 8,22 , insn_pool));
-    ep_3.push_back(InsnFactory::create_v_mov_b32( 9,23 , insn_pool));
-    ep_3.push_back(InsnFactory::create_flat_store_dword_x2(8,6,0x0,insn_pool ));
-
-    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,24,insn_pool);
-
-
-
-
+    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,SCC_SGPR,insn_pool);
 }
+
+void test_counter(FILE * f, vector<bb> &bb_vec ,vector<char *> &insn_pool){
+    // 1. Backup Address ( Prologue) 
+    // 2. 
+    //      a. Insert MemTime at start
+    //      b. 
+    //            i. Insert MemTime at end
+    //            ii. Peforme Subtraction
+    // 3. Write Back Resulti (Epilogue)
+
+
+    /*
+        Reserve s16:17 address
+        Reserve s18:19 / s20:21 for storing mem_time value
+        Reserve s22:23 for storing scc value
+    */
+
+#define ADDR_SGPR 16
+#define MEMTIME_SGPR_1 18
+#define MEMTIME_SGPR_2 20
+#define SCC_SGPR 22
+#define ADDR_VGPR 6
+#define ACC_VGPR 8
+
+
+    uint32_t avail_addr = 0;
+    vector<MyInsn> pro_1, ep_1;
+
+    ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b64(ADDR_SGPR,0,insn_pool));
+    for ( auto & b : bb_vec){
+        ep_1.push_back(InsnFactory::create_s_mov_b64(b.acc_sgpr,128,insn_pool));
+    }
+
+    avail_addr = insert_tramp(f,pro_1,ep_1,0x1000,0x1018,0x150c,SCC_SGPR,insn_pool);
+
+
+    vector<MyInsn> pro_temp, epi_temp;
+    for ( auto & b : bb_vec) {
+       pro_temp.clear(); 
+       epi_temp.clear();
+       set_counter_pro_ep(pro_temp,epi_temp,b.acc_sgpr,insn_pool);
+       avail_addr = insert_tramp(f,pro_temp,epi_temp,b.start_included,b.end_excluded,avail_addr,SCC_SGPR,insn_pool);
+    }
+    
+    vector<MyInsn> pro_3, ep_3;
+
+    ep_3.push_back(InsnFactory::create_s_add_u32( ADDR_SGPR,ADDR_SGPR ,0x4010  ,true, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_addc_u32( ADDR_SGPR +1 , ADDR_SGPR+1  , 128 , false , insn_pool));
+
+    for ( auto & b : bb_vec ){
+        set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,ADDR_VGPR,b.acc_sgpr,ACC_VGPR,insn_pool);
+    }
+
+    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,SCC_SGPR,insn_pool);
+}
+
 
 
 int main(int argc, char **argv){
@@ -416,22 +513,18 @@ int main(int argc, char **argv){
     FILE* fp = fopen(binaryPath,"rb+");
     vector<MyInsn> insns;
     vector<MyInsn> empty;
+    
 
-/*
-    uint32_t start_included, end_excluded , tramp_location;
+    vector<bb>  vec_bb= {{ 0x10f4, 0x13d0, 24 },  { 0x13dc, 0x1434, 26 }, { 0x1438, 0x1500, 28 }};
 
-    start_included = atoi(argv[2]);
-    end_excluded = atoi(argv[3]);
-    tramp_location = atoi(argv[4]);
-*/
-    test_accumulation(fp,insn_pool);
-    fclose(fp);
+    test_acc(fp,vec_bb,insn_pool);
+    //test_counter(fp,vec_bb,insn_pool);
 
     for (auto &p : insn_pool){
         free(p);    
     }
-   
-    /*map<Address,bool> seen;
+  /* 
+    map<Address,bool> seen;
     vector<Function *> funcs;
     SymtabCodeSource * sts;
     CodeObject * co;
@@ -448,21 +541,23 @@ int main(int argc, char **argv){
         auto bit = f->blocks().begin();
         for (; bit != f->blocks().end(); ++ bit){
             Block * b = * bit;
-            if(seen.find(b->start()) != seen.end())
-                continue;
-            seen[b->start()] = true;
 
-            auto edges = b->targets().begin();
-            for ( ; edges != b->targets().end(); ++ edges){
-                if(!*edges) continue;
+            for (auto & edges : b->targets()){
+                
+                printf(" block starting addr = %x , last instr addr = %x\n",
+                    edges->src()->start(),
+                    edges->src()->lastInsnAddr()
+                );
+
             }
-        
+                    
         }
 
     }
     std::cout <<"number of basic blocks " << seen.size() << std::endl;
     */
 
+    fclose(fp);
     return 0;
 
 }
@@ -471,37 +566,56 @@ int main(int argc, char **argv){
 
 
 
-/*
-    insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010  ,true, insn_pool));
-    insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
-    insns.push_back(InsnFactory::create_s_memtime(16,insn_pool));
-    insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 21,17 , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 20,16 , insn_pool));
-    insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
-
-    insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010 + 8 ,true, insn_pool));
-    insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
-    insns.push_back(InsnFactory::create_s_memtime(18,insn_pool));
-    insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 21,19 , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 20,18 , insn_pool));
-    insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
-
-    insns.push_back(InsnFactory::create_s_add_u32( 10,0 ,0x4010 + 16 ,true, insn_pool));
-    insns.push_back(InsnFactory::create_s_addc_u32( 11, 1  , 128 , false , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 19,11 , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 18,10 , insn_pool));
+/*void test_accumulation(FILE * f, vector<char *> &insn_pool){
+    // 1. Backup Address ( Prologue) 
+    // 2. 
+    //      a. Insert MemTime at start
+    //      b. 
+    //            i. Insert MemTime at end
+    //            ii. Peforme Subtraction
+    // 3. Write Back Resulti (Epilogue)
 
 
-    insns.push_back(InsnFactory::create_s_sub_u32( 16 , 18, 16 , false, insn_pool));
-    insns.push_back(InsnFactory::create_s_subb_u32( 17, 19  , 17 , false , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 21,17 , insn_pool));
-    insns.push_back(InsnFactory::create_v_mov_b32( 20,16 , insn_pool));
-    insns.push_back(InsnFactory::create_flat_store_dword_x2(20,18,0x0,insn_pool ));
+ 
+#define ADDR_SGPR 16
+#define MEMTIME_SGPR_1 18
+#define MEMTIME_SGPR_2 20
+#define SCC_SGPR 22
+
+
+    uint32_t avail_addr = 0;
+    vector<MyInsn> pro_1, ep_1;
+
+    ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b64(ADDR_SGPR,0,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b64(24,128,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b64(26,128,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b64(28,128,insn_pool));
+
+    avail_addr = insert_tramp(f,pro_1,ep_1,4096,4120,5388,SCC_SGPR,insn_pool);
+
+    vector<MyInsn> pro_a, ep_a;
+    set_memtime_pro_ep(pro_a,ep_a,MEMTIME_SGPR_1,MEMTIME_SGPR_2,24,insn_pool);
+    avail_addr = insert_tramp(f,pro_a,ep_a,0x10f4,0x13d0,avail_addr,SCC_SGPR,insn_pool);
+
+    vector<MyInsn> pro_b, ep_b;
+    set_memtime_pro_ep(pro_b,ep_b,MEMTIME_SGPR_1,MEMTIME_SGPR_2,26,insn_pool);
+    avail_addr = insert_tramp(f,pro_b,ep_b,0x13dc,0x1434,avail_addr,SCC_SGPR,insn_pool);
+
+    vector<MyInsn> pro_c, ep_c;
+    set_memtime_pro_ep(pro_c,ep_c,MEMTIME_SGPR_1,MEMTIME_SGPR_2,28,insn_pool);
+    avail_addr = insert_tramp(f,pro_c,ep_c,0x1438,0x1500,avail_addr,SCC_SGPR,insn_pool);
+    
+    vector<MyInsn> pro_3, ep_3;
+
+    ep_3.push_back(InsnFactory::create_s_add_u32( ADDR_SGPR,ADDR_SGPR ,0x4010  ,true, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_addc_u32( ADDR_SGPR +1 , ADDR_SGPR+1  , 128 , false , insn_pool));
+    
+    set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,6,24,8,insn_pool);
+    set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,6,26,8,insn_pool);
+    set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,6,28,8,insn_pool);
+
+    avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,SCC_SGPR,insn_pool);
+}
 */
+
