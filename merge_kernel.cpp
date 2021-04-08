@@ -35,9 +35,9 @@ int main(int argc, char ** argv){
     char * buffer;
 
     FILE * f = fopen(filename,"rb+");
-    printf("number of kernels = %d\n",kernels.size());
+    printf("number of kernels = %lu\n",kernels.size());
     for (int i = 0; i < kernels.size() ; i++){
-        printf("kernel %d : offset = %d , size = %d\n",i,kernels[i].first, kernels[i].second);
+        printf("kernel %d : offset = %lld , size = %lld\n",i,kernels[i].first, kernels[i].second);
         buffer = (char *) malloc(kernels[i].second); 
         memset(buffer,0,kernels[i].second);
         sprintf(tmp_filename,"tmp_%02d.hsaco\0",i);

@@ -54,11 +54,15 @@ void test_acc(FILE * f, vector<bb> &bb_vec ,vector<char *> &insn_pool){
     
     vector<MyInsn> pro_3, ep_3;
 
-    ep_3.push_back(InsnFactory::create_s_add_u32( ADDR_SGPR,ADDR_SGPR ,0x4010  ,true, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_add_u32( ADDR_SGPR,ADDR_SGPR ,0x3ff8  ,true, insn_pool));
     ep_3.push_back(InsnFactory::create_s_addc_u32( ADDR_SGPR +1 , ADDR_SGPR+1  , 128 , false , insn_pool));
 
-    for ( auto & b : bb_vec ){
-        set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,ADDR_VGPR,b.acc_sgpr,ACC_VGPR,insn_pool);
+    /*for ( auto & b : bb_vec ){
+        set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,ADDR_VGPR,24,ACC_VGPR,insn_pool);
+    }*/
+
+    for( unsigned i = 0; i  < 20 ; i++){
+        set_writeback_pro_ep(pro_3,ep_3,ADDR_SGPR,ADDR_VGPR,24,ACC_VGPR,insn_pool);
     }
 
     avail_addr = insert_tramp(f,pro_3,ep_3,0x1500,0x1508,avail_addr,SCC_SGPR,insn_pool);

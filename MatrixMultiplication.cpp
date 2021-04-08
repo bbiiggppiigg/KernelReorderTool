@@ -24,6 +24,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #define SAMPLE_VERSION "HIP-Examples-Application-v1.0"
 
+
+#define CHECK(cmd) \
+{\
+    hipError_t error  = cmd;\
+    if (error != hipSuccess) { \
+        fprintf(stderr, "error: '%s'(%d) at %s:%d\n", hipGetErrorString(error), error,__FILE__, __LINE__); \
+        exit(EXIT_FAILURE);\
+          }\
+}
+
+
+
+#define NUM_RECORDS 20
 using namespace appsdk;
 
 /**
@@ -251,7 +264,8 @@ __global__ void mmmKernel(
     matrixC[pos.x + ((pos.y <<  TILEY_SHIFT) + 1) * widthB] = sum1;
     matrixC[pos.x + ((pos.y <<  TILEY_SHIFT) + 2) * widthB] = sum2;
     matrixC[pos.x + ((pos.y <<  TILEY_SHIFT) + 3) * widthB] = sum3;
-
+    matrixC[1024] = make_float4(1,1,1,1);
+    
 }
 
 int
@@ -274,7 +288,7 @@ MatrixMultiplication::setupMatrixMultiplication()
     fillRandom<float>(input1, width1, height1, 0, 10);
 
     // allocate memory for output[width1][height0]
-    unsigned int outputSizeBytes = height0 * width1 * sizeof(float);
+    unsigned int outputSizeBytes = height0 * width1 * sizeof(float) + 8 * NUM_RECORDS;
 
     output = (float *) malloc(outputSizeBytes);
     CHECK_ALLOCATION(output, "Failed to allocate host memory. (output)");
@@ -323,25 +337,34 @@ MatrixMultiplication::runKernels(void)
 {
 float *din0, *din1, *dout;
     // Set input data to matrix A and matrix B
-hipHostMalloc((void**)&inputBuffer0, width0 * height0 * sizeof(float), hipHostMallocDefault);
+/*hipHostMalloc((void**)&inputBuffer0, width0 * height0 * sizeof(float), hipHostMallocDefault);
 hipHostMalloc((void**)&inputBuffer1, width1 * height1 * sizeof(float), hipHostMallocDefault);
 hipHostMalloc((void**)&outputBuffer, width1 * height0 * sizeof(float), hipHostMallocDefault);
 
 hipHostGetDevicePointer((void**)&din0, inputBuffer0,0);
 hipHostGetDevicePointer((void**)&din1, inputBuffer1,0);
-hipHostGetDevicePointer((void**)&dout, outputBuffer,0);
+hipHostGetDevicePointer((void**)&dout, outputBuffer,0);*/
 
-hipMemcpy(din0, input0,width0 * height0 * sizeof(float), hipMemcpyHostToDevice);
-hipMemcpy(din1, input1,width1 * height1 * sizeof(float), hipMemcpyHostToDevice);
+CHECK(hipMalloc(&din0, width1 * height0 * sizeof(float)));
+CHECK(hipMalloc(&din1, width1 * height0 * sizeof(float)));
+CHECK(hipMalloc(&dout, width1 * height0 * sizeof(float) + 8 * NUM_RECORDS));
+
+CHECK(hipMemcpy(din0, input0,width0 * height0 * sizeof(float), hipMemcpyHostToDevice));
+CHECK(hipMemcpy(din1, input1,width1 * height1 * sizeof(float), hipMemcpyHostToDevice));
 
 
 hipLaunchKernelGGL(mmmKernel,
                   dim3((width1/4)/blockSize,(height0/4)/blockSize),
                   dim3(blockSize,blockSize),
                   0, 0,
-                  (float4*)inputBuffer0 ,(float4*)inputBuffer1 ,(float4*)outputBuffer, width0, width1 );
+                  (float4*)din0 ,(float4*)din1 ,(float4*)dout, width0, width1 );
 
-hipMemcpy(output, dout, width1 * height0 * sizeof(float), hipMemcpyDeviceToHost);
+hipMemcpy(output, dout, width1 * height0 * sizeof(float) + 8 * NUM_RECORDS, hipMemcpyDeviceToHost);
+printf("width = %d, height = %d\n",width1,height0);
+for (int i =0; i < width1 * height0 /2 + NUM_RECORDS; i++){
+    printf("i: %d , 0x%llx\n", i, *( ((long long int * ) output)+ i   ));
+}
+puts("HERE");
 
     return SDK_SUCCESS;
 }

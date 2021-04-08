@@ -101,11 +101,11 @@ int main(int argc, char ** argv){
     FILE * f = fopen(filename,"rb");
     fprintf(fmeta,"%s\n",filename);
     setup(f,kernels);
-    fprintf(fmeta,"%d\n",kernels.size());
-    printf("number of kernels = %d\n",kernels.size());
+    fprintf(fmeta,"%lu\n",kernels.size());
+    printf("number of kernels = %lu\n",kernels.size());
     for (int i = 0; i < kernels.size() ; i++){
         fprintf(fmeta,"%d %d\n",kernels[i].first,kernels[i].second);
-        printf("kernel %d : offset = %d , size = %d\n",i,kernels[i].first, kernels[i].second);
+        printf("kernel %d : offset = %lld , size = %lld\n",i,kernels[i].first, kernels[i].second);
         char * buffer = (char *) malloc(kernels[i].second+1); 
         fseek(f,kernels[i].first,SEEK_SET);
         fread(buffer,kernels[i].second,1,f);
