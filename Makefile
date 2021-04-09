@@ -1,9 +1,11 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
-all: split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol mm insert_tramp test_acc test_counter
 
-#
-# A GNU Makefile
-#
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter
+
+TARGETS=$(addprefix bin/,$(targets))
+
+all : $(TARGETS) $(mm)
+
 DYNINST_ROOT=/home/wuxx1279/bin/dyninst
 ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
@@ -13,51 +15,52 @@ lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_
 
 mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication
 
-mm: $(mmpath)
-	cp ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication .
+MatrixMultiplication: $(mmpath)
+	cp $(mmpath) .
 
-edit_kernel: edit_kernel.o
-	 g++ edit_kernel.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o edit_kernel
+bin/edit_kernel: src/edit_kernel.o
+	 g++ src/edit_kernel.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/edit_kernel
 
-edit_kernel.o:  edit_kernel.cpp
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -c edit_kernel.cpp
-
-insert_tramp: insert_tramp.o
-	 g++ insert_tramp.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o insert_tramp
-
-insert_tramp.o:  insert_tramp.cpp
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -c insert_tramp.cpp
+src/edit_kernel.o:  src/edit_kernel.cpp
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -c src/edit_kernel.cpp -o src/edit_kernel.o
 
 
-test_acc: test_acc.o
-	 g++ test_acc.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o test_acc
+bin/test_acc: src/test_acc.o lib/InstrUtil.o
+	 g++ src/test_acc.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_acc
 
-test_acc.o:  test_acc.cpp
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -c test_acc.cpp
+src/test_acc.o:  src/test_acc.cpp 
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_acc.cpp -o src/test_acc.o
 
-test_counter: test_counter.o
-	 g++ test_acc.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o test_counter
+bin/test_counter: src/test_counter.o lib/InstrUtil.o
+	 g++ src/test_counter.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_counter
 
-test_counter.o:  test_counter.cpp
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -c test_counter.cpp
+src/test_counter.o:  src/test_counter.cpp 
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_counter.cpp -o src/test_counter.o
 
-set_register_usage: set_register_usage.cpp
-	g++ -o set_register_usage set_register_usage.cpp
-
-extend_text: extend_text.cpp
-	g++ -o extend_text extend_text.cpp
-
-extend_symbol: extend_symbol.cpp
-	g++ -o extend_symbol extend_symbol.cpp
+lib/InstrUtil.o: lib/InstrUtil.cpp
+	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
 
 
-split_kernel: split_kernel.cpp
-	g++ -o split_kernel split_kernel.cpp
 
-merge_kernel: merge_kernel.cpp
-	g++ -o merge_kernel merge_kernel.cpp
+
+
+bin/set_register_usage: src/set_register_usage.cpp
+	g++ -o bin/set_register_usage src/set_register_usage.cpp
+
+bin/extend_text: src/extend_text.cpp
+	g++ -o bin/extend_text src/extend_text.cpp
+
+bin/extend_symbol: src/extend_symbol.cpp
+	g++ -o bin/extend_symbol src/extend_symbol.cpp
+
+
+bin/split_kernel: src/split_kernel.cpp
+	g++ -o bin/split_kernel src/split_kernel.cpp
+
+bin/merge_kernel: src/merge_kernel.cpp
+	g++ -o bin/merge_kernel src/merge_kernel.cpp
 
 
 clean:
-	rm -f *.bundle *.hsaco *.isa split_kernel merge_kernel edit_kernel *.o
+	rm -f *.bundle *.hsaco *.isa src/*.o lib/*.o bin/*
 

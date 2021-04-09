@@ -40,7 +40,7 @@ int main(int argc, char ** argv){
         printf("kernel %d : offset = %lld , size = %lld\n",i,kernels[i].first, kernels[i].second);
         buffer = (char *) malloc(kernels[i].second); 
         memset(buffer,0,kernels[i].second);
-        sprintf(tmp_filename,"tmp_%02d.hsaco\0",i);
+        sprintf(tmp_filename,"tmp_%02d.hsaco",i);
         FILE * tmpfile = fopen(tmp_filename,"rb");
         fread(buffer,kernels[i].second,1,tmpfile);
         fclose(tmpfile);

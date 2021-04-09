@@ -4,7 +4,7 @@
 #include "CodeObject.h"
 #include "InstructionDecoder.h"
 #include "CFG.h"
-#include "InsnFactory.h"
+#include "InstrUtil.h"
 
 
 using namespace std;

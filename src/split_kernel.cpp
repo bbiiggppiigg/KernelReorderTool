@@ -104,14 +104,14 @@ int main(int argc, char ** argv){
     fprintf(fmeta,"%lu\n",kernels.size());
     printf("number of kernels = %lu\n",kernels.size());
     for (int i = 0; i < kernels.size() ; i++){
-        fprintf(fmeta,"%d %d\n",kernels[i].first,kernels[i].second);
+        fprintf(fmeta,"%lld %lld\n",kernels[i].first,kernels[i].second);
         printf("kernel %d : offset = %lld , size = %lld\n",i,kernels[i].first, kernels[i].second);
         char * buffer = (char *) malloc(kernels[i].second+1); 
         fseek(f,kernels[i].first,SEEK_SET);
         fread(buffer,kernels[i].second,1,f);
 
         char tmp_filename[1000];
-        sprintf(tmp_filename,"tmp_%02d.hsaco\0",i);
+        sprintf(tmp_filename,"tmp_%02d.hsaco",i);
         FILE * tmpfile = fopen(tmp_filename,"wb");
         fwrite(buffer,kernels[i].second,1,tmpfile);
         fclose(tmpfile);

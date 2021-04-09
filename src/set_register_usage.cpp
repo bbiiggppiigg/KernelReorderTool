@@ -60,7 +60,7 @@ void get_kds(FILE * f, vector<pair<uint64_t, string>> & ret){
     read_shdr(&symtab_header,f,&header,symtab_index);
     char * symtab_section = read_section(f,&symtab_header);
     int num_entries = symtab_header.sh_size / symtab_header.sh_entsize;
-    printf("entsize = %d\n",symtab_header.sh_entsize);
+    printf("entsize = %lu\n",symtab_header.sh_entsize);
     printf("number of entries = %d\n",num_entries);
     for (int i =0; i < num_entries ;i ++){
         Elf64_Sym * symbol = ((Elf64_Sym *) symtab_section)+i;
