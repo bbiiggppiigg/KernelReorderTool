@@ -127,6 +127,7 @@ uint32_t vgpr_bits_to_count(uint32_t bits){
 }
 
 void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count ){
+    printf("looking for name %s\n",name.c_str());
     for (auto &p : kds ){
         if(p.second == name ){
             printf("preparing to set new count \n");
@@ -138,11 +139,14 @@ void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string nam
             }
             uint32_t new_bits = set_bits(old_bits,9,6,sgpr_count_to_bits(new_sgpr_count));
             printf("old bits = %x , new bits = %x\n",old_bits,new_bits);
+            printf("old count = %u\n",sgpr_count);
             set_pgm_rsrc1(fp,p.first,new_bits);
             uint32_t written_bits = get_pgm_rsrc1(fp,p.first);
             printf("reading own write, bits = %x\n",written_bits);
+            return;
         }    
     } 
+    printf("GGGGGGGGGGGGGGG!\n");
 }
 
 class COMPUTE_PGM_RSRC1 {
@@ -186,8 +190,8 @@ int main(int argc, char **argv){
 
 
 
-    if(argc != 2){
-        printf("Usage: %s <binary path>\n", argv[0]);
+    if(argc != 4){
+        printf("Usage: %s <binary path> <kernel_name> <new_sgpr_count> \n", argv[0]);
         return -1;
     }
     char *binaryPath = argv[1];
@@ -198,40 +202,9 @@ int main(int argc, char **argv){
     get_kds(fp,kds);
     uint32_t ret =get_pgm_rsrc1(fp,kds[0].first);
     auto tmp = COMPUTE_PGM_RSRC1(ret);
-
-    set_sgpr_usage( fp , kds , "_Z9mmmKernelP15HIP_vector_typeIfLj4EES1_S1_jj.kd" , 26);
-    //ret =get_pgm_rsrc1(fp,kds[0].first);
-    //tmp = COMPUTE_PGM_RSRC1(ret);
+    set_sgpr_usage( fp , kds , string(argv[2])+string(".kd") , strtoul(argv[3],0,0));
     fclose(fp);
 }
 
 
-
-    /*for ( auto & pa : kds) {
-        cout << std::hex << pa.first  << " " << pa.second << endl;
-    }
-
-    char cmd[1000];
-    while(~scanf("%s",cmd)){
-        if(strcmp(cmd,"list") ==0 ){
-            for ( auto & pa : kds) {
-                cout << std::hex << pa.first  << " " << pa.second << endl;
-            }
-        }else if(strcmp(cmd,"setvgpr_usage")==0){
-            printf("There are a total of %u kds\n",kds.size());
-            printf("Please pick the kd you want to edit\n");
-            int index, max_vgpr;
-            scanf("%d",&index);
-            printf("Enter the max index of your vector register\n");
-            scanf("%d",&max_vgpr);
-        }else if(strcmp(cmd,"setsgpr_usage")==0){
-            printf("There are a total of %u kds\n",kds.size());
-            printf("Please pick the kd you want to edit\n");
-            int index, max_sgpr;
-            scanf("%d",&index);
-            printf("Enter the max index of your scalar register\n");
-            scanf("%d",&max_sgpr);
-        }
-
-    }*/
 

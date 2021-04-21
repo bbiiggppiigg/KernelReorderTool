@@ -6,6 +6,9 @@
 using namespace std;
 class MyInsn;
 
+
+
+
 uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & epilogues,uint32_t start_included, uint32_t end_excluded, uint32_t tramp_location, uint32_t scc_store_index ,  vector<char *> & insn_pool);
 
 void set_memtime_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t first_record_sgpr, uint32_t second_record_sgpr, uint32_t accum_sgpr,vector<char *> & insn_pool);
@@ -20,4 +23,9 @@ typedef struct bb {
     uint32_t end_excluded;
     uint32_t acc_sgpr;
 }bb;
+
+
+
+void move_block_to(FILE * f, uint32_t start_included, uint32_t end_excluded, uint32_t target_addr);
+
 #endif

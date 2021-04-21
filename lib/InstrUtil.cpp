@@ -1,4 +1,5 @@
 #include "InstrUtil.h"
+#include <cassert>
 using namespace std;
 class MyInsn;
 
@@ -84,5 +85,39 @@ void set_writeback_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t a
     epi.push_back(InsnFactory::create_v_mov_b32( acc_vgpr+1,acc_sgpr+1 , insn_pool));
     epi.push_back(InsnFactory::create_flat_store_dword_x2(acc_vgpr,addr_vgpr,0x0,insn_pool ));
 }
+
+void move_block_to(FILE * fp, uint32_t start_included, uint32_t end_excluded, uint32_t target_addr){
+    assert( target_addr < start_included || target_addr >= end_excluded);
+
+    uint32_t start_addr,end_addr,split_addr; 
+    if(target_addr < start_included){
+        end_addr = end_excluded;
+        start_addr = target_addr;
+        split_addr = start_included;
+    }else{
+        end_addr = target_addr + end_excluded- start_included;
+        start_addr = start_included;
+        split_addr = end_excluded;
+    }
+    uint32_t buf_size = end_addr - start_addr;
+    uint32_t sh_size = end_addr - split_addr;
+    uint32_t fh_size = split_addr - start_addr;
+    void * buffer = malloc(sizeof(char) * (buf_size));    
+    fseek(fp,start_addr,SEEK_SET);
+    fread(buffer,1,buf_size,fp);
+    fseek(fp,start_addr,SEEK_SET);
+    printf("writing to address : %x\n",start_addr);
+    fwrite(buffer+split_addr-start_addr,sh_size,1,fp);
+    printf("writing to address : %x\n",start_addr+sh_size);
+    fwrite(buffer,fh_size,1,fp);
+    printf("first 4bytes of buffer = %x%x\n", * (uint32_t *) buffer, *((uint32_t *) buffer + 1));
+
+}
+
+
+
+
+
+
 
 

@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter move_block
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -41,6 +41,9 @@ lib/InstrUtil.o: lib/InstrUtil.cpp
 	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
 
 
+
+bin/move_block: src/move_block.cpp lib/InstrUtil.o
+	g++ -o bin/move_block -Iinclude src/move_block.cpp lib/InstrUtil.o
 
 
 
