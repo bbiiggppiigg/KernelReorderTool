@@ -191,7 +191,7 @@ void test_acc(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool){
     ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ep_1.push_back(InsnFactory::create_s_mov_b64(c.addr_sgpr,c.orig_addr_sgpr,insn_pool));
     for ( auto & b : bb_vec){
-        ep_1.push_back(InsnFactory::create_s_mov_b64(b.acc_sgpr,128,insn_pool));
+        ep_1.push_back(InsnFactory::create_s_mov_b64(b.acc_sgpr,129,insn_pool));
     }
 
     avail_addr = insert_tramp(f,pro_1,ep_1,c.prolog_start_included,c.prolog_end_excluded,c.first_scratch_space,c.scc_sgpr,insn_pool);
@@ -207,10 +207,17 @@ void test_acc(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool){
     
     vector<MyInsn> pro_3, ep_3;
 
+    //ep_3.push_back(InsnFactory::create_s_lshr_b32( 30, 130 ,3, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_mov_b32( 30, 8, insn_pool));
+    //ep_3.push_back(InsnFactory::create_s_lshl_b32( 30, 0, 30 , insn_pool));
+    //ep_3.push_back(InsnFactory::create_s_and_b32( 30,0xff,3, 0xffff, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,30  , false, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_addc_u32( c.addr_sgpr +1 , c.addr_sgpr+1  , 128 , false , insn_pool));
     ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,0x3ff8  ,true, insn_pool));
     ep_3.push_back(InsnFactory::create_s_addc_u32( c.addr_sgpr +1 , c.addr_sgpr+1  , 128 , false , insn_pool));
 
     for ( auto & b : bb_vec ){
+        //set_writeback_pro_ep(pro_3,ep_3,c.addr_sgpr,c.addr_vgpr,b.acc_sgpr,c.acc_vgpr,insn_pool);
         set_writeback_pro_ep(pro_3,ep_3,c.addr_sgpr,c.addr_vgpr,b.acc_sgpr,c.acc_vgpr,insn_pool);
     }
 
@@ -219,12 +226,6 @@ void test_acc(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool){
 
 
 int main(int argc, char **argv){
-
-
-
-
-
-
     vector < char *> insn_pool;
     if(argc != 4){
         printf("Usage: %s <binary path> <config_path> <bb_path>  \n", argv[0]);

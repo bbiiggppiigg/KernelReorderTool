@@ -23,6 +23,16 @@ class InsnFactory {
     
 public:
 // SOP1
+    static MyInsn create_s_mov_b32( uint32_t sdst, uint32_t ssrc0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0xbe800000;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        uint32_t op = 0;
+        cmd  = ( cmd | (sdst<< 16) | (op << 8) |ssrc0);
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_mov_b64 "));
+    }
+
 
     static MyInsn create_s_mov_b64( uint32_t sdst, uint32_t ssrc0, vector<char *> & insn_pool ){
         uint32_t cmd = 0xbe800000;
@@ -76,7 +86,64 @@ public:
         insn_pool.push_back(cmd_ptr);
         return MyInsn(cmd_ptr,4,std::string("s_movk_i32 ")+std::to_string(simm16));
     }
+
+// VOP2
+   static MyInsn create_v_add_u32(  uint32_t vdst, uint32_t vsrc1, uint32_t src0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0x0;
+        uint32_t op = 52;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        cmd = ( cmd | (op << 25) | ( vdst << 17) | (vsrc1 << 9)  | src0 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
+    }
+// VOP3AB
+   static MyInsn create_v_mul_lo_u32(  uint32_t vdst, uint32_t src1, uint32_t src0, vector<char *> & insn_pool ){
+
+        uint32_t cmd_low = 0xd0000000;
+        uint32_t cmd_high = 0x0;
+        uint32_t op = 645;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+        cmd_low = ( cmd_low | (op << 16)   | vdst );
+        cmd_high = ( cmd_high | (src1 << 9)  | src0 );
+        memcpy( cmd_ptr ,&cmd_low,  4 );
+        memcpy( cmd_ptr+4 ,&cmd_high,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,8,std::string("s_and_b32 "));
+    }
+
+
 // SOP2
+   static MyInsn create_s_lshr_b32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 30;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
+    }
+   static MyInsn create_s_lshl_b32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 28;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
+    }
+
+  static MyInsn create_s_mul_i32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 36;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
+    }
+
+
    static MyInsn create_s_and_b32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
         uint32_t cmd = 0x80000000;
         uint32_t op = 12;
@@ -86,6 +153,21 @@ public:
         insn_pool.push_back(cmd_ptr);
         return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
     }
+   static MyInsn create_s_and_b32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, uint32_t simm32 ,vector<char *> & insn_pool ){
+        uint32_t cmd = 0x80000000;
+        uint32_t op = 12;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+        cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+        printf("cmd_ptr = %llx\n", *(unsigned long long int * ) cmd_ptr+4);
+        memcpy( cmd_ptr ,&cmd,  4 );
+        printf("cmd_ptr = %llx\n", *(unsigned long long int * ) cmd_ptr+4);
+        memcpy( cmd_ptr+4 ,&simm32,  4 );
+        printf("cmd_ptr = %llx\n", *(unsigned long long int * ) cmd_ptr+4);
+        insn_pool.push_back(cmd_ptr);
+        return MyInsn(cmd_ptr,8,std::string("s_and_b32 "));
+    }
+
+
 
 
    static MyInsn create_s_add_u32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0  , bool useImm , vector<char *> & insn_pool ){
