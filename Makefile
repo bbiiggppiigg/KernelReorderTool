@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter move_block
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -37,6 +37,12 @@ bin/test_counter: src/test_counter.o lib/InstrUtil.o
 src/test_counter.o:  src/test_counter.cpp 
 	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_counter.cpp -o src/test_counter.o
 
+bin/test_getreg: src/test_getreg.o lib/InstrUtil.o
+	 g++ src/test_getreg.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_getreg
+
+src/test_getreg.o:  src/test_getreg.cpp 
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_getreg.cpp -o src/test_getreg.o
+
 lib/InstrUtil.o: lib/InstrUtil.cpp
 	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
 
@@ -44,6 +50,9 @@ lib/InstrUtil.o: lib/InstrUtil.cpp
 
 bin/move_block: src/move_block.cpp lib/InstrUtil.o
 	g++ -o bin/move_block -Iinclude src/move_block.cpp lib/InstrUtil.o
+
+bin/report_kd: src/report_kd.cpp
+	g++ -o bin/report_kd src/report_kd.cpp
 
 
 

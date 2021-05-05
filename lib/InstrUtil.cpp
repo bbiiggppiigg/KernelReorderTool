@@ -73,6 +73,11 @@ void set_counter_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi ,  uint32_t ac
     epi.push_back(InsnFactory::create_s_addc_u32(accum_sgpr+1,accum_sgpr+1,128,false,insn_pool));
 }
 
+void set_getreg_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi ,  uint32_t accum_sgpr, uint32_t size, uint32_t offset, uint32_t hwRegId,vector<char *> & insn_pool){
+    epi.push_back(InsnFactory::create_s_getreg_b32(accum_sgpr,size,offset,hwRegId,insn_pool));
+}
+
+
 
 void set_writeback_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t addr_sgpr,uint32_t addr_vgpr, uint32_t acc_sgpr, uint32_t acc_vgpr,vector<char *> & insn_pool){
     

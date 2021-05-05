@@ -16,6 +16,9 @@ void set_memtime_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t fir
 
 void set_counter_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi ,  uint32_t accum_sgpr,vector<char *> & insn_pool);
 
+void set_getreg_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi ,  uint32_t accum_sgpr, uint32_t size , uint32_t offset, uint32_t hwRegId, vector<char *> & insn_pool);
+
+
 void set_writeback_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t addr_sgpr,uint32_t addr_vgpr, uint32_t acc_sgpr, uint32_t acc_vgpr,vector<char *> & insn_pool);
 
 typedef struct bb {

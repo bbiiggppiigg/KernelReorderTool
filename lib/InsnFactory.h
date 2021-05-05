@@ -76,6 +76,18 @@ public:
     }
 
 // SOPK
+ static MyInsn create_s_getreg_b32(  uint32_t target_sgpr, uint8_t size, uint8_t offset, uint8_t hwRegId , vector<char *> & insn_pool ){
+        uint32_t cmd = 0xb0000000;
+        uint32_t op = 17;
+        char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+        size -=1;
+        cmd = ( cmd | (op << 23) |  (target_sgpr << 16 ) |(size << 11) | ( offset << 6)  | hwRegId );
+        memcpy( cmd_ptr ,&cmd,  4 );
+        insn_pool.push_back(cmd_ptr);
+        printf("creating instruction s_getreg_b32 = %x\n",cmd);
+        return MyInsn(cmd_ptr,4,std::string("s_getreg ")+std::to_string(hwRegId));
+    }
+
     static MyInsn create_s_movk_i32(  uint32_t target_sgpr, int16_t simm16  , vector<char *> & insn_pool ){
         uint32_t cmd = 0xb0000000;
         uint32_t op = 0x0;
