@@ -20,4 +20,4 @@ echo "Mering Kernel"
 bin/merge_kernel
 
 
-llvm-objdump -d --mcpu=gfx803 ./tmp_00.hsaco > tmp.s
+llvm-objdump -d --mcpu=gfx900 ./tmp_00.hsaco > tmp.s

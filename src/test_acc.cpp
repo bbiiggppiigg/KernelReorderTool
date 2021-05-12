@@ -208,10 +208,10 @@ void test_acc(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool){
     vector<MyInsn> pro_3, ep_3;
 
     //ep_3.push_back(InsnFactory::create_s_lshr_b32( 30, 130 ,3, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_mov_b32( 30, 8, insn_pool));
+    //ep_3.push_back(InsnFactory::create_s_mov_b32( 30, 8, insn_pool));
     //ep_3.push_back(InsnFactory::create_s_lshl_b32( 30, 0, 30 , insn_pool));
     //ep_3.push_back(InsnFactory::create_s_and_b32( 30,0xff,3, 0xffff, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,30  , false, insn_pool));
+    ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,128  , false, insn_pool));
     ep_3.push_back(InsnFactory::create_s_addc_u32( c.addr_sgpr +1 , c.addr_sgpr+1  , 128 , false , insn_pool));
     ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,0x3ff8  ,true, insn_pool));
     ep_3.push_back(InsnFactory::create_s_addc_u32( c.addr_sgpr +1 , c.addr_sgpr+1  , 128 , false , insn_pool));

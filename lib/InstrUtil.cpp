@@ -89,6 +89,7 @@ void set_writeback_pro_ep(vector<MyInsn> & pro, vector<MyInsn> &epi , uint32_t a
     epi.push_back(InsnFactory::create_v_mov_b32( acc_vgpr,acc_sgpr , insn_pool));
     epi.push_back(InsnFactory::create_v_mov_b32( acc_vgpr+1,acc_sgpr+1 , insn_pool));
     epi.push_back(InsnFactory::create_flat_store_dword_x2(acc_vgpr,addr_vgpr,0x0,insn_pool ));
+    //epi.push_back(InsnFactory::create_global_store_dword_x2(acc_vgpr,addr_vgpr,0x0,insn_pool ));
 }
 
 void move_block_to(FILE * fp, uint32_t start_included, uint32_t end_excluded, uint32_t target_addr){

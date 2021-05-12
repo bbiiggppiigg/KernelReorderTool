@@ -43,7 +43,7 @@ bin/test_getreg: src/test_getreg.o lib/InstrUtil.o
 src/test_getreg.o:  src/test_getreg.cpp 
 	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_getreg.cpp -o src/test_getreg.o
 
-lib/InstrUtil.o: lib/InstrUtil.cpp
+lib/InstrUtil.o: lib/InstrUtil.cpp lib/InsnFactory.h
 	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
 
 
