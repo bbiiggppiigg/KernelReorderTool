@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -30,6 +30,12 @@ bin/test_acc: src/test_acc.o lib/InstrUtil.o
 
 src/test_acc.o:  src/test_acc.cpp 
 	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_acc.cpp -o src/test_acc.o
+
+bin/test_time: src/test_time.o lib/InstrUtil.o
+	 g++ src/test_time.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_time
+
+src/test_time.o:  src/test_time.cpp 
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_time.cpp -o src/test_time.o
 
 bin/test_counter: src/test_counter.o lib/InstrUtil.o
 	 g++ src/test_counter.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_counter
