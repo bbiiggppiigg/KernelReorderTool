@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import statistics
 
 filename = sys.argv[1]
 with open(filename,'r') as f:
@@ -8,6 +9,15 @@ with open(filename,'r') as f:
 lines = lines[1:]
 indices = []
 timestamps = []
+for line in lines:
+    try:
+        time = line.split("(hipEventElapsedTime) = ")[1]
+        time = time.split("ms")[0]
+    except Exception as e:
+        continue
+
+print ("Runtime = ",time)
+
 for line in lines:
     try:
         tmp1,tmp2 = line.split(',')
@@ -23,14 +33,33 @@ for line in lines:
 min_index = indices[0]
 n = len(indices)
 print(n)
+tss = []
+starts = [] 
+ends = []
+
+def report_stats(name, stats):
+    print(f'reporting statistics for {name}')
+    print(f'min = {min(stats)}, max ={max(stats)}, gap = {max(stats)-min(stats)}')
+    print ('average = ',statistics.mean(stats))
+    print ('stdev = ',statistics.pstdev(stats))
+    print('======================================')
+
+
+
 for i in range(0,n,2):
-    print(f"i = {i}")
     index = (i/2)
-    timestamp = int(timestamps[i+1],16)-int(timestamps[i],16)
-    if(timestamps[i+1]=='3f8000003f800000'):
-        print('skip this')
-    else:
-        print('index = %d, timestamp = 0x%x'%(index,timestamp))
+    #timestamp = int(timestamps[i+1],16)-int(timestamps[i],16)
+    start = int(timestamps[i],16)
+    end = int(timestamps[i+1],16)
+    timestamp = end - start
+    starts.append(start)
+    ends.append(end)
+    tss.append(timestamp)
+
+
+report_stats('time',tss)
+report_stats('start',starts)
+report_stats('end',ends)
 
 
 
