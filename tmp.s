@@ -1,10 +1,10 @@
 
-tmp_00.hsaco:	file format ELF64-amdgpu
+tmp_00.hsaco:	file format elf64-amdgpu
 
 
 Disassembly of section .text:
 
-0000000000001000 _Z15vectoradd_floatPfPKfS1_ii:
+0000000000001000 <_Z15vectoradd_floatPfPKfS1_ii>:
 	s_load_dword s0, s[6:7], 0x18                              // 000000001000: C0020003 00000018
 	s_load_dword s10, s[4:5], 0x4                              // 000000001008: C0020282 00000004
 	s_waitcnt lgkmcnt(0)                                       // 000000001010: BF8CC07F
@@ -39,7 +39,7 @@ Disassembly of section .text:
 	s_waitcnt vmcnt(0)                                         // 0000000010B0: BF8C0F70
 	v_fma_f32 v2, v3, v3, v2                                   // 0000000010B4: D1CB0002 040A0703
 
-00000000000010bc BB0_2:
+00000000000010bc <BB0_2>:
 	s_or_b64 exec, exec, s[2:3]                                // 0000000010BC: 87FE027E
 	v_lshlrev_b64 v[0:1], 2, v[0:1]                            // 0000000010C0: D28F0000 00020082
 	v_mov_b32_e32 v3, s1                                       // 0000000010C8: 7E060201

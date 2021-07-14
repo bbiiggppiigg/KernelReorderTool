@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata insert_tramp
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -15,8 +15,14 @@ lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_
 
 mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication
 
+bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h
+	g++ -g -Wall -I$(DYNINST_ROOT)/include src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o $(lDyninst) -o bin/insert_tramp
+
 MatrixMultiplication: $(mmpath)
 	cp $(mmpath) .
+
+bin/analyze_metadata: src/analyze_metadata.cpp
+	g++ src/analyze_metadata.cpp -o bin/analyze_metadata
 
 bin/edit_kernel: src/edit_kernel.o
 	 g++ src/edit_kernel.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/edit_kernel

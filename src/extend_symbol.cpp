@@ -103,7 +103,7 @@ void extend_symbol(FILE * f, char * target_symbol_name, int new_symbol_size){
         printf("symbol name = %s\n",symbol_name);
         if(strcmp(target_symbol_name,symbol_name)==0){
            target_index =i ; 
-           break;
+           //break;
         }
     }
 

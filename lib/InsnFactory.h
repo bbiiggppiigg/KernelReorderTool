@@ -7,10 +7,10 @@ using namespace std;
 
 class MyInsn {
 	public:
-		const void * ptr;
+		void * ptr;
 		unsigned int size;
 		string _pretty;
-		MyInsn( const void * _ptr , unsigned int _size, string pretty) : ptr(_ptr) , size(_size), _pretty(pretty) {
+		MyInsn( void * _ptr , unsigned int _size, string pretty) : ptr(_ptr) , size(_size), _pretty(pretty) {
 
 		};
 		void write(FILE* fp){
@@ -19,9 +19,105 @@ class MyInsn {
 
 };
 
+class MyBranchInsn : public MyInsn{
+    public:
+        
+        uint32_t _branch_addr;
+        uint32_t _target_addr;
+        MyBranchInsn(uint32_t branch_addr, uint32_t target_addr, void * cmd_ptr,uint32_t size, string pretty) : MyInsn ( cmd_ptr, size , pretty), _branch_addr(branch_addr) , _target_addr(target_addr) {
+        
+        }
+        /*
+         * There are two cases, 
+         * branch forward, where we increase the target_addr by the insertion_size
+         * backward branch
+         *
+         */
+        void update_for_insertion(uint32_t insert_loc, uint32_t insert_size){
+
+
+            uint32_t cmd_value = *(uint32_t*) ptr;
+
+            if( _branch_addr < _target_addr ){
+                if (insert_loc <= _branch_addr || insert_loc > _target_addr )
+                    return;
+                _target_addr += insert_size;
+                int16_t simm16 = ( (int32_t) _target_addr - 4 - (int32_t) _branch_addr ) >> 2;
+                memcpy(ptr,&simm16,2);
+            }else{
+                if (insert_loc <= _target_addr || insert_loc > _branch_addr )
+                    return;
+                _branch_addr += insert_size;
+                int16_t simm16 = ( (int32_t) _target_addr - 4 - (int32_t) _branch_addr ) >> 2;
+                memcpy(ptr,&simm16,2);
+            }
+            uint32_t new_value = *(uint32_t*) ptr;
+
+            cout << " old value = " << std::hex << cmd_value << " "  << new_value << endl;
+        }
+		void write_to_file(FILE* fp){
+            fseek(fp,_branch_addr,SEEK_SET);
+			fwrite(ptr,size,1,fp);
+		}
+};
+
 class InsnFactory {
 
 	public:
+        // SOPP
+        //
+        static MyBranchInsn create_s_cbranch_execz(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
+            void * cmd_ptr =  malloc(sizeof(char ) * 4);
+            insn_pool.push_back( (char *) cmd_ptr);
+            memcpy(cmd_ptr,cmd,4);
+            return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_execz"));
+        }
+
+        static MyBranchInsn create_s_cbranch_execnz(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
+            void * cmd_ptr =  malloc(sizeof(char ) * 4);
+            insn_pool.push_back( (char * ) cmd_ptr);
+            memcpy(cmd_ptr,cmd,4);
+            return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_execnz"));
+        }
+
+
+        static MyBranchInsn convert_to_branch_insn( uint32_t branch_addr, uint32_t target_addr, char * cmd , uint32_t length , vector<char *> & insn_pool){
+            if(length == 4){
+                uint32_t * cmd_ptr = (uint32_t * ) cmd;
+                uint32_t cmd_value = *cmd_ptr;
+                uint32_t and_result = cmd_value & 0xff800000;
+                if ( and_result == 0xbf800000){
+                    uint32_t op =  ( cmd_value >> 16 ) & 0x7f;
+                    switch( op ){
+                        case 4: // s_cbranch_scc0
+                        case 5: // s_cbranch_scc1
+                        case 6: // s_cbranch_vccz
+                        case 7: // s_cbranch_vccnz
+                            printf(" op = %u \n",op);
+                            break;
+                        case 8: // s_cbranch_execz
+
+                            return create_s_cbranch_execz(branch_addr, target_addr, cmd,insn_pool);
+                            puts("execz");
+                            break;
+                        case 9: // s_cbranch_execnz
+
+                            return create_s_cbranch_execnz(branch_addr, target_addr, cmd,insn_pool);
+                            puts("execnz");
+                            break;
+                        default:
+                            puts("unknown op");
+                            break;
+                    }
+                                   
+                }else{
+                    std::cout << std::hex << (and_result) <<std::endl;
+                }
+            }else{
+                printf("length = %u\n",length);
+            }
+            
+        }
 
 		// SOP1
 		//

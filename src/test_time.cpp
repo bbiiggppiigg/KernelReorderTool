@@ -60,55 +60,6 @@ config read_config(char * filename){
     return ret;
 }
 
-void test_acc(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool){
-    // 1. backup address ( prologue) 
-    // 2. 
-    //      a. insert memtime at start
-    //      b. 
-    //            i. insert memtime at end
-    //            ii. peforme subtraction
-    // 3. write back resulti (epilogue)
-
-
-
-    uint32_t avail_addr = 0;
-    vector<MyInsn> pro_1, ep_1;
-
-    ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b64(c.addr_sgpr,c.orig_addr_sgpr,insn_pool));
-    for ( auto & b : bb_vec){
-        ep_1.push_back(InsnFactory::create_s_mov_b64(b.acc_sgpr,129,insn_pool));
-    }
-
-    avail_addr = insert_tramp(f,pro_1,ep_1,c.prolog_start_included,c.prolog_end_excluded,c.first_scratch_space,c.scc_sgpr,insn_pool);
-
-
-    vector<MyInsn> pro_temp, epi_temp;
-    for ( auto & b : bb_vec) {
-       pro_temp.clear(); 
-       epi_temp.clear();
-       set_memtime_pro_ep(pro_temp,epi_temp,c.memtime_sgpr_1,c.memtime_sgpr_2,b.acc_sgpr,insn_pool);
-       avail_addr = insert_tramp(f,pro_temp,epi_temp,b.start_included,b.end_excluded,avail_addr,c.scc_sgpr,insn_pool);
-    }
-    
-    vector<MyInsn> pro_3, ep_3;
-
-    //ep_3.push_back(InsnFactory::create_s_lshr_b32( 30, 130 ,3, insn_pool));
-    //ep_3.push_back(InsnFactory::create_s_mov_b32( 30, 8, insn_pool));
-    //ep_3.push_back(InsnFactory::create_s_lshl_b32( 30, 0, 30 , insn_pool));
-    //ep_3.push_back(InsnFactory::create_s_and_b32( 30,0xff,3, 0xffff, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,128  , false, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_addc_u32( c.addr_sgpr +1 , c.addr_sgpr+1  , 128 , false , insn_pool));
-    ep_3.push_back(InsnFactory::create_s_add_u32( c.addr_sgpr,c.addr_sgpr ,0x3ff8  ,true, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_addc_u32( c.addr_sgpr +1 , c.addr_sgpr+1  , 128 , false , insn_pool));
-
-    for ( auto & b : bb_vec ){
-        //set_writeback_pro_ep(pro_3,ep_3,c.addr_sgpr,c.addr_vgpr,b.acc_sgpr,c.acc_vgpr,insn_pool);
-        set_writeback_pro_ep(pro_3,ep_3,c.addr_sgpr,c.addr_vgpr,b.acc_sgpr,c.acc_vgpr,insn_pool);
-    }
-
-    avail_addr = insert_tramp(f,pro_3,ep_3,c.epilog_start_included,c.epilog_end_excluded,avail_addr,c.scc_sgpr,insn_pool);
-}
 
 void test_time(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool){
     // 1. backup address ( prologue) 
@@ -128,9 +79,9 @@ void test_time(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool)
 
     ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ep_1.push_back(InsnFactory::create_s_mov_b64(c.addr_sgpr,c.orig_addr_sgpr,insn_pool)); 
-    ep_1.push_back(InsnFactory::create_s_load_dword(36,4,0xc,insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b32(38,8,insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b32(39,9,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_load_dword(36,4,0xc,insn_pool)); // SGPR36 = *SGPR4 + 0xC
+    ep_1.push_back(InsnFactory::create_s_mov_b32(38,8,insn_pool)); // SGPR38 = SGPR8
+    ep_1.push_back(InsnFactory::create_s_mov_b32(39,9,insn_pool)); // SGPR39 = SGPR9
 
     avail_addr = insert_tramp(f,pro_1,ep_1,c.prolog_start_included,c.prolog_end_excluded,c.first_scratch_space,c.scc_sgpr,insn_pool);
 
@@ -141,12 +92,12 @@ void test_time(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool)
     pro_3.push_back(InsnFactory::create_s_memtime(c.memtime_sgpr_2,insn_pool));
 
     pro_3.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ep_3.push_back(InsnFactory::create_s_ashr_i32( 36, 131 ,36, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_mul_hi_u32(37,36,39,insn_pool));
-    ep_3.push_back(InsnFactory::create_s_mul_i32(36,36,39,insn_pool));
-    ep_3.push_back(InsnFactory::create_s_add_u32( 36,36 ,38  , false, insn_pool));
-    ep_3.push_back(InsnFactory::create_s_addc_u32( 37 , 37  , 128 , false , insn_pool));
-    ep_3.push_back(InsnFactory::create_s_lshl_b64(36, 132 , 36 , insn_pool));
+    ep_3.push_back(InsnFactory::create_s_ashr_i32( 36, 131 ,36, insn_pool)); // SGPR36 /= 8 
+    ep_3.push_back(InsnFactory::create_s_mul_hi_u32(37,36,39,insn_pool));    // SGPR37 = SGPR36 * SGPR39 (hi)
+    ep_3.push_back(InsnFactory::create_s_mul_i32(36,36,39,insn_pool));       // SGPR36 = SGPR36 * SGPR39 (low)
+    ep_3.push_back(InsnFactory::create_s_add_u32( 36,36 ,38  , false, insn_pool)); // SGPR36 += SGPR38
+    ep_3.push_back(InsnFactory::create_s_addc_u32( 37 , 37  , 128 , false , insn_pool)); // SGPR37 += SGPR0
+    ep_3.push_back(InsnFactory::create_s_lshl_b64(36, 132 , 36 , insn_pool)); // SGPR36 = SGPR36 << 4 
     //
     //
     //
