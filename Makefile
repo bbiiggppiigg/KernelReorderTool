@@ -15,8 +15,12 @@ lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_
 
 mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication
 
-bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h
-	g++ -g -Wall -I$(DYNINST_ROOT)/include src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o $(lDyninst) -o bin/insert_tramp
+
+lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp 
+	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o
+
+bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
+	g++ -g -Wall -I$(DYNINST_ROOT)/include src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/insert_tramp
 
 MatrixMultiplication: $(mmpath)
 	cp $(mmpath) .
@@ -68,11 +72,11 @@ bin/report_kd: src/report_kd.cpp
 
 
 
-bin/set_register_usage: src/set_register_usage.cpp
-	g++ -o bin/set_register_usage src/set_register_usage.cpp
+bin/set_register_usage: src/set_register_usage.cpp lib/kernel_elf_helper.o
+	g++ -o bin/set_register_usage -Iinclude lib/kernel_elf_helper.o src/set_register_usage.cpp
 
-bin/extend_text: src/extend_text.cpp
-	g++ -o bin/extend_text src/extend_text.cpp
+bin/extend_text: src/extend_text.cpp lib/kernel_elf_helper.o
+	g++ -o bin/extend_text -Iinclude lib/kernel_elf_helper.o src/extend_text.cpp
 
 bin/extend_symbol: src/extend_symbol.cpp
 	g++ -o bin/extend_symbol src/extend_symbol.cpp

@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import re
+import sys
+filename= sys.argv[1]
 
 def find_max_in_singles(singles):
     return max(list(map(lambda x: int(x[1:]),singles)))
@@ -22,7 +24,7 @@ def find_max_vgpr(text):
     pairs = re.compile(r'v\[\d+:\d+\]').findall(text)
     return(find_max(singles,pairs))
     
-with open('tmp.s') as f:
+with open(filename) as f:
     text = f.read()
     print(find_max_sgpr(text))
     print(find_max_vgpr(text))

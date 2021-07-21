@@ -37,17 +37,17 @@ class MyBranchInsn : public MyInsn{
 
 
             uint32_t cmd_value = *(uint32_t*) ptr;
+            
+
+            if (insert_loc <= _branch_addr )
+                _branch_addr += insert_size;
+            if (insert_loc <= _target_addr)
+                _target_addr += insert_size;
 
             if( _branch_addr < _target_addr ){
-                if (insert_loc <= _branch_addr || insert_loc > _target_addr )
-                    return;
-                _target_addr += insert_size;
                 int16_t simm16 = ( (int32_t) _target_addr - 4 - (int32_t) _branch_addr ) >> 2;
                 memcpy(ptr,&simm16,2);
             }else{
-                if (insert_loc <= _target_addr || insert_loc > _branch_addr )
-                    return;
-                _branch_addr += insert_size;
                 int16_t simm16 = ( (int32_t) _target_addr - 4 - (int32_t) _branch_addr ) >> 2;
                 memcpy(ptr,&simm16,2);
             }
@@ -56,6 +56,7 @@ class MyBranchInsn : public MyInsn{
             cout << " old value = " << std::hex << cmd_value << " "  << new_value << endl;
         }
 		void write_to_file(FILE* fp){
+            printf("updateing branch instruction at address %x\n",_branch_addr);
             fseek(fp,_branch_addr,SEEK_SET);
 			fwrite(ptr,size,1,fp);
 		}
@@ -64,6 +65,20 @@ class MyBranchInsn : public MyInsn{
 class InsnFactory {
 
 	public:
+        // SOPC
+        static MyInsn create_s_cmp_eq_u64( uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+			uint32_t cmd = 0xbf000000;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+			uint32_t op = 18;
+			cmd  = ( cmd | (op<< 16) | (ssrc1 << 8) |ssrc0);
+			memcpy( cmd_ptr ,&cmd,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,4,std::string("s_cmp_eq_u64 "));
+		}
+
+            
+
+
         // SOPP
         //
         static MyBranchInsn create_s_cbranch_execz(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
@@ -521,6 +536,76 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
+        // LDS
+        //
+		static MyInsn create_ds_write_b32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+            uint32_t cmd_low = 0xda000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 13;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 17 )  );
+
+			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+		static MyInsn create_ds_add_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+            uint32_t cmd_low = 0xda000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 0;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 17 )  );
+
+			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+		static MyInsn create_ds_write_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+            uint32_t cmd_low = 0xda000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 13;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 17 )  );
+
+			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+		static MyInsn create_ds_write_b64( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+            uint32_t cmd_low = 0xda000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 77;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 17 )  );
+
+			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+
+		static MyInsn create_ds_read_b64( uint32_t vgpr_addr , uint32_t vdst   ,vector<char *> & insn_pool ){
+            uint32_t cmd_low = 0xda000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 118;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 17 )  );
+
+			cmd_high = ( cmd_high | vdst << 24 | vgpr_addr );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+
+
 
 };
 
