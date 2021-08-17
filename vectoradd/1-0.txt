@@ -1,0 +1,164 @@
+[SymtabCodeSource.C:428] processing 8 symtab regions in tmp_00.hsaco
+   1000 .text
+   200 .note [skipped]
+   668 .dynsym [skipped]
+   6b0 .gnu.hash [skipped]
+   6d4 .hash [skipped]
+   6f4 .dynstr [skipped]
+   740 .rodata
+Add known data range [740, 780) from symbol _Z15vectoradd_floatPfPKfS1_ii.kd
+Add known data range [740, 780) from symbol _Z15vectoradd_floatPfPKfS1_ii.kd
+   2000 .dynamic [skipped]
+[SymtabCodeSource.C:482] processing 1 symtab hints
+	<1000,vectoradd_float,[1000,10b4)>
+[Parser.C:1948] recording block [ffffffffffffffff,ffffffffffffffff)
+Checking non-returning for vectoradd_float
+[CodeObject.C] adding hint 1000
+[Parser.C:168] parse() called on Parser 0x9c3830 with state 0
+[Parser.C:283] entered parse_vanilla()
+	1 function hints
+[Parser.C:1948] recording block [1000,1000)
+	 pushing work element for block (nil), edge (nil), target 0x1000
+[Parser.C] ==== starting to parse frame 1000 ====
+Iteration 1 for function vectoradd_float at 1000
+[Parser.C] parsing block 1000
+[Parser.C:1762] curAddr 0x1000: s_load_dwordx2 SGPR[0-1], [(SGPR[6-7], (0x18 + 0x0))] 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1008: s_load_dword SGPR2, [(SGPR[4-5], (0x4 + 0x0))] 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1010: s_waitcnt  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1014: s_lshr_b32 SGPR3, 0x10, SGPR2 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1018: s_mul_i32 SGPR9, SGPR3, SGPR9 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x101c: v_add_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1020: v_mul_lo_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1028: s_and_b32 SGPR2, 0xffff, SGPR2 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1030: s_mul_i32 SGPR8, SGPR2, SGPR8 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1034: s_mul_i32 SGPR0, SGPR0, SGPR1 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1038: s_nop  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1040: s_nop  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1044: s_and_saveexec_b64 SGPR0, VCC_LO 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1048: s_cbranch_execz ((PC + 0x4) + 0x100) 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+	 branch or return, ret true
+Function vectoradd_float tries to set parsing edge at 1048
+Getting edges
+IA_IAPI.C[861]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x100) to 0x1048...SUCCESS (CFT=0x10b0)
+Returned 2 edges
+		2 edges:
+			edge target 10b0, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[74]: adding conditional taken edge 1048->10b0
+resolveable_edge: 1, tailcall: 0, target: 10b0
+[ParserDetails.C:582] pushing 10b0 onto worklist
+[ParserDetails.C:584] new edge is 0x9cebb0
+	 pushing work element for block (nil), edge 0x9cebb0, target 0x10b0
+			edge target 104c, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[78]: adding conditional not taken edge 1048->104c
+resolveable_edge: 1, tailcall: 0, target: 104c
+[ParserDetails.C:582] pushing 104c onto worklist
+[ParserDetails.C:584] new edge is 0x9cec50
+	 pushing work element for block (nil), edge 0x9cec50, target 0x104c
+	 add_edge called, src_addr 1048, dst 104c, edge type 2, looked up block [1000, 104c)
+[Parser.C:1948] recording block [104c,104c)
+[Parser.C] parsing block 104c
+[Parser.C:1762] curAddr 0x104c: s_load_dwordx4 SGPR[0-3], [(SGPR[6-7], (0x0 + 0x0))] 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1054: s_load_dwordx4 SGPR[8-11], [(SGPR[6-7], (0x10 + 0x0))] 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x105c: v_ashrrev_i32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1060: v_lshlrev_b64  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1068: s_waitcnt  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x106c: v_mov_b32 VGPR1, SGPR1 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1070: v_add_co_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1074: v_addc_co_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1078: v_mov_b32 VGPR1, SGPR9 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x107c: v_add_co_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1080: v_addc_co_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1084: v_mov_b32 VGPR1, SGPR3 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1088: v_add_co_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x108c: v_addc_co_u32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1090: flat_load_dword_global (ADDRESS_MODE_32?VGPR0:VGPR[0-1]) 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x1098: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4-5]) 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x10a0: s_waitcnt  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x10a4: v_add_f32  
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+[Parser.C:1762] curAddr 0x10a8: flat_store_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2-3]) 
+[Parser.C:1768] leaf 1 funcname vectoradd_float 
+hasCFT called
+	 add_edge called, src_addr 1048, dst 10b0, edge type 1, looked up block [1000, 104c)
+[Parser.C:1948] recording block [10b0,10b0)
+[Parser.C] parsing block 10b0
+Checking non-returning for vectoradd_float
+Set function vectoradd_float at 1000 ret status from 0 to 1
+[Parser.C] frame 1000 complete, return status: 1
+[/home/wuxx1279/dyninst/parseAPI/src/Parser.C] vectoradd_float return status 1, no waiters
+[/home/wuxx1279/dyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
+)[Parser.C] finalizing vectoradd_float (1000)
+	 Considering target block [0x10b0,0x10b4) from edge 0x9cebb0
+	 Adding target block [10b0,10b4) to worklist according to edge from 1048, type 1
+	 Considering target block [0x104c,0x10b4) from edge 0x9cec50
+	 Adding target block [104c,10b4) to worklist according to edge from 1048, type 2
+No targets, exits func
+Adding block 0x104c as exit
+No targets, exits func
+Adding block 0x10b0 as exit
+1000 extent [1000,10b4)
+[Parser.C:187] parsing complete for Parser 0x9c3830 with state 4
+[Parser.C:168] parse() called on Parser 0x9c3830 with state 4
