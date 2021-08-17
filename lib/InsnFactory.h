@@ -131,7 +131,7 @@ class InsnFactory {
             }else{
                 printf("length = %u\n",length);
             }
-            
+            exit(-1);
         }
 
 		// SOP1
@@ -452,6 +452,20 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("s_load_dword")+std::to_string(sgpr_target_pair));
 		}
+		static MyInsn create_s_load_dwordx2( uint32_t sgpr_target_pair, uint32_t sgpr_addr_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xc0000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 0x1;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			uint32_t imm = 1;
+			cmd_low = ( cmd_low | (op << 18) | (imm << 17) |   sgpr_target_pair << 6 | (sgpr_addr_pair >> 1) );
+
+			cmd_high = ( cmd_high | offset );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("s_load_dwordx2")+std::to_string(sgpr_target_pair));
+		}
 
 		static MyInsn create_s_load_dword_x4( uint32_t sgpr_target_pair, uint32_t sgpr_addr_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
 			uint32_t cmd_low = 0xc0000000;
@@ -564,6 +578,20 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
+		static MyInsn create_ds_inc_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+            uint32_t cmd_low = 0xda000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 3;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 17 )  );
+
+			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+
 		static MyInsn create_ds_write_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
             uint32_t cmd_low = 0xda000000;
 			uint32_t cmd_high = 0x0;

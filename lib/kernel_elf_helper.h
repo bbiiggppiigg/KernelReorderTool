@@ -8,7 +8,10 @@
 using namespace std;
 void extend_text(FILE * f, int new_text_size);
 void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count );
+
+void update_symtab_symbol_size(FILE * f, const char kernel_name [],uint32_t new_size);
 void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , uint32_t insert_loc , uint32_t insert_size);
+void update_lds_usage(FILE * f, uint32_t new_lds_usage);
 void get_kds(FILE * f, vector<pair<uint64_t, string>> & ret);
 uint32_t get_bits(uint32_t value, uint32_t hi , uint32_t low);
 uint32_t set_bits(uint32_t old_bits, uint32_t hi, uint32_t low, uint32_t bits);
@@ -208,6 +211,7 @@ class AMDGPU_KERNEL_METADATA{
                 sgpr_count +=1;
             }
             PRINT(dispatch_ptr);
+            PRINT(kernarg_segment_ptr);
             PRINT(queue_ptr);
             PRINT(work_group_id_x);
             PRINT(work_group_id_y);

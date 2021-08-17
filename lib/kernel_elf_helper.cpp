@@ -10,6 +10,85 @@
 #define Shdr Elf64_Shdr
 #define Phdr Elf64_Phdr
 using namespace std;
+
+void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
+    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
+    fread(shdr,sizeof(Shdr),1,f);
+}
+
+void read_phdr(Phdr * phdr,FILE * f,  ElfW* hdr, int offset){
+    fseek(f,hdr->e_phoff + sizeof(Phdr) * offset ,SEEK_SET);
+    fread(phdr,sizeof(Phdr),1,f);
+}
+
+char * read_section(FILE * f, Shdr * shdr) {
+    int offset = shdr->sh_offset;
+    int size = shdr->sh_size;
+    fseek(f,offset,SEEK_SET);
+    char * ret = (char * ) malloc(size) ;
+    fread(ret,size,1,f);
+    return ret;
+}
+void * write_section(FILE * f, Shdr * shdr, char * data) {
+    int offset = shdr->sh_offset;
+    int size = shdr->sh_size;
+    fseek(f,offset,SEEK_SET);
+    fwrite(data,size,1,f);
+}
+
+void update_lds_usage(FILE * f, uint32_t new_usage){
+
+    fseek(f,0,SEEK_SET);
+    ElfW header;
+    fread(&header,sizeof(header),1,f);
+    
+    Shdr shstrtable_header; 
+    read_shdr(&shstrtable_header,f,&header,header.e_shstrndx);
+    char * shstrtable = read_section(f,&shstrtable_header);
+
+    Shdr tmp_hdr;
+    Shdr note_hdr;
+    
+    int note_index = -1;
+    for (unsigned int i = 1; i < header.e_shnum ; i ++){
+        read_shdr(&tmp_hdr,f,&header,i);
+        char * sh_name = shstrtable+tmp_hdr.sh_name;
+        if(0==strcmp(sh_name,".note")){
+            note_index = i ;
+            note_hdr = tmp_hdr;
+            printf("found .note, index =%d\n",note_index);
+            break;
+        }
+    }
+
+    char * shnote = read_section(f,&note_hdr);
+    //fwrite(shnote,note_hdr.sh_size,1,stdout);
+    char pattern[] = ".group_segment_fixed_size";
+    char * location = (char * )  memmem(shnote,note_hdr.sh_size,pattern,strlen(pattern));
+    if(location){
+        uint8_t * update_ptr = (uint8_t * ) (location+strlen(pattern));
+        *update_ptr = new_usage;
+        printf("updateing lds usage in note at address %x to %d\n",note_hdr.sh_offset + location - shnote + strlen(pattern), new_usage);
+        write_section(f,&note_hdr,shnote);
+    }else{
+        puts("Can't find gg");    
+    }
+    //fwrite(shnote,1,0x468,stdout);
+    //fseek(f,header.e_shoff + sizeof(Shdr) * text_index ,SEEK_SET);
+    //fwrite(&text_hdr,sizeof(Shdr),1,f);
+    free(shstrtable);
+    
+   /* 
+    Phdr tmp_phdr;
+    for (unsigned int i = 0; i < header.e_phnum ;i ++){
+        read_phdr(&tmp_phdr,f,&header,i);
+        if(tmp_phdr.p_offset == note_hdr.sh_addr){
+            printf("patching text_size in program header at 0x%lx to %d\n",header.e_phoff+sizeof(Phdr)*i,new_usage);
+            break;
+        }
+    }*/
+}
+
 void set_lds_usage(FILE* fp, uint32_t kd_offset , uint32_t new_lds_usage ){
     uint32_t old_value ;
     fseek(fp,kd_offset,SEEK_SET);
@@ -52,26 +131,6 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
     fseek(fp,kd_offset+0x30,SEEK_SET);
     fwrite(&new_bits,1,sizeof(new_bits),fp);
 
-}
-
-
-void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
-    fread(shdr,sizeof(Shdr),1,f);
-}
-
-void read_phdr(Phdr * phdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_phoff + sizeof(Phdr) * offset ,SEEK_SET);
-    fread(phdr,sizeof(Phdr),1,f);
-}
-
-char * read_section(FILE * f, Shdr * shdr) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    char * ret = (char * ) malloc(size) ;
-    fread(ret,size,1,f);
-    return ret;
 }
 
 
@@ -121,7 +180,6 @@ void extend_text(FILE * f, int new_text_size){
 }
 
 
-#
 void get_kds(FILE * f, vector<pair<uint64_t, string>> & ret){
     fseek(f,0,SEEK_SET);
     ElfW header;
@@ -322,6 +380,76 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 			}
 				
 		}
+	}
+
+}
+
+
+/* Update the symbol of labels that is after the insertion point such that llvm-objdump works correctly
+ */
+
+void update_symtab_symbol_size(FILE * f, const char kernel_name [] , uint32_t new_size){
+	ElfW header;
+    fseek(f,0,SEEK_SET);
+	fread(&header,sizeof(header),1,f);
+
+	Shdr shstrtable_header;
+	read_shdr(&shstrtable_header,f,&header,header.e_shstrndx);
+	char * shstrtable = read_section(f,&shstrtable_header);
+
+	Shdr tmp_hdr;
+
+	Shdr text_hdr;
+	Shdr symtab_hdr;
+	Shdr strtab_hdr;
+	Shdr dynsym_hdr;
+	Shdr dynstr_hdr;
+
+	//int text_index = -1;
+	//int symtab_index = -1;
+	for (unsigned int i = 1; i < header.e_shnum ; i ++){
+		read_shdr(&tmp_hdr,f,&header,i);
+		char * sh_name = shstrtable+tmp_hdr.sh_name;
+		if(0==strcmp(sh_name,".text")){
+	//		text_index = i ;
+			text_hdr = tmp_hdr;
+		}
+		if(0==strcmp(sh_name,".symtab")){
+			symtab_hdr = tmp_hdr;
+	//		symtab_index = i;
+		}
+		if(0==strcmp(sh_name,".strtab")){
+			strtab_hdr = tmp_hdr;
+		}
+		if(0==strcmp(sh_name,".dynstr")){
+			dynstr_hdr = tmp_hdr;
+		}
+
+		if(0==strcmp(sh_name,".dynsym")){
+			dynsym_hdr = tmp_hdr;
+		}
+
+
+	}
+
+	char * strtab_content = read_section(f,&strtab_hdr);
+	//char * dynstr_content = read_section(f,&dynstr_hdr);
+
+
+	Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
+
+	int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
+	//int target_index = -1;
+	for (int i =0 ; i < num_entries ;i ++){
+		Elf64_Sym * symbol = symtab_content+i;
+		char * symbol_name = strtab_content + symbol -> st_name;
+        if(strcmp(kernel_name,symbol_name)==0){
+            puts(symbol_name);
+            symbol->st_size = new_size;
+		    fseek(f,symtab_hdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+			fwrite(symbol,sizeof(Elf64_Sym),1,f);
+
+        }
 	}
 
 }
