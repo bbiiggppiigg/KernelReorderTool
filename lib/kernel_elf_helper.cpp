@@ -60,6 +60,10 @@ void update_lds_usage(FILE * f, uint32_t new_usage){
             break;
         }
     }
+    if(note_index == -1){
+        puts("CAN'T FIND NOTE SECTION");
+        exit(-1);
+    }
 
     char * shnote = read_section(f,&note_hdr);
     //fwrite(shnote,note_hdr.sh_size,1,stdout);
@@ -130,6 +134,7 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
 
     fseek(fp,kd_offset+0x30,SEEK_SET);
     fwrite(&new_bits,1,sizeof(new_bits),fp);
+    printf("old bits = %x, new bits = %x, writing to address %p\n",old_bits,new_bits,kd_offset+0x30);
 
 }
 
@@ -330,41 +335,28 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 	Shdr dynstr_hdr;
 
 	//int text_index = -1;
-	//int symtab_index = -1;
+	int symtab_index = -1;
 	for (unsigned int i = 1; i < header.e_shnum ; i ++){
 		read_shdr(&tmp_hdr,f,&header,i);
 		char * sh_name = shstrtable+tmp_hdr.sh_name;
-		if(0==strcmp(sh_name,".text")){
-	//		text_index = i ;
-			text_hdr = tmp_hdr;
-		}
 		if(0==strcmp(sh_name,".symtab")){
 			symtab_hdr = tmp_hdr;
-	//		symtab_index = i;
+            printf("found symtab at index %d\n",i);
+			symtab_index = i;
 		}
-		if(0==strcmp(sh_name,".strtab")){
-			strtab_hdr = tmp_hdr;
-		}
-		if(0==strcmp(sh_name,".dynstr")){
-			dynstr_hdr = tmp_hdr;
-		}
-
-		if(0==strcmp(sh_name,".dynsym")){
-			dynsym_hdr = tmp_hdr;
-
-
-
-		}
-
 
 	}
+    if(symtab_index == -1){
+        printf("ERROR ! Can't Find Symtab\n");
+        exit(-1);
+    }
 
 	//char * strtab_content = read_section(f,&strtab_hdr);
 	//char * dynstr_content = read_section(f,&dynstr_hdr);
 
 
 	Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
-
+    printf("symtab hdr sh_size : %d, .ent_size = %d\n",symtab_hdr.sh_size,symtab_hdr.sh_entsize);
 	int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
 	//int target_index = -1;
 	for (int i =0 ; i < num_entries ;i ++){

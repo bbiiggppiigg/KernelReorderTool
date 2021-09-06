@@ -88,6 +88,14 @@ class InsnFactory {
             return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_execz"));
         }
 
+        static MyBranchInsn create_s_cbranch_scc1(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
+            void * cmd_ptr =  malloc(sizeof(char ) * 4);
+            insn_pool.push_back( (char *) cmd_ptr);
+            memcpy(cmd_ptr,cmd,4);
+            return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_scc1"));
+        }
+
+
         static MyBranchInsn create_s_cbranch_execnz(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
             void * cmd_ptr =  malloc(sizeof(char ) * 4);
             insn_pool.push_back( (char * ) cmd_ptr);
@@ -104,8 +112,13 @@ class InsnFactory {
                 if ( and_result == 0xbf800000){
                     uint32_t op =  ( cmd_value >> 16 ) & 0x7f;
                     switch( op ){
-                        case 4: // s_cbranch_scc0
+                        case 2:
+                            return create_s_branch(branch_addr, target_addr,cmd,insn_pool);
+
                         case 5: // s_cbranch_scc1
+
+                            return create_s_cbranch_scc1(branch_addr, target_addr, cmd,insn_pool);
+                        case 4: // s_cbranch_scc0
                         case 6: // s_cbranch_vccz
                         case 7: // s_cbranch_vccnz
                             printf(" op = %u \n",op);
@@ -136,14 +149,24 @@ class InsnFactory {
 
 		// SOP1
 		//
-		static MyInsn create_s_mov_b32( uint32_t sdst, uint32_t ssrc0, vector<char *> & insn_pool ){
+		static MyInsn create_s_mov_b32( uint32_t sdst, uint32_t ssrc0, bool useImm ,vector<char *> & insn_pool ){
 			uint32_t cmd = 0xbe800000;
-			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
 			uint32_t op = 0;
-			cmd  = ( cmd | (sdst<< 16) | (op << 8) |ssrc0);
-			memcpy( cmd_ptr ,&cmd,  4 );
-			insn_pool.push_back(cmd_ptr);
-			return MyInsn(cmd_ptr,4,std::string("s_mov_b64 "));
+			char * cmd_ptr;
+            if(useImm){
+                cmd_ptr = (char * ) malloc(sizeof(char ) * 8);    
+                cmd  = ( cmd | (sdst<< 16) | (op << 8) | 255);
+			    memcpy( cmd_ptr ,&cmd,  4 );
+			    memcpy( cmd_ptr+4 ,&ssrc0,  4 );
+			    insn_pool.push_back(cmd_ptr);
+			    return MyInsn(cmd_ptr,8,std::string("s_mov_b32 "));
+            }else{
+                cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+			    cmd  = ( cmd | (sdst<< 16) | (op << 8) |ssrc0);
+			    memcpy( cmd_ptr ,&cmd,  4 );
+			    insn_pool.push_back(cmd_ptr);
+			    return MyInsn(cmd_ptr,4,std::string("s_mov_b64 "));
+            }
 		}
 
 
@@ -177,6 +200,15 @@ class InsnFactory {
 			return MyInsn(cmd_ptr,4,std::string("s_waitcnt_0 "));
 		}
 		// VOP1
+		static MyInsn create_v_readfirstlane_b32(  uint32_t vdst, uint32_t src  , vector<char *> & insn_pool ){
+			uint32_t cmd = 0x7e000000;
+			uint32_t op = 2;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+			cmd = ( cmd | (vdst << 17) | ( op << 9)  | src);
+			memcpy( cmd_ptr ,&cmd,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,4,std::string("v_mov_b32 "));
+		}
 
 		static MyInsn create_v_mov_b32(  uint32_t vdst, uint32_t src  , vector<char *> & insn_pool ){
 			uint32_t cmd = 0x7e000000;
@@ -220,8 +252,30 @@ class InsnFactory {
 			cmd = ( cmd | (op << 25) | ( vdst << 17) | (vsrc1 << 9)  | src0 );
 			memcpy( cmd_ptr ,&cmd,  4 );
 			insn_pool.push_back(cmd_ptr);
-			return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
+			return MyInsn(cmd_ptr,4,std::string("v_add_u32 "));
 		}
+		static MyInsn create_v_add_co_u32(  uint32_t vdst, uint32_t vsrc1, uint32_t src0, vector<char *> & insn_pool ){
+			uint32_t cmd = 0x0;
+			uint32_t op = 25;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+			cmd = ( cmd | (op << 25) | ( vdst << 17) | (vsrc1 << 9)  | src0 );
+			memcpy( cmd_ptr ,&cmd,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,4,std::string("v_add_co_u32 "));
+		}
+
+
+		static MyInsn create_v_addc_co_u32(  uint32_t vdst, uint32_t vsrc1, uint32_t src0, vector<char *> & insn_pool ){
+			uint32_t cmd = 0x0;
+			uint32_t op = 28;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+			cmd = ( cmd | (op << 25) | ( vdst << 17) | (vsrc1 << 9)  | src0 );
+			memcpy( cmd_ptr ,&cmd,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,4,std::string("v_addc_co_u32 "));
+		}
+
+
 		// VOP3AB
 		static MyInsn create_v_mul_lo_u32(  uint32_t vdst, uint32_t src1, uint32_t src0, vector<char *> & insn_pool ){
 
@@ -277,13 +331,15 @@ class InsnFactory {
 			return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
 		}
 
-		static MyInsn create_s_mul_i32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+		static MyInsn create_s_mul_i32(  uint8_t sdst, uint8_t ssrc1, uint8_t ssrc0, vector<char *> & insn_pool ){
 			uint32_t cmd = 0x80000000;
 			uint32_t op = 36;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
 			cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
 			memcpy( cmd_ptr ,&cmd,  4 );
 			insn_pool.push_back(cmd_ptr);
+            printf("generated s_mul_i32 instruction, cmd = 0x%x\n",cmd);
+            printf("dst = %u, ssrc1 = %u, ssrc0 = %u\n",sdst,ssrc1,ssrc0);
 			return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
 		}
 
@@ -415,16 +471,21 @@ class InsnFactory {
 
 
 		//
-		static MyInsn create_s_branch( uint32_t pc , uint32_t target  , vector<char *> & insn_pool ){
-			uint32_t cmd = 0xbf800000;
-			uint32_t op = 0x2;
-			uint16_t simm16 = (( target - pc  - 4 )  / 4)  & 0xffff;
+		static MyBranchInsn create_s_branch( uint32_t branch_addr , uint32_t target_addr , char * cmd_in  , vector<char *> & insn_pool ){
+
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
-			cmd = ( cmd | (op << 16) | simm16 );
-			memcpy( cmd_ptr ,&cmd,  4 );
-			printf("creating s_branch from %x to %x, cmd = 0x%x\n",pc,target,cmd); 
 			insn_pool.push_back(cmd_ptr);
-			return MyInsn(cmd_ptr,4,std::string("s_branch ")+std::to_string(simm16));
+            if(cmd_in){
+                memcpy(cmd_ptr,cmd_in,4); 
+            }else{
+			    uint32_t cmd = 0xbf800000;
+			    uint32_t op = 0x2;
+			    uint16_t simm16 = (( target_addr - branch_addr  - 4 )  / 4)  & 0xffff;
+			    cmd = ( cmd | (op << 16) | simm16 );
+			    memcpy( cmd_ptr ,&cmd,  4 );
+			    printf("creating s_branch from %x to %x, cmd = 0x%x\n",branch_addr,target_addr,cmd); 
+            }
+			return MyBranchInsn(branch_addr, target_addr , cmd_ptr,4,std::string("s_branch "));
 		}
 		static MyInsn create_s_memtime( uint32_t sgpr_pair  , vector<char *> & insn_pool ){
 			uint32_t cmd_low = 0xc0000000;

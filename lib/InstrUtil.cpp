@@ -12,7 +12,7 @@ uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & ep
 
     // setup branch from original block to tramp
     fseek(f,start_included,SEEK_SET);
-    InsnFactory::create_s_branch(start_included,tramp_location, insn_pool ).write(f);
+    InsnFactory::create_s_branch(start_included,tramp_location, NULL, insn_pool ).write(f);
     
     
     auto save_scc = InsnFactory::create_s_mov_b64(scc_store_index,253,insn_pool);
@@ -49,7 +49,7 @@ uint32_t insert_tramp( FILE * f, vector<MyInsn> & prologues, vector<MyInsn> & ep
 
     }
 
-    InsnFactory::create_s_branch(tramp_location + f_index, end_excluded, insn_pool).write(f);
+    InsnFactory::create_s_branch(tramp_location + f_index, end_excluded,NULL, insn_pool).write(f);
     return tramp_location + f_index + 4;
 }
 
