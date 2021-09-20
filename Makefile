@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata insert_tramp
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata insert_tramp update_note_modify_lds_size
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -62,15 +62,8 @@ src/test_getreg.o:  src/test_getreg.cpp
 lib/InstrUtil.o: lib/InstrUtil.cpp lib/InsnFactory.h
 	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
 
-
-
 bin/move_block: src/move_block.cpp lib/InstrUtil.o
 	g++ -o bin/move_block -Iinclude src/move_block.cpp lib/InstrUtil.o
-
-bin/report_kd: src/report_kd.cpp
-	g++ -o bin/report_kd src/report_kd.cpp
-
-
 
 bin/set_register_usage: src/set_register_usage.cpp lib/kernel_elf_helper.o
 	g++ -o bin/set_register_usage -Iinclude lib/kernel_elf_helper.o src/set_register_usage.cpp
@@ -78,15 +71,20 @@ bin/set_register_usage: src/set_register_usage.cpp lib/kernel_elf_helper.o
 bin/extend_text: src/extend_text.cpp lib/kernel_elf_helper.o
 	g++ -o bin/extend_text -Iinclude lib/kernel_elf_helper.o src/extend_text.cpp
 
-bin/extend_symbol: src/extend_symbol.cpp
-	g++ -o bin/extend_symbol src/extend_symbol.cpp
+bin/report_kd: src/report_kd.cpp
+	g++ -o $@ $<
 
+bin/extend_symbol: src/extend_symbol.cpp
+	g++ -o $@ $<
 
 bin/split_kernel: src/split_kernel.cpp
-	g++ -o bin/split_kernel src/split_kernel.cpp
+	g++ -o $@ $<
 
 bin/merge_kernel: src/merge_kernel.cpp
-	g++ -o bin/merge_kernel src/merge_kernel.cpp
+	g++ -o $@ $<
+
+bin/update_note_modify_lds_size: src/update_note_modify_lds_size.cpp
+	g++ -I ../msgpack-c/include/ $< -o $@
 
 
 clean:

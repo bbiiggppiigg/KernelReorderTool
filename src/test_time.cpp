@@ -80,8 +80,8 @@ void test_time(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_pool)
     ep_1.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ep_1.push_back(InsnFactory::create_s_mov_b64(c.addr_sgpr,c.orig_addr_sgpr,insn_pool)); 
     ep_1.push_back(InsnFactory::create_s_load_dword(36,4,0xc,insn_pool)); // SGPR36 = *SGPR4 + 0xC
-    ep_1.push_back(InsnFactory::create_s_mov_b32(38,8,insn_pool)); // SGPR38 = SGPR8
-    ep_1.push_back(InsnFactory::create_s_mov_b32(39,9,insn_pool)); // SGPR39 = SGPR9
+    ep_1.push_back(InsnFactory::create_s_mov_b32(38,8,false,insn_pool)); // SGPR38 = SGPR8
+    ep_1.push_back(InsnFactory::create_s_mov_b32(39,9,false,insn_pool)); // SGPR39 = SGPR9
 
     avail_addr = insert_tramp(f,pro_1,ep_1,c.prolog_start_included,c.prolog_end_excluded,c.first_scratch_space,c.scc_sgpr,insn_pool);
 

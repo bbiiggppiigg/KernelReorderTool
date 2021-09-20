@@ -113,7 +113,7 @@ void move_block_to(FILE * fp, uint32_t start_included, uint32_t end_excluded, ui
     fread(buffer,1,buf_size,fp);
     fseek(fp,start_addr,SEEK_SET);
     printf("writing to address : %x\n",start_addr);
-    fwrite(buffer+split_addr-start_addr,sh_size,1,fp);
+    fwrite((uint8_t *) buffer+split_addr-start_addr,sh_size,1,fp);
     printf("writing to address : %x\n",start_addr+sh_size);
     fwrite(buffer,fh_size,1,fp);
     printf("first 4bytes of buffer = %x%x\n", * (uint32_t *) buffer, *((uint32_t *) buffer + 1));

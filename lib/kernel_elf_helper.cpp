@@ -29,7 +29,7 @@ char * read_section(FILE * f, Shdr * shdr) {
     fread(ret,size,1,f);
     return ret;
 }
-void * write_section(FILE * f, Shdr * shdr, char * data) {
+void write_section(FILE * f, Shdr * shdr, char * data) {
     int offset = shdr->sh_offset;
     int size = shdr->sh_size;
     fseek(f,offset,SEEK_SET);
@@ -72,7 +72,7 @@ void update_lds_usage(FILE * f, uint32_t new_usage){
     if(location){
         uint8_t * update_ptr = (uint8_t * ) (location+strlen(pattern));
         *update_ptr = new_usage;
-        printf("updateing lds usage in note at address %x to %d\n",note_hdr.sh_offset + location - shnote + strlen(pattern), new_usage);
+        printf("updateing lds usage in note at address %lx to %d\n",note_hdr.sh_offset + location - shnote + strlen(pattern), new_usage);
         write_section(f,&note_hdr,shnote);
     }else{
         puts("Can't find gg");    
@@ -134,7 +134,7 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
 
     fseek(fp,kd_offset+0x30,SEEK_SET);
     fwrite(&new_bits,1,sizeof(new_bits),fp);
-    printf("old bits = %x, new bits = %x, writing to address %p\n",old_bits,new_bits,kd_offset+0x30);
+    printf("old bits = %x, new bits = %x, writing to address %x\n",old_bits,new_bits,  kd_offset+0x30);
 
 }
 
@@ -328,11 +328,11 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 
 	Shdr tmp_hdr;
 
-	Shdr text_hdr;
+	//Shdr text_hdr;
 	Shdr symtab_hdr;
-	Shdr strtab_hdr;
-	Shdr dynsym_hdr;
-	Shdr dynstr_hdr;
+	//Shdr strtab_hdr;
+	//Shdr dynsym_hdr;
+	//Shdr dynstr_hdr;
 
 	//int text_index = -1;
 	int symtab_index = -1;
@@ -356,7 +356,7 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 
 
 	Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
-    printf("symtab hdr sh_size : %d, .ent_size = %d\n",symtab_hdr.sh_size,symtab_hdr.sh_entsize);
+    printf("symtab hdr sh_size : %ld, .ent_size = %ld\n",symtab_hdr.sh_size,symtab_hdr.sh_entsize);
 	int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
 	//int target_index = -1;
 	for (int i =0 ; i < num_entries ;i ++){

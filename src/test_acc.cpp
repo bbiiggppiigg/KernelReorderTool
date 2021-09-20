@@ -130,8 +130,8 @@ void test_acc_new(FILE * f, config c,vector<bb> &bb_vec ,vector<char *> &insn_po
         ep_1.push_back(InsnFactory::create_s_mov_b64(b.acc_sgpr,129,insn_pool));
     }
     ep_1.push_back(InsnFactory::create_s_load_dword(36,4,0xc,insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b32(38,8,insn_pool));
-    ep_1.push_back(InsnFactory::create_s_mov_b32(39,9,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b32(38,8,false,insn_pool));
+    ep_1.push_back(InsnFactory::create_s_mov_b32(39,9,false,insn_pool));
 
     avail_addr = insert_tramp(f,pro_1,ep_1,c.prolog_start_included,c.prolog_end_excluded,c.first_scratch_space,c.scc_sgpr,insn_pool);
 
@@ -190,7 +190,7 @@ int main(int argc, char **argv){
     FILE * bb_file = fopen(argv[3],"r");
     uint32_t start_included, end_excluded, acc_sgpr;
     char tmp1[100],tmp2[100],tmp3[100];
-    while(~fscanf(bb_file,"%s %s %s",&tmp1,&tmp2,&tmp3)){
+    while(~fscanf(bb_file,"%s %s %s",tmp1,tmp2,tmp3)){
        start_included = strtoul(tmp1,0,0);
        end_excluded = strtoul(tmp2,0,0);
        acc_sgpr = strtoul(tmp3,0,0);
