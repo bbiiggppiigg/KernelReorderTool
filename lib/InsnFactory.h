@@ -293,6 +293,31 @@ class InsnFactory {
 
 
 		// SOP2
+        static MyInsn create_s_and_b32(  uint32_t sdst, uint32_t ssrc0, uint32_t ssrc1  , bool useImm , vector<char *> & insn_pool ){
+			uint32_t cmd = 0x80000000;
+			uint32_t op = 12;
+
+			if(useImm){
+				char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+				cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | 0xff );
+				memcpy( cmd_ptr ,&cmd,  4 );
+				memcpy( cmd_ptr+4 ,&ssrc0,  4 );
+				insn_pool.push_back(cmd_ptr);
+				return MyInsn(cmd_ptr,8,std::string("s_add_u32 "));
+
+
+			}else{
+				char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+				cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | ssrc0 );
+				memcpy( cmd_ptr ,&cmd,  4 );
+				insn_pool.push_back(cmd_ptr);
+				return MyInsn(cmd_ptr,4,std::string("s_sub_u32 "));
+			}
+		}
+
+
+
+        //
 		static MyInsn create_s_ashr_i32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
 			uint32_t cmd = 0x80000000;
 			uint32_t op = 32;

@@ -241,39 +241,59 @@ uint32_t get_size(vector<MyInsn> &insns){
 typedef uint16_t reg;
 typedef uint16_t sreg;
 typedef uint16_t vreg;
-void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s_backup_writeback_addr , uint32_t writeback_param_offset  ,const AMDGPU_KERNEL_METADATA & metadata ,const uint32_t grid_dim , const uint32_t num_branches ,vreg ds_addr , vreg ds_data_0, vreg ds_data_1 ,vreg v_minus_1, sreg s_local_warp_id ,vector<char *> & insn_pool){
+void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s_backup_writeback_addr , uint32_t writeback_param_offset  ,const AMDGPU_KERNEL_METADATA & metadata ,const uint32_t grid_dim , const uint32_t num_warps_per_block ,const uint32_t num_branches ,vreg ds_addr , vreg ds_data_0, vreg ds_data_1 ,vreg v_minus_1, sreg s_local_warp_id ,vector<char *> & insn_pool){
 
-        
+        /**
+         * To calculate the local warp id, we need to calculate threadId_Y * Threads_PER_block_X / 64
+         * Here we reuse warp_sgpr_pair to do so
+         */
+        // First step load from dispatch ptr size of block 
+        init_insns.push_back(InsnFactory::create_s_load_dword(warp_sgpr_pair,metadata.dispatch_ptr,4,insn_pool)); 
 
+        init_insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+        // Format is block_size_y || block_size_x, so bit operation to remove upper half
+        init_insns.push_back(InsnFactory::create_s_and_b32(warp_sgpr_pair,0xffff,warp_sgpr_pair,true,insn_pool)); 
+        // Here we read thread_id_y 
+        init_insns.push_back(InsnFactory::create_v_readfirstlane_b32(s_local_warp_id,256+VGPR1,insn_pool)); 
+        // Thread_ID_Y * THREADS_PER_BLOCK_X
+        init_insns.push_back(InsnFactory::create_s_mul_i32(s_local_warp_id, s_local_warp_id, warp_sgpr_pair ,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+        // Divide by 64
+        init_insns.push_back(InsnFactory::create_s_lshr_b32(s_local_warp_id,S_6, s_local_warp_id ,insn_pool)); 
 
 
         /**
-         * We calculate per warp id and store it in the register warp_sgpr_pair
-         * S[TMP  ] = WGID_Y << 4 (assume w know GRID_DIM_X = 16)
+         * We want to calculate a global wavefront id ( for global write back) and a local wavefront id ( for ds cache writes)
+         * The first step is to calculate the block id WG_ID_Y * GRID_DIM_X (# blocks along x axis)+ WG_ID_X
+         * S[TMP  ] = WGID_Y * GRID_DIM_X  TODO: (assuming we know GRID_DIM_X )
          * S[TMP  ] += WGID_X
          * S[TMP+1] = 0
+         * TODO: Assume working in two dimension
          */ 
-        if(metadata.work_group_id_z != -1)
-            init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_z ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
- 
-        else if(metadata.work_group_id_y != -1)
-            init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_y ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
-        init_insns.push_back(InsnFactory::create_s_lshl_b32(warp_sgpr_pair,S_16, metadata.work_group_id_y ,insn_pool)); // TMP= WG_ID_Y << 4 (assume we know GRID_DIM_X ) 
+        //if(metadata.work_group_id_z != -1)
+        //    init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_z ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+        //else if(metadata.work_group_id_y != -1)
+        //    init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_y ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+        //init_insns.push_back(InsnFactory::create_s_lshl_b32(warp_sgpr_pair,S_16, metadata.work_group_id_y ,insn_pool)); // TMP= WG_ID_Y << 4 (assume we know GRID_DIM_X ) 
+        //
+        //
+        init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_y ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
         init_insns.push_back(InsnFactory::create_s_add_u32(warp_sgpr_pair,warp_sgpr_pair, metadata.work_group_id_x,false,insn_pool)); // SGPR_10 += WG_ID_X (SGPR8)
-        // WARPS PER BLOCK
-        init_insns.push_back(InsnFactory::create_s_lshl_b32(warp_sgpr_pair,S_2, warp_sgpr_pair ,insn_pool)); // TMP= WG_ID_Y << 4 (assume we know GRID_DIM_X ) 
-        init_insns.push_back(InsnFactory::create_v_readfirstlane_b32(s_local_warp_id,256+VGPR0,insn_pool));
+
         
-        init_insns.push_back(InsnFactory::create_s_lshr_b32(s_local_warp_id,S_6, s_local_warp_id ,insn_pool)); // TMP= WG_ID_Y << 4 (assume we know GRID_DIM_X ) 
+        /**
+         * A global wavefront Id = work_group_id * num_wavefronts_per_work_group + local_wavefront_id
+         */
 
+        init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,warp_sgpr_pair ,num_warps_per_block+128,insn_pool)); 
+        //init_insns.push_back(InsnFactory::create_s_lshl_b32(warp_sgpr_pair,S_2, warp_sgpr_pair ,insn_pool)); // TODO: This is assuming 4 warps per block? 
         init_insns.push_back(InsnFactory::create_s_add_u32(warp_sgpr_pair,warp_sgpr_pair,s_local_warp_id,false,insn_pool));
-
         init_insns.push_back(InsnFactory::create_s_addc_u32(warp_sgpr_pair+1,warp_sgpr_pair+1,S_0,false,insn_pool));
-        //iinit_insns.push_back(InsnFactory::create_s_mov_b32(warp_sgpr_pair+1,S_0,false,insn_pool)); // SGPR_11 = 0 
 
-        init_insns.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // M0 = -1
+        init_insns.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
 
         init_insns.push_back(InsnFactory::create_s_load_dwordx2(s_backup_writeback_addr,metadata.kernarg_segment_ptr,writeback_param_offset,insn_pool)); 
+        // Backup Writeback Address 
+
 
         /**
          * Here we initialize shared memory with 0, and vregs with 0 except one holding -1 for the purpose of ds_inc
@@ -413,15 +433,16 @@ int main(int argc, char **argv){
 
 
 	vector < char *> insn_pool;
-	if(argc < 7){
-		printf("Usage: %s <binary path> sgpr_max vgpr_max grid_dim_x writeback_param_offset writeback_offset \n", argv[0]);
+	if(argc < 8){
+		printf("Usage: %s <binary path> sgpr_max vgpr_max grid_dim_x num_warps_per_block writeback_param_offset writeback_offset \n", argv[0]);
 		return -1;
 	}
     int sgpr_max = atoi(argv[2]);
     int vgpr_max = atoi(argv[3]);
     uint32_t grid_dim_x=  atoi(argv[4]);  
-    uint32_t writeback_param_offset = atoi(argv[5]);
-    uint32_t writeback_offset = atoi(argv[6]);
+    uint32_t num_warps_per_block = atoi(argv[5]);
+    uint32_t writeback_param_offset = atoi(argv[6]);
+    uint32_t writeback_offset = atoi(argv[7]);
 
 	char *binaryPath = argv[1];
 	FILE* fp = fopen(binaryPath,"rb+");
@@ -467,7 +488,7 @@ int main(int argc, char **argv){
 
     {
         vector<MyInsn> init_insns;
-        setup_initailization(init_insns, warp_sgpr_pair,s_backup_writeback_addr,writeback_param_offset, metadata,grid_dim_x ,num_branches,ds_addr,ds_data_0,ds_data_1,v_minus_1,s_local_warp_id,insn_pool);
+        setup_initailization(init_insns, warp_sgpr_pair,s_backup_writeback_addr,writeback_param_offset, metadata,grid_dim_x , num_warps_per_block ,num_branches,ds_addr,ds_data_0,ds_data_1,v_minus_1,s_local_warp_id,insn_pool);
         inplace_insert(fp,text_start,text_end,init_insns,branches, after_waitcnt + target_shift,insn_pool);
         target_shift += get_size(init_insns);
     }
