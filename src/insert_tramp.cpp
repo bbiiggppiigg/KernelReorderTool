@@ -241,14 +241,17 @@ uint32_t get_size(vector<MyInsn> &insns){
 typedef uint16_t reg;
 typedef uint16_t sreg;
 typedef uint16_t vreg;
-void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s_backup_writeback_addr , uint32_t writeback_param_offset  ,const AMDGPU_KERNEL_METADATA & metadata ,const uint32_t grid_dim , const uint32_t num_warps_per_block ,const uint32_t num_branches ,vreg ds_addr , vreg ds_data_0, vreg ds_data_1 ,vreg v_minus_1, sreg s_local_warp_id ,vector<char *> & insn_pool){
+void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s_backup_writeback_addr , uint32_t writeback_param_offset  ,const AMDGPU_KERNEL_METADATA & metadata ,const uint32_t grid_dim , const uint32_t num_warps_per_block ,const uint32_t num_branches ,vreg ds_addr , vreg ds_data_0, vreg ds_data_1 ,vreg v_minus_1, sreg s_local_warp_id ,uint32_t lds_base ,vector<char *> & insn_pool){
 
         /**
-         * To calculate the local warp id, we need to calculate threadId_Y * Threads_PER_block_X / 64
+         * To calculate the local warp id, we need to calculate threadId_Y * Threads_PER_block_X + threadID_X / 64
          * Here we reuse warp_sgpr_pair to do so
          */
         // First step load from dispatch ptr size of block 
-        init_insns.push_back(InsnFactory::create_s_load_dword(warp_sgpr_pair,metadata.dispatch_ptr,4,insn_pool)); 
+        if(metadata.dispatch_ptr != -1)
+            init_insns.push_back(InsnFactory::create_s_load_dword(warp_sgpr_pair,metadata.dispatch_ptr,4,insn_pool)); 
+        else
+            init_insns.push_back(InsnFactory::create_s_mov_b32(warp_sgpr_pair,65664,true,insn_pool));
 
         init_insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
         // Format is block_size_y || block_size_x, so bit operation to remove upper half
@@ -257,6 +260,14 @@ void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s
         init_insns.push_back(InsnFactory::create_v_readfirstlane_b32(s_local_warp_id,256+VGPR1,insn_pool)); 
         // Thread_ID_Y * THREADS_PER_BLOCK_X
         init_insns.push_back(InsnFactory::create_s_mul_i32(s_local_warp_id, s_local_warp_id, warp_sgpr_pair ,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+
+
+        // READ AND PLUS THREAD_ID_X
+        init_insns.push_back(InsnFactory::create_v_readfirstlane_b32(warp_sgpr_pair,256+VGPR0,insn_pool)); 
+
+        init_insns.push_back(InsnFactory::create_s_add_u32(s_local_warp_id, s_local_warp_id, warp_sgpr_pair,false ,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+
+
         // Divide by 64
         init_insns.push_back(InsnFactory::create_s_lshr_b32(s_local_warp_id,S_6, s_local_warp_id ,insn_pool)); 
 
@@ -275,8 +286,10 @@ void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s
         //    init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_y ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
         //init_insns.push_back(InsnFactory::create_s_lshl_b32(warp_sgpr_pair,S_16, metadata.work_group_id_y ,insn_pool)); // TMP= WG_ID_Y << 4 (assume we know GRID_DIM_X ) 
         //
-        //
-        init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_y ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+        if(metadata.work_group_id_y != -1)
+            init_insns.push_back(InsnFactory::create_s_mul_i32(warp_sgpr_pair,metadata.work_group_id_y ,grid_dim+128,insn_pool)); // TMP = WG_ID * GRID_DIM_X
+        else
+            init_insns.push_back(InsnFactory::create_s_mul_i32_const(warp_sgpr_pair,129 ,grid_dim,insn_pool)); // TMP = WG_ID * GRID_DIM_X
         init_insns.push_back(InsnFactory::create_s_add_u32(warp_sgpr_pair,warp_sgpr_pair, metadata.work_group_id_x,false,insn_pool)); // SGPR_10 += WG_ID_X (SGPR8)
 
         
@@ -291,8 +304,6 @@ void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s
 
         init_insns.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
 
-        init_insns.push_back(InsnFactory::create_s_load_dwordx2(s_backup_writeback_addr,metadata.kernarg_segment_ptr,writeback_param_offset,insn_pool)); 
-        // Backup Writeback Address 
 
 
         /**
@@ -301,7 +312,9 @@ void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s
          *
          */  
  
-        init_insns.push_back(InsnFactory::create_v_mov_b32(ds_addr , S_0, insn_pool)); 
+
+        init_insns.push_back(InsnFactory::create_s_mov_b32(s_backup_writeback_addr,lds_base,true,insn_pool));
+        init_insns.push_back(InsnFactory::create_v_mov_b32(ds_addr , s_backup_writeback_addr, insn_pool)); 
         init_insns.push_back(InsnFactory::create_v_mov_b32(ds_data_0 , S_0, insn_pool)); 
         init_insns.push_back(InsnFactory::create_v_mov_b32(ds_data_1 , S_0, insn_pool)); 
         init_insns.push_back(InsnFactory::create_v_mov_b32(v_minus_1 , S_MINUS_1, insn_pool)); 
@@ -310,8 +323,9 @@ void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s
             init_insns.push_back(InsnFactory::create_v_add_u32(ds_addr,ds_addr,S_8,insn_pool)); 
         }
     
-        init_insns.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // M0 = -1
 
+        // Backup Writeback Address 
+        init_insns.push_back(InsnFactory::create_s_load_dwordx2(s_backup_writeback_addr,metadata.kernarg_segment_ptr,writeback_param_offset,insn_pool)); 
         //init_insns.push_back(InsnFactory::create_s_mov_b64(s_backup_writeback_addr,s_writeback_addr,insn_pool)); 
         init_insns.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
@@ -328,7 +342,7 @@ void setup_initailization(vector<MyInsn> & init_insns,sreg warp_sgpr_pair,sreg s
     * s_backup_execcond : The register that in s_and_saveexec_b64
  */ 
 
-void per_branch_instrumentation(vector<MyInsn> & instr_insns, sreg s_warp_id ,sreg s_addr_cal, uint32_t branch_id , vreg v_lds_addr, vreg v_lds_data , vreg v_const_minus_1 ,sreg s_backup_exec, sreg s_backup_execcond , uint32_t num_branches,sreg s_local_warp_id , vector<char *> & insn_pool){
+void per_branch_instrumentation(vector<MyInsn> & instr_insns, sreg s_warp_id ,sreg s_addr_cal, uint32_t branch_id , vreg v_lds_addr, vreg v_lds_data , vreg v_const_minus_1 ,sreg s_backup_exec, sreg s_backup_execcond , uint32_t num_branches,sreg s_local_warp_id , uint32_t lds_base ,vector<char *> & insn_pool){
 
 
         instr_insns.push_back(InsnFactory::create_s_mov_b64(s_backup_exec,EXEC,insn_pool)); // backup EXEC
@@ -343,6 +357,9 @@ void per_branch_instrumentation(vector<MyInsn> & instr_insns, sreg s_warp_id ,sr
         instr_insns.push_back(InsnFactory::create_s_add_u32(s_addr_cal,s_addr_cal,branch_id+128,false,insn_pool));
 
         instr_insns.push_back(InsnFactory::create_s_lshl_b32(s_addr_cal,S_3, s_addr_cal  ,insn_pool)); // LEFT SHIFT By 3 = times 8 
+
+        instr_insns.push_back(InsnFactory::create_s_add_u32(s_addr_cal, s_addr_cal,lds_base,true  ,insn_pool)); // LEFT SHIFT By 3 = times 8 
+
 
         instr_insns.push_back(InsnFactory::create_v_mov_b32(v_lds_addr, s_addr_cal, insn_pool)); //  vgpr stores the addr
 
@@ -371,7 +388,7 @@ void per_branch_instrumentation(vector<MyInsn> & instr_insns, sreg s_warp_id ,sr
 
 
 
-void setup_writeback(vector<MyInsn> & writeback_insns,sreg s_backup_writeback_addr ,sreg s_addr_cal, sreg s_warp_id , uint32_t num_branches , vreg v_lds_addr, vreg v_lds_data , vreg v_global_addr  ,uint32_t writeback_offset, sreg s_writeback_offset  ,vector<char *> & insn_pool){
+void setup_writeback(vector<MyInsn> & writeback_insns,sreg s_backup_writeback_addr ,sreg s_addr_cal, sreg s_warp_id , uint32_t num_branches , vreg v_lds_addr, vreg v_lds_data , vreg v_global_addr  ,uint32_t writeback_offset, sreg s_writeback_offset, uint32_t lds_base  ,vector<char *> & insn_pool){
 
 
     // TODO: Setup a register for storing the offset
@@ -389,18 +406,19 @@ void setup_writeback(vector<MyInsn> & writeback_insns,sreg s_backup_writeback_ad
     writeback_insns.push_back(InsnFactory::create_s_add_u32(s_warp_id,s_warp_id, s_writeback_offset , false ,insn_pool));
     writeback_insns.push_back(InsnFactory::create_s_addc_u32(s_warp_id+1,S_0, s_warp_id+1 , false ,insn_pool));  
 
+
     writeback_insns.push_back(InsnFactory::create_v_mov_b32(v_global_addr , s_warp_id, insn_pool)); // v[0] = s[0]
     writeback_insns.push_back(InsnFactory::create_v_mov_b32(v_global_addr+1 , s_warp_id+1, insn_pool)); // v[1 ]= s[1] 
 
 
 
     // TODO: Replace S_0 with LDS_OFFSET
-    writeback_insns.push_back(InsnFactory::create_v_mov_b32(v_lds_addr , S_0, insn_pool)); 
+    writeback_insns.push_back(InsnFactory::create_v_mov_b32_const(v_lds_addr , lds_base, insn_pool)); 
 
 
 }
 
-void per_branch_writeback(vector<MyInsn> & writeback_insns,sreg s_backup_writeback_addr ,sreg s_addr_cal, sreg s_warp_id , uint32_t num_branches , vreg v_lds_addr, vreg v_lds_data , vreg v_global_addr  , vector<char *> & insn_pool){
+void per_branch_writeback(vector<MyInsn> & writeback_insns,sreg s_backup_writeback_addr ,sreg s_addr_cal, sreg s_warp_id , uint32_t num_branches , vreg v_lds_addr, vreg v_lds_data , vreg v_global_addr  ,vector<char *> & insn_pool){
     puts("Per Branch WriteBack !");
         /*writeback_insns.push_back(InsnFactory::create_s_mov_b64(EXEC,S_1,insn_pool)); // EXEC = 1 
 
@@ -433,8 +451,8 @@ int main(int argc, char **argv){
 
 
 	vector < char *> insn_pool;
-	if(argc < 8){
-		printf("Usage: %s <binary path> sgpr_max vgpr_max grid_dim_x num_warps_per_block writeback_param_offset writeback_offset \n", argv[0]);
+	if(argc < 9){
+		printf("Usage: %s <binary path> sgpr_max vgpr_max grid_dim_x num_warps_per_block writeback_param_offset writeback_offset lds_base \n", argv[0]);
 		return -1;
 	}
     int sgpr_max = atoi(argv[2]);
@@ -443,6 +461,7 @@ int main(int argc, char **argv){
     uint32_t num_warps_per_block = atoi(argv[5]);
     uint32_t writeback_param_offset = atoi(argv[6]);
     uint32_t writeback_offset = atoi(argv[7]);
+    uint32_t lds_base = atoi(argv[8]);
 
 	char *binaryPath = argv[1];
 	FILE* fp = fopen(binaryPath,"rb+");
@@ -488,7 +507,7 @@ int main(int argc, char **argv){
 
     {
         vector<MyInsn> init_insns;
-        setup_initailization(init_insns, warp_sgpr_pair,s_backup_writeback_addr,writeback_param_offset, metadata,grid_dim_x , num_warps_per_block ,num_branches,ds_addr,ds_data_0,ds_data_1,v_minus_1,s_local_warp_id,insn_pool);
+        setup_initailization(init_insns, warp_sgpr_pair,s_backup_writeback_addr,writeback_param_offset, metadata,grid_dim_x , num_warps_per_block ,num_branches,ds_addr,ds_data_0,ds_data_1,v_minus_1,s_local_warp_id,lds_base,insn_pool);
         inplace_insert(fp,text_start,text_end,init_insns,branches, after_waitcnt + target_shift,insn_pool);
         target_shift += get_size(init_insns);
     }
@@ -499,7 +518,7 @@ int main(int argc, char **argv){
         auto addr = pair_addr_sgpr.first;
         auto sgpr = pair_addr_sgpr.second;
         vector<MyInsn> update_branch_statistic;
-        per_branch_instrumentation(update_branch_statistic, warp_sgpr_pair , addr_sgpr_pair , branch_id  , ds_addr , ds_data_0, v_minus_1 , backup_exec_sgpr_pair, sgpr , num_branches ,s_local_warp_id ,insn_pool);
+        per_branch_instrumentation(update_branch_statistic, warp_sgpr_pair , addr_sgpr_pair , branch_id  , ds_addr , ds_data_0, v_minus_1 , backup_exec_sgpr_pair, sgpr , num_branches ,s_local_warp_id, lds_base  ,insn_pool);
         inplace_insert(fp,text_start,text_end,update_branch_statistic,branches, addr + target_shift,insn_pool);
         target_shift+= get_size(update_branch_statistic);
         branch_id++;
@@ -517,7 +536,7 @@ int main(int argc, char **argv){
     {
         vector<MyInsn> writeback_insns;
 
-        setup_writeback(writeback_insns, s_backup_writeback_addr , 6 , warp_sgpr_pair , num_branches , ds_addr , ds_data_0 , VGPR0 , writeback_offset , s_writeback_offset ,insn_pool);
+        setup_writeback(writeback_insns, s_backup_writeback_addr , 6 , warp_sgpr_pair , num_branches , ds_addr , ds_data_0 , VGPR0 , writeback_offset , s_writeback_offset,lds_base ,insn_pool);
         for ( uint32_t i =0 ; i < num_branches ; i++)
             per_branch_writeback(writeback_insns, s_backup_writeback_addr , 6 , warp_sgpr_pair , num_branches , ds_addr , ds_data_0 , VGPR0  ,insn_pool);
         inplace_insert_no_update(fp,text_start,text_end,writeback_insns,branches, before_endpgm+ target_shift,insn_pool);
@@ -525,8 +544,8 @@ int main(int argc, char **argv){
     // 0x10b0
 
     extend_text(fp,text_end-text_start);
-    set_lds_usage(fp,kds[0].first,1024/* this is capped at 0x7f for now */);
-    update_lds_usage(fp,0x7f);
+    //set_lds_usage(fp,kds[0].first,1024/* this is capped at 0x7f for now */);
+    //update_lds_usage(fp,0x7f);
     set_sgpr_vgpr_usage(fp,kds[0].first,sgpr_max+24,vgpr_max + 4);
     string kernel_name = kds[0].second.substr(0,kds[0].second.find(".kd"));
     update_symtab_symbol_size(fp,kernel_name.c_str(),text_end-text_start);

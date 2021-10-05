@@ -102,6 +102,21 @@ class InsnFactory {
             memcpy(cmd_ptr,cmd,4);
             return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_execnz"));
         }
+        static MyBranchInsn create_s_cbranch_vccz(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
+            void * cmd_ptr =  malloc(sizeof(char ) * 4);
+            insn_pool.push_back( (char * ) cmd_ptr);
+            memcpy(cmd_ptr,cmd,4);
+            return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_vccz"));
+        }
+
+        static MyBranchInsn create_s_cbranch_vccnz(uint32_t branch_addr, uint32_t target_addr, char * cmd , vector<char *> & insn_pool){
+            void * cmd_ptr =  malloc(sizeof(char ) * 4);
+            insn_pool.push_back( (char * ) cmd_ptr);
+            memcpy(cmd_ptr,cmd,4);
+            return MyBranchInsn( branch_addr, target_addr,cmd_ptr, 4 , string("s_cbranch_vccnz"));
+        }
+
+
 
 
         static MyBranchInsn convert_to_branch_insn( uint32_t branch_addr, uint32_t target_addr, char * cmd , uint32_t length , vector<char *> & insn_pool){
@@ -120,7 +135,11 @@ class InsnFactory {
                             return create_s_cbranch_scc1(branch_addr, target_addr, cmd,insn_pool);
                         case 4: // s_cbranch_scc0
                         case 6: // s_cbranch_vccz
+
+                            return create_s_cbranch_vccz(branch_addr, target_addr, cmd,insn_pool);
                         case 7: // s_cbranch_vccnz
+                            
+                            return create_s_cbranch_vccnz(branch_addr, target_addr, cmd,insn_pool);
                             printf(" op = %u \n",op);
                             break;
                         case 8: // s_cbranch_execz
@@ -144,6 +163,7 @@ class InsnFactory {
             }else{
                 printf("length = %u\n",length);
             }
+            printf("exiting because of unsupport branch\n");
             exit(-1);
         }
 
@@ -219,6 +239,18 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,4,std::string("v_mov_b32 "));
 		}
+		static MyInsn create_v_mov_b32_const(  uint32_t vdst, uint32_t src  , vector<char *> & insn_pool ){
+			uint32_t cmd = 0x7e000000;
+			uint32_t op = 1;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd = ( cmd | (vdst << 17) | ( op << 9)  | 255);
+			memcpy( cmd_ptr ,&cmd,  4 );
+			memcpy( cmd_ptr+4 ,&src,  4 );
+			insn_pool.push_back(cmd_ptr);
+            printf("Creating v_mob_b32_const instr, cmd = %llx\n",*(uint64_t *)cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("v_mov_b32 "));
+		}
+
 
 		// SOPK
 		static MyInsn create_s_getreg_b32(  uint32_t target_sgpr, uint8_t size, uint8_t offset, uint8_t hwRegId , vector<char *> & insn_pool ){
@@ -367,6 +399,22 @@ class InsnFactory {
             printf("dst = %u, ssrc1 = %u, ssrc0 = %u\n",sdst,ssrc1,ssrc0);
 			return MyInsn(cmd_ptr,4,std::string("s_and_b32 "));
 		}
+		static MyInsn create_s_mul_i32_const(  uint8_t sdst, uint8_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
+			uint32_t cmd = 0x80000000;
+			uint32_t op = 36;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd = ( cmd | (op << 23) | ( sdst << 16) | (ssrc1 << 8)  | 255 );
+            uint32_t cmd_high = ssrc0;
+
+			memcpy( cmd_ptr ,&cmd,  4 );
+			memcpy( cmd_ptr+4 ,&cmd_high,  4 );
+
+			insn_pool.push_back(cmd_ptr);
+            printf("generated s_mul_i32_const instruction, cmd = 0x%x:%x\n",cmd,cmd_high);
+            printf("dst = %u, ssrc1 = %u, ssrc0 = %u\n",sdst,ssrc1,ssrc0);
+			return MyInsn(cmd_ptr,8,std::string("s_and_b32 "));
+		}
+
 
 		static MyInsn create_s_mul_hi_u32(  uint32_t sdst, uint32_t ssrc1, uint32_t ssrc0, vector<char *> & insn_pool ){
 			uint32_t cmd = 0x80000000;
