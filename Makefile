@@ -17,7 +17,7 @@ mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMu
 
 
 lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp 
-	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o
+	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/
 
 bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
 	g++ -g -Wall -I$(DYNINST_ROOT)/include src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/insert_tramp

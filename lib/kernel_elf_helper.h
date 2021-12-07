@@ -72,6 +72,8 @@ class COMPUTE_PGM_RSRC2 {
     uint8_t enable_sgpr_workgroup_id_x;
     uint8_t enable_sgpr_workgroup_id_y;
     uint8_t enable_sgpr_workgroup_id_z;
+    uint8_t enable_sgpr_workgroup_info;
+    uint8_t enable_vgpr_workitem_id;
     
     const uint8_t pgm_rsrc2_offset = 0x34;
     uint32_t raw_value;
@@ -85,6 +87,10 @@ class COMPUTE_PGM_RSRC2 {
         enable_sgpr_workgroup_id_x = get_bits(raw_value,7,7);
         enable_sgpr_workgroup_id_y = get_bits(raw_value,8,8);
         enable_sgpr_workgroup_id_z = get_bits(raw_value,9,9);
+        enable_sgpr_workgroup_info= get_bits(raw_value,10,10);
+        enable_vgpr_workitem_id = get_bits(raw_value,11,12);
+
+        PRINT(enable_vgpr_workitem_id);
         //PRINT(enable_private_segment);
         //PRINT(user_sgpr_count);
         //PRINT(enable_trap_handler);
@@ -100,12 +106,16 @@ class COMPUTE_PGM_RSRC2 {
         enable_sgpr_workgroup_id_x = get_bits(value,7,7);
         enable_sgpr_workgroup_id_y = get_bits(value,8,8);
         enable_sgpr_workgroup_id_z = get_bits(value,9,9);
+        enable_sgpr_workgroup_info= get_bits(raw_value,10,10);
+        enable_vgpr_workitem_id = get_bits(raw_value,11,12);
+ 
         //PRINT(enable_private_segment);
         //PRINT(user_sgpr_count);
         //PRINT(enable_trap_handler);
         PRINT(enable_sgpr_workgroup_id_x);
         PRINT(enable_sgpr_workgroup_id_y);
         PRINT(enable_sgpr_workgroup_id_z);
+        PRINT(enable_vgpr_workitem_id);
     }
     
 };
@@ -164,8 +174,12 @@ class AMDGPU_KERNEL_METADATA{
         int32_t work_group_id_x;
         int32_t work_group_id_y;
         int32_t work_group_id_z;
+        uint32_t sgpr_count;
+        uint32_t vgpr_count;
+        uint32_t group_segment_fixed_size;
+        void parse_msgpack(FILE* fp);
+        AMDGPU_KERNEL_METADATA(FILE * fp , uint32_t kd_offset);/*{
 
-        AMDGPU_KERNEL_METADATA(FILE * fp , uint32_t kd_offset){
             uint32_t sgpr_count = 0;
             dispatch_ptr = queue_ptr = kernarg_segment_ptr = dispatch_id = flat_scratch_init = private_segment_size = work_group_id_x = work_group_id_y = work_group_id_z = -1;
             pgm_rsrc1 = new COMPUTE_PGM_RSRC1(fp,kd_offset);
@@ -217,7 +231,7 @@ class AMDGPU_KERNEL_METADATA{
             PRINT(work_group_id_y);
             PRINT(work_group_id_z);
            
-        }
+        }*/
 
     
     

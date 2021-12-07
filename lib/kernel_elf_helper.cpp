@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstring>
 #include <cassert>
+#include <msgpack.hpp>
+#include <cstdlib>
 #include "kernel_elf_helper.h"
 
 #define ElfW Elf64_Ehdr
@@ -446,5 +448,145 @@ void update_symtab_symbol_size(FILE * f, const char kernel_name [] , uint32_t ne
 
 }
 
+void AMDGPU_KERNEL_METADATA::parse_msgpack(FILE * f){
+	ElfW header;
+    fseek(f,0,SEEK_SET);
+	fread(&header,sizeof(header),1,f);
 
+	Shdr shstrtable_header;
+	read_shdr(&shstrtable_header,f,&header,header.e_shstrndx);
+	char * shstrtable = read_section(f,&shstrtable_header);
+	Shdr tmp_hdr;
+	Shdr note_hdr;
+
+	//int text_index = -1;
+	int note_index = -1;
+	for (unsigned int i = 1; i < header.e_shnum ; i ++){
+		read_shdr(&tmp_hdr,f,&header,i);
+		char * sh_name = shstrtable+tmp_hdr.sh_name;
+		if(0==strcmp(sh_name,".note")){
+			note_hdr = tmp_hdr;
+            //printf("found .note at index %d\n",i);
+			note_index = i;
+		}
+
+	}
+    if(note_index == -1){
+        printf("ERROR ! Can't Find Symtab\n");
+        exit(-1);
+    }
+
+	//char * strtab_content = read_section(f,&strtab_hdr);
+	//char * dynstr_content = read_section(f,&dynstr_hdr);
+
+
+	char * note_content = (char *) read_section(f,&note_hdr);
+    std::string str(note_content,note_hdr.sh_size);
+    
+    std::map<std::string, msgpack::object > kvmap;
+    std::vector<msgpack::object> kernarg_list;
+    std::map<std::string, msgpack::object> kernarg_list_map;
+    msgpack::zone z;
+
+    
+    uint32_t offset =0 ;
+
+    /**
+     * Step 2, parse some non-msgpack header data
+     * First 4 bytes : Size of the Name str (should be AMDGPU\0)
+     * Second 4 bytes: Size of the note in msgpack format
+     * Third 4 bytes : Type of the note (should be 32)
+     * Followed by the Name str
+     * Padding until 4 byte aligned
+     * Followed by msgpack data
+     */ 
+    msgpack::object_handle oh; 
+    std::string name_szstr=str.substr(0,4);
+    uint32_t name_sz = *( (uint32_t*)  name_szstr.c_str());
+    std::string note_type = str.substr(8,4);
+    std::string name = str.substr(12,name_sz);
+    offset = 12 + name_sz;
+    while(offset%4) offset++;
+
+    /*
+     * Now we are ready to process the msgpack data
+     * We unpack from offset calculated above
+     * Unpack until we get to .group_segment_fixed_size
+     *
+     */
+    oh = msgpack::unpack(str.data()+offset, str.size()-offset);
+    msgpack::object map_root = oh.get();
+    map_root.convert(kvmap);
+    kvmap["amdhsa.kernels"].convert(kernarg_list);
+    kernarg_list[0].convert(kernarg_list_map);
+
+    kernarg_list_map[".sgpr_count"].convert(sgpr_count);
+    kernarg_list_map[".vgpr_count"].convert(vgpr_count);
+    kernarg_list_map[".group_segment_fixed_size"].convert(group_segment_fixed_size);
+    //vgpr_count = kernarg_list_map[".sgpr_count"];
+    //group_segment_fixed_size = kernarg_list_map[".group_segment_fixed_size"];
+
+
+}
+
+
+
+AMDGPU_KERNEL_METADATA::AMDGPU_KERNEL_METADATA(FILE * fp , uint32_t kd_offset){
+            uint32_t sgpr_count = 0;
+            dispatch_ptr = queue_ptr = kernarg_segment_ptr = dispatch_id = flat_scratch_init = private_segment_size = work_group_id_x = work_group_id_y = work_group_id_z = -1;
+            pgm_rsrc1 = new COMPUTE_PGM_RSRC1(fp,kd_offset);
+            pgm_rsrc2 = new COMPUTE_PGM_RSRC2(fp,kd_offset);
+            pgm_others = new Others(fp,kd_offset);
+            if(pgm_others->enable_sgpr_private_segment_buffer){
+                sgpr_count += 4;
+            }
+            if(pgm_others->enable_sgpr_dispatch_ptr){
+                dispatch_ptr = sgpr_count;
+                sgpr_count += 2;
+            }
+            if(pgm_others->enable_sgpr_queue_ptr){
+                queue_ptr = sgpr_count;
+                sgpr_count +=2 ;
+            }
+            if(pgm_others->enable_sgpr_kernarg_segment_ptr){
+                kernarg_segment_ptr = sgpr_count;
+                sgpr_count += 2;
+            }
+            if(pgm_others->enable_sgpr_dispatch_id){
+                dispatch_id = sgpr_count;
+                sgpr_count += 2;
+            }
+            if(pgm_others->enable_sgpr_flat_scratch_init){
+                flat_scratch_init = sgpr_count;
+                sgpr_count += 2;
+            }
+            if(pgm_others->enable_sgpr_private_segment_size){
+                private_segment_size = sgpr_count;
+                sgpr_count += 1;
+            }
+            if(pgm_rsrc2->enable_sgpr_workgroup_id_x){
+                work_group_id_x = sgpr_count;
+                sgpr_count +=1;
+            }
+            if(pgm_rsrc2->enable_sgpr_workgroup_id_y){
+                work_group_id_y = sgpr_count;
+                sgpr_count +=1;
+            }
+            if(pgm_rsrc2->enable_sgpr_workgroup_id_x){
+                work_group_id_z = sgpr_count;
+                sgpr_count +=1;
+            }
+            parse_msgpack(fp);
+            PRINT(dispatch_ptr);
+            PRINT(kernarg_segment_ptr);
+            PRINT(queue_ptr);
+            PRINT(work_group_id_x);
+            PRINT(work_group_id_y);
+            PRINT(work_group_id_z);
+            PRINT(sgpr_count);
+            PRINT(vgpr_count);
+            PRINT(group_segment_fixed_size);
+
+           
+        }
 
