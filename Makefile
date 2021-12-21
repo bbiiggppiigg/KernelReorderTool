@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata insert_tramp update_note_modify_lds_size
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata insert_tramp update_note_modify_lds_size updated_insert_tramp
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -11,7 +11,8 @@ ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
 endif
 
-lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_filesystem -lboost_system
+TBB=/opt/spack/opt/spack/linux-centos8-zen2/gcc-10.2.0/intel-tbb-2020.3-zbj2dajg6q53hhsfd7kglxwqhyc7ie3v/include
+lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_filesystem -lboost_system 
 
 mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication
 
@@ -20,7 +21,11 @@ lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp
 	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/
 
 bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/insert_tramp
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/insert_tramp
+
+bin/updated_insert_tramp: src/updated_insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_insert_tramp
+
 
 MatrixMultiplication: $(mmpath)
 	cp $(mmpath) .
@@ -32,32 +37,33 @@ bin/edit_kernel: src/edit_kernel.o
 	 g++ src/edit_kernel.o  -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/edit_kernel
 
 src/edit_kernel.o:  src/edit_kernel.cpp
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -c src/edit_kernel.cpp -o src/edit_kernel.o
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) -c src/edit_kernel.cpp -o src/edit_kernel.o
+
 
 
 bin/test_acc: src/test_acc.o lib/InstrUtil.o
 	 g++ src/test_acc.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_acc
 
 src/test_acc.o:  src/test_acc.cpp 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_acc.cpp -o src/test_acc.o
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) -Iinclude -c src/test_acc.cpp -o src/test_acc.o
 
 bin/test_time: src/test_time.o lib/InstrUtil.o
 	 g++ src/test_time.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_time
 
 src/test_time.o:  src/test_time.cpp 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_time.cpp -o src/test_time.o
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -I$(TBB) -c src/test_time.cpp -o src/test_time.o
 
 bin/test_counter: src/test_counter.o lib/InstrUtil.o
 	 g++ src/test_counter.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_counter
 
 src/test_counter.o:  src/test_counter.cpp 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_counter.cpp -o src/test_counter.o
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -I$(TBB) -c src/test_counter.cpp -o src/test_counter.o
 
 bin/test_getreg: src/test_getreg.o lib/InstrUtil.o
 	 g++ src/test_getreg.o  lib/InstrUtil.o -g -L$(DYNINST_ROOT)/lib  $(lDyninst) -o bin/test_getreg
 
 src/test_getreg.o:  src/test_getreg.cpp 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -Iinclude -c src/test_getreg.cpp -o src/test_getreg.o
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) -Iinclude -c src/test_getreg.cpp -o src/test_getreg.o
 
 lib/InstrUtil.o: lib/InstrUtil.cpp lib/InsnFactory.h
 	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
