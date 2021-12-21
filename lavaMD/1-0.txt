@@ -14,7 +14,7 @@ Add known data range [840, 880) from symbol _Z15kernel_gpu_cuda7par_str7dim_strP
 [Parser.C:1962] recording block [ffffffffffffffff,ffffffffffffffff)
 Checking non-returning for kernel_gpu_cuda
 [CodeObject.C] adding hint 1000
-[Parser.C:169] parse() called on Parser 0x130b1e0 with state 0
+[Parser.C:169] parse() called on Parser 0x16011e0 with state 0
 [Parser.C:283] entered parse_vanilla()
 	1 function hints
 [Parser.C:1962] recording block [1000,1000)
@@ -56,14 +56,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1020->1560
 resolveable_edge: 1, tailcall: 0, target: 1560
 [ParserDetails.C:583] pushing 1560 onto worklist
-[ParserDetails.C:584] new edge is 0x13162a0
-	 pushing work element for block (nil), edge 0x13162a0, target 0x1560
+[ParserDetails.C:584] new edge is 0x160c2a0
+	 pushing work element for block (nil), edge 0x160c2a0, target 0x1560
 			edge target 1024, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1020->1024
 resolveable_edge: 1, tailcall: 0, target: 1024
 [ParserDetails.C:583] pushing 1024 onto worklist
-[ParserDetails.C:584] new edge is 0x1316340
-	 pushing work element for block (nil), edge 0x1316340, target 0x1024
+[ParserDetails.C:584] new edge is 0x160c340
+	 pushing work element for block (nil), edge 0x160c340, target 0x1024
 	 add_edge called, src_addr 1020, dst 1024, edge type 2, looked up block [1000, 1024)
 [Parser.C:1962] recording block [1024,1024)
 [Parser.C] parsing block 1024
@@ -125,14 +125,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1074->10c4
 resolveable_edge: 1, tailcall: 0, target: 10c4
 [ParserDetails.C:583] pushing 10c4 onto worklist
-[ParserDetails.C:584] new edge is 0x1316fa0
-	 pushing work element for block (nil), edge 0x1316fa0, target 0x10c4
+[ParserDetails.C:584] new edge is 0x160cfa0
+	 pushing work element for block (nil), edge 0x160cfa0, target 0x10c4
 			edge target 1078, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1074->1078
 resolveable_edge: 1, tailcall: 0, target: 1078
 [ParserDetails.C:583] pushing 1078 onto worklist
-[ParserDetails.C:584] new edge is 0x1317040
-	 pushing work element for block (nil), edge 0x1317040, target 0x1078
+[ParserDetails.C:584] new edge is 0x160d040
+	 pushing work element for block (nil), edge 0x160d040, target 0x1078
 	 add_edge called, src_addr 1074, dst 1078, edge type 2, looked up block [1024, 1078)
 [Parser.C:1962] recording block [1078,1078)
 [Parser.C] parsing block 1078
@@ -248,14 +248,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 111c->1560
 resolveable_edge: 1, tailcall: 0, target: 1560
 [ParserDetails.C:583] pushing 1560 onto worklist
-[ParserDetails.C:584] new edge is 0x1316110
-	 pushing work element for block (nil), edge 0x1316110, target 0x1560
+[ParserDetails.C:584] new edge is 0x160c110
+	 pushing work element for block (nil), edge 0x160c110, target 0x1560
 			edge target 1120, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 111c->1120
 resolveable_edge: 1, tailcall: 0, target: 1120
 [ParserDetails.C:583] pushing 1120 onto worklist
-[ParserDetails.C:584] new edge is 0x1316150
-	 pushing work element for block (nil), edge 0x1316150, target 0x1120
+[ParserDetails.C:584] new edge is 0x160c150
+	 pushing work element for block (nil), edge 0x160c150, target 0x1120
 	 add_edge called, src_addr 111c, dst 1120, edge type 2, looked up block [1078, 1120)
 [Parser.C:1962] recording block [1120,1120)
 [Parser.C] parsing block 1120
@@ -425,8 +425,8 @@ Returned 1 edges
 ParserDetails.C[87]: adding direct edge 1270->12b4
 resolveable_edge: 1, tailcall: 0, target: 12b4
 [ParserDetails.C:583] pushing 12b4 onto worklist
-[ParserDetails.C:584] new edge is 0x131b520
-	 pushing work element for block (nil), edge 0x131b520, target 0x12b4
+[ParserDetails.C:584] new edge is 0x1611520
+	 pushing work element for block (nil), edge 0x1611520, target 0x12b4
 	 add_edge called, src_addr 1074, dst 10c4, edge type 1, looked up block [1024, 1078)
 [Parser.C:1962] recording block [10c4,10c4)
 [Parser.C] parsing block 10c4
@@ -523,14 +523,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 12c0->12f8
 resolveable_edge: 1, tailcall: 0, target: 12f8
 [ParserDetails.C:583] pushing 12f8 onto worklist
-[ParserDetails.C:584] new edge is 0x131a450
-	 pushing work element for block (nil), edge 0x131a450, target 0x12f8
+[ParserDetails.C:584] new edge is 0x1610450
+	 pushing work element for block (nil), edge 0x1610450, target 0x12f8
 			edge target 12c4, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 12c0->12c4
 resolveable_edge: 1, tailcall: 0, target: 12c4
 [ParserDetails.C:583] pushing 12c4 onto worklist
-[ParserDetails.C:584] new edge is 0x13170e0
-	 pushing work element for block (nil), edge 0x13170e0, target 0x12c4
+[ParserDetails.C:584] new edge is 0x160d0e0
+	 pushing work element for block (nil), edge 0x160d0e0, target 0x12c4
 	 add_edge called, src_addr 12c0, dst 12c4, edge type 2, looked up block [12b4, 12c4)
 [Parser.C:1962] recording block [12c4,12c4)
 [Parser.C] parsing block 12c4
@@ -580,14 +580,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 12fc->138c
 resolveable_edge: 1, tailcall: 0, target: 138c
 [ParserDetails.C:583] pushing 138c onto worklist
-[ParserDetails.C:584] new edge is 0x131b1d0
-	 pushing work element for block (nil), edge 0x131b1d0, target 0x138c
+[ParserDetails.C:584] new edge is 0x16111d0
+	 pushing work element for block (nil), edge 0x16111d0, target 0x138c
 			edge target 1300, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 12fc->1300
 resolveable_edge: 1, tailcall: 0, target: 1300
 [ParserDetails.C:583] pushing 1300 onto worklist
-[ParserDetails.C:584] new edge is 0x131b080
-	 pushing work element for block (nil), edge 0x131b080, target 0x1300
+[ParserDetails.C:584] new edge is 0x1611080
+	 pushing work element for block (nil), edge 0x1611080, target 0x1300
 	 add_edge called, src_addr 12fc, dst 1300, edge type 2, looked up block [12c4, 1300)
 [Parser.C:1962] recording block [1300,1300)
 [Parser.C] parsing block 1300
@@ -694,14 +694,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 13a0->1274
 resolveable_edge: 1, tailcall: 0, target: 1274
 [ParserDetails.C:583] pushing 1274 onto worklist
-[ParserDetails.C:584] new edge is 0x131c4e0
-	 pushing work element for block (nil), edge 0x131c4e0, target 0x1274
+[ParserDetails.C:584] new edge is 0x16124e0
+	 pushing work element for block (nil), edge 0x16124e0, target 0x1274
 			edge target 13a4, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 13a0->13a4
 resolveable_edge: 1, tailcall: 0, target: 13a4
 [ParserDetails.C:583] pushing 13a4 onto worklist
-[ParserDetails.C:584] new edge is 0x131c580
-	 pushing work element for block (nil), edge 0x131c580, target 0x13a4
+[ParserDetails.C:584] new edge is 0x1612580
+	 pushing work element for block (nil), edge 0x1612580, target 0x13a4
 	 add_edge called, src_addr 13a0, dst 13a4, edge type 2, looked up block [1300, 13a4)
 [Parser.C:1962] recording block [13a4,13a4)
 [Parser.C] parsing block 13a4
@@ -898,14 +898,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1548->13d0
 resolveable_edge: 1, tailcall: 0, target: 13d0
 [ParserDetails.C:583] pushing 13d0 onto worklist
-[ParserDetails.C:584] new edge is 0x131cb10
-	 pushing work element for block (nil), edge 0x131cb10, target 0x13d0
+[ParserDetails.C:584] new edge is 0x1612b10
+	 pushing work element for block (nil), edge 0x1612b10, target 0x13d0
 			edge target 154c, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1548->154c
 resolveable_edge: 1, tailcall: 0, target: 154c
 [ParserDetails.C:583] pushing 154c onto worklist
-[ParserDetails.C:584] new edge is 0x131cb80
-	 pushing work element for block (nil), edge 0x131cb80, target 0x154c
+[ParserDetails.C:584] new edge is 0x1612b80
+	 pushing work element for block (nil), edge 0x1612b80, target 0x154c
 	 add_edge called, src_addr 1548, dst 154c, edge type 2, looked up block [13a4, 154c)
 [Parser.C:1962] recording block [154c,154c)
 [Parser.C] parsing block 154c
@@ -920,7 +920,7 @@ hasCFT called
 Function kernel_gpu_cuda tries to set parsing edge at 1554
 [Parser.C:1796] nop-block ended at 155c
 [Parser.C:1798] pushing 155c onto worklist
-	 pushing work element for block (nil), edge 0x131cad0, target 0x155c
+	 pushing work element for block (nil), edge 0x1612ad0, target 0x155c
 	 add_edge called, src_addr 1554, dst 155c, edge type 5, looked up block [154c, 155c)
 [Parser.C:1962] recording block [155c,155c)
 [Parser.C] parsing block 155c
@@ -937,8 +937,8 @@ Returned 1 edges
 ParserDetails.C[87]: adding direct edge 155c->1274
 resolveable_edge: 1, tailcall: 0, target: 1274
 [ParserDetails.C:583] pushing 1274 onto worklist
-[ParserDetails.C:584] new edge is 0x131ad60
-	 pushing work element for block (nil), edge 0x131ad60, target 0x1274
+[ParserDetails.C:584] new edge is 0x1610d60
+	 pushing work element for block (nil), edge 0x1610d60, target 0x1274
 	 add_edge called, src_addr 13a0, dst 1274, edge type 1, looked up block [1300, 13a4)
 [Parser.C:1962] recording block [1274,1274)
 [Parser.C] parsing block 1274
@@ -997,14 +997,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 12b0->1560
 resolveable_edge: 1, tailcall: 0, target: 1560
 [ParserDetails.C:583] pushing 1560 onto worklist
-[ParserDetails.C:584] new edge is 0x1315530
-	 pushing work element for block (nil), edge 0x1315530, target 0x1560
+[ParserDetails.C:584] new edge is 0x160b530
+	 pushing work element for block (nil), edge 0x160b530, target 0x1560
 			edge target 12b4, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 12b0->12b4
 resolveable_edge: 1, tailcall: 0, target: 12b4
 [ParserDetails.C:583] pushing 12b4 onto worklist
-[ParserDetails.C:584] new edge is 0x131a730
-	 pushing work element for block (nil), edge 0x131a730, target 0x12b4
+[ParserDetails.C:584] new edge is 0x1610730
+	 pushing work element for block (nil), edge 0x1610730, target 0x12b4
 	 add_edge called, src_addr 12b0, dst 12b4, edge type 2, looked up block [1274, 12b4)
 [Parser.C] skipping locally parsed target at 12b4, [12b4, 12c4)
 	 add_edge called, src_addr 12c0, dst 12f8, edge type 1, looked up block [12b4, 12c4)
@@ -1224,46 +1224,46 @@ Set function kernel_gpu_cuda at 1000 ret status from 0 to 1
 [/home/wuxx1279/mdyninst/parseAPI/src/Parser.C] kernel_gpu_cuda return status 1, no waiters
 [/home/wuxx1279/mdyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
 )[Parser.C] finalizing kernel_gpu_cuda (1000)
-	 Considering target block [0x1560,0x1564) from edge 0x13162a0
+	 Considering target block [0x1560,0x1564) from edge 0x160c2a0
 	 Adding target block [1560,1564) to worklist according to edge from 1020, type 1
-	 Considering target block [0x1024,0x1078) from edge 0x1316340
+	 Considering target block [0x1024,0x1078) from edge 0x160c340
 	 Adding target block [1024,1078) to worklist according to edge from 1020, type 2
-	 Considering target block [0x10c4,0x1120) from edge 0x1316fa0
+	 Considering target block [0x10c4,0x1120) from edge 0x160cfa0
 	 Adding target block [10c4,1120) to worklist according to edge from 1074, type 1
-	 Considering target block [0x1078,0x10c4) from edge 0x1317040
+	 Considering target block [0x1078,0x10c4) from edge 0x160d040
 	 Adding target block [1078,10c4) to worklist according to edge from 1074, type 2
-	 Considering target block [0x10c4,0x1120) from edge 0x1316bb0
-	 Considering target block [0x1560,0x1564) from edge 0x1316110
-	 Considering target block [0x1120,0x1274) from edge 0x1316150
+	 Considering target block [0x10c4,0x1120) from edge 0x160cbb0
+	 Considering target block [0x1560,0x1564) from edge 0x160c110
+	 Considering target block [0x1120,0x1274) from edge 0x160c150
 	 Adding target block [1120,1274) to worklist according to edge from 111c, type 2
-	 Considering target block [0x12b4,0x12c4) from edge 0x131b520
+	 Considering target block [0x12b4,0x12c4) from edge 0x1611520
 	 Adding target block [12b4,12c4) to worklist according to edge from 1270, type 4
-	 Considering target block [0x12c4,0x12f8) from edge 0x13170e0
+	 Considering target block [0x12c4,0x12f8) from edge 0x160d0e0
 	 Adding target block [12c4,12f8) to worklist according to edge from 12c0, type 2
-	 Considering target block [0x12f8,0x1300) from edge 0x131a450
+	 Considering target block [0x12f8,0x1300) from edge 0x1610450
 	 Adding target block [12f8,1300) to worklist according to edge from 12c0, type 1
-	 Considering target block [0x1300,0x138c) from edge 0x131b080
+	 Considering target block [0x1300,0x138c) from edge 0x1611080
 	 Adding target block [1300,138c) to worklist according to edge from 12fc, type 2
-	 Considering target block [0x138c,0x13a4) from edge 0x131b1d0
+	 Considering target block [0x138c,0x13a4) from edge 0x16111d0
 	 Adding target block [138c,13a4) to worklist according to edge from 12fc, type 1
-	 Considering target block [0x1274,0x12b4) from edge 0x131c4e0
+	 Considering target block [0x1274,0x12b4) from edge 0x16124e0
 	 Adding target block [1274,12b4) to worklist according to edge from 13a0, type 1
-	 Considering target block [0x13a4,0x13d0) from edge 0x131c580
+	 Considering target block [0x13a4,0x13d0) from edge 0x1612580
 	 Adding target block [13a4,13d0) to worklist according to edge from 13a0, type 2
-	 Considering target block [0x13d0,0x154c) from edge 0x131c620
+	 Considering target block [0x13d0,0x154c) from edge 0x1612620
 	 Adding target block [13d0,154c) to worklist according to edge from 13c8, type 5
-	 Considering target block [0x13d0,0x154c) from edge 0x131cb10
-	 Considering target block [0x154c,0x155c) from edge 0x131cb80
+	 Considering target block [0x13d0,0x154c) from edge 0x1612b10
+	 Considering target block [0x154c,0x155c) from edge 0x1612b80
 	 Adding target block [154c,155c) to worklist according to edge from 1548, type 2
-	 Considering target block [0x155c,0x1560) from edge 0x131cad0
+	 Considering target block [0x155c,0x1560) from edge 0x1612ad0
 	 Adding target block [155c,1560) to worklist according to edge from 1554, type 5
-	 Considering target block [0x1274,0x12b4) from edge 0x131ad60
-	 Considering target block [0x1560,0x1564) from edge 0x1315530
-	 Considering target block [0x12b4,0x12c4) from edge 0x131a730
-	 Considering target block [0x138c,0x13a4) from edge 0x131a560
-	 Considering target block [0x12f8,0x1300) from edge 0x1315c20
+	 Considering target block [0x1274,0x12b4) from edge 0x1610d60
+	 Considering target block [0x1560,0x1564) from edge 0x160b530
+	 Considering target block [0x12b4,0x12c4) from edge 0x1610730
+	 Considering target block [0x138c,0x13a4) from edge 0x1610560
+	 Considering target block [0x12f8,0x1300) from edge 0x160bc20
 No targets, exits func
 Adding block 0x1560 as exit
 1000 extent [1000,1564)
-[Parser.C:187] parsing complete for Parser 0x130b1e0 with state 4
-[Parser.C:169] parse() called on Parser 0x130b1e0 with state 4
+[Parser.C:187] parsing complete for Parser 0x16011e0 with state 4
+[Parser.C:169] parse() called on Parser 0x16011e0 with state 4
