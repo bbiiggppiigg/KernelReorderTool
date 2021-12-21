@@ -1,0 +1,2 @@
+rm *.perf
+./lavaMD.exe -boxes1d 10
