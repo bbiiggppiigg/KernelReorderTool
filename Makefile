@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata insert_tramp update_note_modify_lds_size updated_insert_tramp updated_base
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata update_note_modify_lds_size updated_insert_tramp updated_base
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -12,19 +12,20 @@ $(error DYNINST_ROOT is not set)
 endif
 
 TBB=/opt/spack/opt/spack/linux-centos8-zen2/gcc-10.2.0/intel-tbb-2020.3-zbj2dajg6q53hhsfd7kglxwqhyc7ie3v/include
+TBB=/opt/intel-tbb/include
 lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_filesystem -lboost_system 
 
 mmpath = ../HIP-Examples/HIP-Examples-Applications/MatrixMultiplication/MatrixMultiplication
 
 
 lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp 
-	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/
+	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/  -I/opt/intel-tbb/include
 
-bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/insert_tramp
+#bin/insert_tramp: src/insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
+#	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/insert_tramp
 
-bin/updated_insert_tramp: src/updated_insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_insert_tramp
+bin/updated_insert_tramp: src/updated_insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
+	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_insert_tramp
 
 bin/updated_base: src/updated_base.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
 	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_base.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_base

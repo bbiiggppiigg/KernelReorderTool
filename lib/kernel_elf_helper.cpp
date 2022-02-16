@@ -136,13 +136,13 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
 
     fseek(fp,kd_offset+0x30,SEEK_SET);
     fwrite(&new_bits,1,sizeof(new_bits),fp);
-    printf("old bits = %x, new bits = %x, writing to address %x\n",old_bits,new_bits,  kd_offset+0x30);
+    //printf("old bits = %x, new bits = %x, writing to address %x\n",old_bits,new_bits,  kd_offset+0x30);
 
 }
 
 
 
-void extend_text(FILE * f, int new_text_size){
+void extend_text(FILE * f, int inc_text_size){
 
     fseek(f,0,SEEK_SET);
     ElfW header;
@@ -165,8 +165,8 @@ void extend_text(FILE * f, int new_text_size){
         }
     }
 
-    text_hdr.sh_size = new_text_size;
-    printf("patching text_size in section header at 0x%lx to %d\n",header.e_shoff+sizeof(Shdr)*text_index,new_text_size);
+    text_hdr.sh_size += inc_text_size;
+    //printf("patching text_size in section header at 0x%lx to %d\n",header.e_shoff+sizeof(Shdr)*text_index,new_text_size);
     fseek(f,header.e_shoff + sizeof(Shdr) * text_index ,SEEK_SET);
     fwrite(&text_hdr,sizeof(Shdr),1,f);
     free(shstrtable);
@@ -176,11 +176,11 @@ void extend_text(FILE * f, int new_text_size){
     for (unsigned int i = 0; i < header.e_phnum ;i ++){
         read_phdr(&tmp_phdr,f,&header,i);
         if(tmp_phdr.p_offset == text_hdr.sh_addr){
-            tmp_phdr.p_filesz = new_text_size;
-            tmp_phdr.p_memsz = new_text_size;
+            tmp_phdr.p_filesz += inc_text_size;
+            tmp_phdr.p_memsz += inc_text_size;
             fseek(f,header.e_phoff+sizeof(Phdr) * i , SEEK_SET);
             fwrite(&tmp_phdr,sizeof(Phdr),1,f);
-            printf("patching text_size in program header at 0x%lx to %d\n",header.e_phoff+sizeof(Phdr)*i,new_text_size);
+            //printf("patching text_size in program header at 0x%lx to %d\n",header.e_phoff+sizeof(Phdr)*i,new_text_size);
             break;
         }
     }
@@ -224,8 +224,8 @@ void get_kds(FILE * f, vector<pair<uint64_t, string>> & ret){
     read_shdr(&symtab_header,f,&header,symtab_index);
     char * symtab_section = read_section(f,&symtab_header);
     int num_entries = symtab_header.sh_size / symtab_header.sh_entsize;
-    printf("entsize = %lu\n",symtab_header.sh_entsize);
-    printf("number of entries = %d\n",num_entries);
+    //printf("entsize = %lu\n",symtab_header.sh_entsize);
+    //printf("number of entries = %d\n",num_entries);
     for (int i =0; i < num_entries ;i ++){
         Elf64_Sym * symbol = ((Elf64_Sym *) symtab_section)+i;
         char * symbol_name = strtab_section + symbol->st_name;
@@ -333,23 +333,30 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 	//Shdr text_hdr;
 	Shdr symtab_hdr;
 	//Shdr strtab_hdr;
-	//Shdr dynsym_hdr;
+	Shdr dynsym_hdr;
 	//Shdr dynstr_hdr;
 
 	//int text_index = -1;
 	int symtab_index = -1;
+    int dynsym_index = -1;
 	for (unsigned int i = 1; i < header.e_shnum ; i ++){
 		read_shdr(&tmp_hdr,f,&header,i);
 		char * sh_name = shstrtable+tmp_hdr.sh_name;
 		if(0==strcmp(sh_name,".symtab")){
 			symtab_hdr = tmp_hdr;
-            printf("found symtab at index %d\n",i);
+            //printf("found symtab at index %d\n",i);
 			symtab_index = i;
 		}
+        if(0==strcmp(sh_name,".dynsym")){
+			dynsym_hdr = tmp_hdr;
+            //printf("found dynsym at index %d\n",i);
+			dynsym_index = i;
+		}
+
 
 	}
-    if(symtab_index == -1){
-        printf("ERROR ! Can't Find Symtab\n");
+    if(symtab_index == -1 || dynsym_index == -1 ){
+        printf("ERROR ! Can't Find Symtab or Dynsym\n");
         exit(-1);
     }
 
@@ -358,18 +365,33 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 
 
 	Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
-    printf("symtab hdr sh_size : %ld, .ent_size = %ld\n",symtab_hdr.sh_size,symtab_hdr.sh_entsize);
+	Elf64_Sym * dynsym_content = (Elf64_Sym *) read_section(f,&dynsym_hdr);
+    //printf("symtab hdr sh_size : %ld, .ent_size = %ld\n",symtab_hdr.sh_size,symtab_hdr.sh_entsize);
 	int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
-	//int target_index = -1;
 	for (int i =0 ; i < num_entries ;i ++){
 		Elf64_Sym * symbol = symtab_content+i;
 		//char * symbol_name = strtab_content + symbol -> st_name;
         //puts(symbol_name);
 		if( text_start < symbol->st_value && symbol->st_value < text_end ){
-			if(symbol->st_value >= insert_loc){
+			if(symbol->st_value > insert_loc){
 				symbol->st_value += insert_size;
                 //printf("writing to address %x\n",symtab_hdr.sh_offset +i * sizeof(Elf64_Sym));
 				fseek(f,symtab_hdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+				fwrite(symbol,sizeof(Elf64_Sym),1,f);
+			}
+				
+		}
+	}
+    num_entries = dynsym_hdr.sh_size / dynsym_hdr.sh_entsize;
+	for (int i =0 ; i < num_entries ;i ++){
+		Elf64_Sym * symbol = dynsym_content+i;
+		//char * symbol_name = strtab_content + symbol -> st_name;
+        //puts(symbol_name);
+		if( text_start < symbol->st_value && symbol->st_value < text_end ){
+			if(symbol->st_value > insert_loc){
+				symbol->st_value += insert_size;
+                //printf("writing to address %x\n",symtab_hdr.sh_offset +i * sizeof(Elf64_Sym));
+				fseek(f,dynsym_hdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
 				fwrite(symbol,sizeof(Elf64_Sym),1,f);
 			}
 				
@@ -427,10 +449,12 @@ void update_symtab_symbol_size(FILE * f, const char kernel_name [] , uint32_t ne
 	}
 
 	char * strtab_content = read_section(f,&strtab_hdr);
-	//char * dynstr_content = read_section(f,&dynstr_hdr);
+	char * dynstr_content = read_section(f,&dynstr_hdr);
 
 
 	Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
+	Elf64_Sym * dynsym_content = (Elf64_Sym *) read_section(f,&dynsym_hdr);
+
 
 	int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
 	//int target_index = -1;
@@ -445,6 +469,20 @@ void update_symtab_symbol_size(FILE * f, const char kernel_name [] , uint32_t ne
 
         }
 	}
+	num_entries = dynsym_hdr.sh_size / dynsym_hdr.sh_entsize;
+	//int target_index = -1;
+	for (int i =0 ; i < num_entries ;i ++){
+		Elf64_Sym * symbol = dynsym_content+i;
+		char * symbol_name = dynstr_content + symbol -> st_name;
+        if(strcmp(kernel_name,symbol_name)==0){
+            puts(symbol_name);
+            symbol->st_size = new_size;
+		    fseek(f,dynsym_hdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+			fwrite(symbol,sizeof(Elf64_Sym),1,f);
+
+        }
+	}
+
 
 }
 

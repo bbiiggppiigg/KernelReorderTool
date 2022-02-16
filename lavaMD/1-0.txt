@@ -9,12 +9,12 @@
 Add known data range [840, 880) from symbol _Z15kernel_gpu_cuda7par_str7dim_strP7box_strP11FOUR_VECTORPdS4_.kd
 Add known data range [840, 880) from symbol _Z15kernel_gpu_cuda7par_str7dim_strP7box_strP11FOUR_VECTORPdS4_.kd
    2000 .dynamic [skipped]
-[SymtabCodeSource.C:482] processing 1 symtab hints
+[SymtabCodeSource.C:483] processing 1 symtab hints
 	<1000,kernel_gpu_cuda,[1000,1564)>
 [Parser.C:1962] recording block [ffffffffffffffff,ffffffffffffffff)
 Checking non-returning for kernel_gpu_cuda
 [CodeObject.C] adding hint 1000
-[Parser.C:169] parse() called on Parser 0x16011e0 with state 0
+[Parser.C:169] parse() called on Parser 0x26e78c0 with state 0
 [Parser.C:283] entered parse_vanilla()
 	1 function hints
 [Parser.C:1962] recording block [1000,1000)
@@ -22,7 +22,7 @@ Checking non-returning for kernel_gpu_cuda
 [Parser.C] ==== starting to parse frame 1000 ====
 Iteration 1 for function kernel_gpu_cuda at 1000
 [Parser.C] parsing block 1000
-[Parser.C:1776] curAddr 0x1000: s_load_dwordx2 SGPR[0-1], [(SGPR[4-5], (0x18 + 0x0))] 
+[Parser.C:1776] curAddr 0x1000: s_load_dwordx2 SGPR[0:1], [(SGPR[4:5], (0x18 + 0x0))] 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1008: s_ashr_i32 SGPR7, 0x1f, SGPR6 
@@ -31,7 +31,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x100c: v_mov_b32 VGPR1, SGPR6 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1010: v_mov_b32 VGPR1, SGPR7 
+[Parser.C:1776] curAddr 0x1010: v_mov_b32 VGPR2, SGPR7 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1014: s_waitcnt  
@@ -49,28 +49,28 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 1020
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_vccnz ((PC + 0x4) + 0x1340) to 0x1020...SUCCESS (CFT=0x1560)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_vccnz ((PC + 0x4) + 0x1340) to 0x1020...SUCCESS (CFT=0x1560)
 Returned 2 edges
 		2 edges:
 			edge target 1560, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1020->1560
 resolveable_edge: 1, tailcall: 0, target: 1560
 [ParserDetails.C:583] pushing 1560 onto worklist
-[ParserDetails.C:584] new edge is 0x160c2a0
-	 pushing work element for block (nil), edge 0x160c2a0, target 0x1560
+[ParserDetails.C:584] new edge is 0x26f2900
+	 pushing work element for block (nil), edge 0x26f2900, target 0x1560
 			edge target 1024, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1020->1024
 resolveable_edge: 1, tailcall: 0, target: 1024
 [ParserDetails.C:583] pushing 1024 onto worklist
-[ParserDetails.C:584] new edge is 0x160c340
-	 pushing work element for block (nil), edge 0x160c340, target 0x1024
+[ParserDetails.C:584] new edge is 0x26f29a0
+	 pushing work element for block (nil), edge 0x26f29a0, target 0x1024
 	 add_edge called, src_addr 1020, dst 1024, edge type 2, looked up block [1000, 1024)
 [Parser.C:1962] recording block [1024,1024)
 [Parser.C] parsing block 1024
-[Parser.C:1776] curAddr 0x1024: s_load_dwordx8 SGPR[8-15], [(SGPR[4-5], (0x40 + 0x0))] 
+[Parser.C:1776] curAddr 0x1024: s_load_dwordx8 SGPR[8:15], [(SGPR[4:5], (0x40 + 0x0))] 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x102c: v_mov_b32 VGPR1, 0x290 
+[Parser.C:1776] curAddr 0x102c: v_mov_b32 VGPR3, 0x290 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1034: s_waitcnt  
@@ -79,19 +79,19 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1038: v_mov_b32 VGPR1, SGPR8 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x103c: v_mov_b32 VGPR1, SGPR9 
+[Parser.C:1776] curAddr 0x103c: v_mov_b32 VGPR2, SGPR9 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1040: v_mad_i64_i32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1048: v_readfirstlane_b32 0x290, VGPR1 
+[Parser.C:1776] curAddr 0x1048: v_readfirstlane_b32 VGPR0, VGPR1 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x104c: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x104c: v_readfirstlane_b32 VGPR1, VGPR2 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1050: s_load_dword SGPR2, [(SGPR[0-1], (0x10 + 0x0))] 
+[Parser.C:1776] curAddr 0x1050: s_load_dword SGPR2, [(SGPR[0:1], (0x10 + 0x0))] 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1058: s_movk_i32  
@@ -118,21 +118,21 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 1074
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x76) to 0x1074...SUCCESS (CFT=0x10c4)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x76) to 0x1074...SUCCESS (CFT=0x10c4)
 Returned 2 edges
 		2 edges:
 			edge target 10c4, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1074->10c4
 resolveable_edge: 1, tailcall: 0, target: 10c4
 [ParserDetails.C:583] pushing 10c4 onto worklist
-[ParserDetails.C:584] new edge is 0x160cfa0
-	 pushing work element for block (nil), edge 0x160cfa0, target 0x10c4
+[ParserDetails.C:584] new edge is 0x26f35f0
+	 pushing work element for block (nil), edge 0x26f35f0, target 0x10c4
 			edge target 1078, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1074->1078
 resolveable_edge: 1, tailcall: 0, target: 1078
 [ParserDetails.C:583] pushing 1078 onto worklist
-[ParserDetails.C:584] new edge is 0x160d040
-	 pushing work element for block (nil), edge 0x160d040, target 0x1078
+[ParserDetails.C:584] new edge is 0x26f3690
+	 pushing work element for block (nil), edge 0x26f3690, target 0x1078
 	 add_edge called, src_addr 1074, dst 1078, edge type 2, looked up block [1024, 1078)
 [Parser.C:1962] recording block [1078,1078)
 [Parser.C] parsing block 1078
@@ -148,7 +148,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1088: s_addc_u32 SGPR19, SGPR19, SGPR11 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x108c: v_mov_b32 VGPR1, SGPR19 
+[Parser.C:1776] curAddr 0x108c: v_mov_b32 VGPR4, SGPR19 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1090: v_add_co_u32  
@@ -157,10 +157,10 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1094: v_addc_co_u32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1098: s_nop_global (ADDRESS_MODE_32?VGPR10:VGPR[10-11]) 
+[Parser.C:1776] curAddr 0x1098: s_nop_global (ADDRESS_MODE_32?VGPR10:VGPR[10:11]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10a0: s_nop_global (ADDRESS_MODE_32?VGPR10:VGPR[10-11]) 
+[Parser.C:1776] curAddr 0x10a0: s_nop_global (ADDRESS_MODE_32?VGPR10:VGPR[10:11]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10a8: v_lshlrev_b32  
@@ -181,19 +181,19 @@ hasCFT called
 [Parser.C:1776] curAddr 0x10c4: s_or_b64 EXEC_LO, SGPR16, EXEC_LO 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10c8: v_mov_b32 VGPR1, SGPR8 
+[Parser.C:1776] curAddr 0x10c8: v_mov_b32 VGPR2, SGPR8 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10cc: v_mov_b32 VGPR1, 0x290 
+[Parser.C:1776] curAddr 0x10cc: v_mov_b32 VGPR4, 0x290 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10d4: v_mov_b32 VGPR1, SGPR9 
+[Parser.C:1776] curAddr 0x10d4: v_mov_b32 VGPR3, SGPR9 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10d8: v_mad_i64_i32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10e0: v_mov_b32 VGPR1, 0x0 
+[Parser.C:1776] curAddr 0x10e0: v_mov_b32 VGPR4, 0x0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10e4: s_waitcnt  
@@ -202,10 +202,10 @@ hasCFT called
 [Parser.C:1776] curAddr 0x10e8: s_barrier  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10ec: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x10ec: v_readfirstlane_b32 VGPR16, VGPR2 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10f0: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x10f0: v_readfirstlane_b32 VGPR17, VGPR3 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10f4: v_add_co_u32  
@@ -220,7 +220,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1100: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1104: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4-5]) 
+[Parser.C:1776] curAddr 0x1104: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x110c: s_mov_b32 SGPR16, 0x0 
@@ -241,25 +241,25 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 111c
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_vccnz ((PC + 0x4) + 0x1088) to 0x111c...SUCCESS (CFT=0x1560)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_vccnz ((PC + 0x4) + 0x1088) to 0x111c...SUCCESS (CFT=0x1560)
 Returned 2 edges
 		2 edges:
 			edge target 1560, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 111c->1560
 resolveable_edge: 1, tailcall: 0, target: 1560
 [ParserDetails.C:583] pushing 1560 onto worklist
-[ParserDetails.C:584] new edge is 0x160c110
-	 pushing work element for block (nil), edge 0x160c110, target 0x1560
+[ParserDetails.C:584] new edge is 0x26f2770
+	 pushing work element for block (nil), edge 0x26f2770, target 0x1560
 			edge target 1120, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 111c->1120
 resolveable_edge: 1, tailcall: 0, target: 1120
 [ParserDetails.C:583] pushing 1120 onto worklist
-[ParserDetails.C:584] new edge is 0x160c150
-	 pushing work element for block (nil), edge 0x160c150, target 0x1120
+[ParserDetails.C:584] new edge is 0x26f27b0
+	 pushing work element for block (nil), edge 0x26f27b0, target 0x1120
 	 add_edge called, src_addr 111c, dst 1120, edge type 2, looked up block [1078, 1120)
 [Parser.C:1962] recording block [1120,1120)
 [Parser.C] parsing block 1120
-[Parser.C:1776] curAddr 0x1120: s_load_dwordx2 SGPR[4-5], [(SGPR[4-5], (0x0 + 0x0))] 
+[Parser.C:1776] curAddr 0x1120: s_load_dwordx2 SGPR[4:5], [(SGPR[4:5], (0x0 + 0x0))] 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1128: s_lshl_b64 SGPR2, 0x5, SGPR2 
@@ -271,7 +271,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1130: v_lshlrev_b64  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1138: v_mov_b32 VGPR1, 0xc80 
+[Parser.C:1776] curAddr 0x1138: v_mov_b32 VGPR6, 0xc80 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1140: s_waitcnt  
@@ -289,7 +289,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1154: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x115c: v_mov_b32 VGPR1, SGPR3 
+[Parser.C:1776] curAddr 0x115c: v_mov_b32 VGPR6, SGPR3 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1160: v_add_co_u32  
@@ -307,7 +307,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1178: v_add_co_u32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x117c: v_mov_b32 VGPR1, SGPR13 
+[Parser.C:1776] curAddr 0x117c: v_mov_b32 VGPR2, SGPR13 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1180: v_addc_co_u32  
@@ -346,7 +346,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x11d4: s_mov_b32 SGPR34, 0xb 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x11d8: v_mov_b32 0x55555511, SGPR11 
+[Parser.C:1776] curAddr 0x11d8: v_mov_b32 VGPR0, SGPR11 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x11dc: v_add_co_u32  
@@ -416,7 +416,7 @@ hasCFT called
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 	 branch or return, ret true
-IA_IAPI.C[868]: binding PC PC in s_branch ((PC + 0x4) + 0x64) to 0x1270...SUCCESS (CFT=0x12b4)
+IA_IAPI.C[869]: binding PC PC in s_branch ((PC + 0x4) + 0x64) to 0x1270...SUCCESS (CFT=0x12b4)
 Function kernel_gpu_cuda tries to set parsing edge at 1270
 Getting edges
 Returned 1 edges
@@ -425,27 +425,27 @@ Returned 1 edges
 ParserDetails.C[87]: adding direct edge 1270->12b4
 resolveable_edge: 1, tailcall: 0, target: 12b4
 [ParserDetails.C:583] pushing 12b4 onto worklist
-[ParserDetails.C:584] new edge is 0x1611520
-	 pushing work element for block (nil), edge 0x1611520, target 0x12b4
+[ParserDetails.C:584] new edge is 0x26f7be0
+	 pushing work element for block (nil), edge 0x26f7be0, target 0x12b4
 	 add_edge called, src_addr 1074, dst 10c4, edge type 1, looked up block [1024, 1078)
 [Parser.C:1962] recording block [10c4,10c4)
 [Parser.C] parsing block 10c4
 [Parser.C:1776] curAddr 0x10c4: s_or_b64 EXEC_LO, SGPR16, EXEC_LO 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10c8: v_mov_b32 VGPR1, SGPR8 
+[Parser.C:1776] curAddr 0x10c8: v_mov_b32 VGPR2, SGPR8 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10cc: v_mov_b32 VGPR1, 0x290 
+[Parser.C:1776] curAddr 0x10cc: v_mov_b32 VGPR4, 0x290 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10d4: v_mov_b32 VGPR1, SGPR9 
+[Parser.C:1776] curAddr 0x10d4: v_mov_b32 VGPR3, SGPR9 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10d8: v_mad_i64_i32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10e0: v_mov_b32 VGPR1, 0x0 
+[Parser.C:1776] curAddr 0x10e0: v_mov_b32 VGPR4, 0x0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10e4: s_waitcnt  
@@ -454,10 +454,10 @@ hasCFT called
 [Parser.C:1776] curAddr 0x10e8: s_barrier  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10ec: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x10ec: v_readfirstlane_b32 VGPR16, VGPR2 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x10f0: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x10f0: v_readfirstlane_b32 VGPR17, VGPR3 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x10f4: v_add_co_u32  
@@ -472,7 +472,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1100: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1104: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4-5]) 
+[Parser.C:1776] curAddr 0x1104: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x110c: s_mov_b32 SGPR16, 0x0 
@@ -501,7 +501,7 @@ Function kernel_gpu_cuda tries to set parsing edge at 111c
 	 add_edge called, src_addr 1270, dst 12b4, edge type 4, looked up block [1120, 1274)
 [Parser.C:1962] recording block [12b4,12b4)
 [Parser.C] parsing block 12b4
-[Parser.C:1776] curAddr 0x12b4: v_mov_b32 0x290, SGPR6 
+[Parser.C:1776] curAddr 0x12b4: v_mov_b32 VGPR0, SGPR6 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x12b8: s_cmp_eq_u32  
@@ -516,28 +516,28 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 12c0
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_scc1 ((PC + 0x4) + 0x52) to 0x12c0...SUCCESS (CFT=0x12f8)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_scc1 ((PC + 0x4) + 0x52) to 0x12c0...SUCCESS (CFT=0x12f8)
 Returned 2 edges
 		2 edges:
 			edge target 12f8, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 12c0->12f8
 resolveable_edge: 1, tailcall: 0, target: 12f8
 [ParserDetails.C:583] pushing 12f8 onto worklist
-[ParserDetails.C:584] new edge is 0x1610450
-	 pushing work element for block (nil), edge 0x1610450, target 0x12f8
+[ParserDetails.C:584] new edge is 0x26f6b40
+	 pushing work element for block (nil), edge 0x26f6b40, target 0x12f8
 			edge target 12c4, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 12c0->12c4
 resolveable_edge: 1, tailcall: 0, target: 12c4
 [ParserDetails.C:583] pushing 12c4 onto worklist
-[ParserDetails.C:584] new edge is 0x160d0e0
-	 pushing work element for block (nil), edge 0x160d0e0, target 0x12c4
+[ParserDetails.C:584] new edge is 0x26f31c0
+	 pushing work element for block (nil), edge 0x26f31c0, target 0x12c4
 	 add_edge called, src_addr 12c0, dst 12c4, edge type 2, looked up block [12b4, 12c4)
 [Parser.C:1962] recording block [12c4,12c4)
 [Parser.C] parsing block 12c4
-[Parser.C:1776] curAddr 0x12c4: v_mov_b32 0x290, SGPR8 
+[Parser.C:1776] curAddr 0x12c4: v_mov_b32 VGPR0, SGPR8 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x12c8: v_mov_b32 VGPR1, SGPR41 
+[Parser.C:1776] curAddr 0x12c8: v_mov_b32 VGPR2, SGPR41 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x12cc: v_mov_b32 VGPR1, SGPR9 
@@ -546,22 +546,22 @@ hasCFT called
 [Parser.C:1776] curAddr 0x12d0: v_mad_i64_i32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x12d8: v_mov_b32 VGPR1, 0x0 
+[Parser.C:1776] curAddr 0x12d8: v_mov_b32 VGPR2, 0x0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x12dc: v_mad_i64_i32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x12e4: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x12e4: v_readfirstlane_b32 VGPR2, VGPR0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x12e8: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x12e8: v_readfirstlane_b32 VGPR3, VGPR1 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x12ec: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x12f0: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2-3]) 
+[Parser.C:1776] curAddr 0x12f0: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x12f8: s_and_saveexec_b64 SGPR2, SGPR0 
@@ -573,28 +573,28 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 12fc
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x140) to 0x12fc...SUCCESS (CFT=0x138c)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x140) to 0x12fc...SUCCESS (CFT=0x138c)
 Returned 2 edges
 		2 edges:
 			edge target 138c, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 12fc->138c
 resolveable_edge: 1, tailcall: 0, target: 138c
 [ParserDetails.C:583] pushing 138c onto worklist
-[ParserDetails.C:584] new edge is 0x16111d0
-	 pushing work element for block (nil), edge 0x16111d0, target 0x138c
+[ParserDetails.C:584] new edge is 0x26f7890
+	 pushing work element for block (nil), edge 0x26f7890, target 0x138c
 			edge target 1300, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 12fc->1300
 resolveable_edge: 1, tailcall: 0, target: 1300
 [ParserDetails.C:583] pushing 1300 onto worklist
-[ParserDetails.C:584] new edge is 0x1611080
-	 pushing work element for block (nil), edge 0x1611080, target 0x1300
+[ParserDetails.C:584] new edge is 0x26f7740
+	 pushing work element for block (nil), edge 0x26f7740, target 0x1300
 	 add_edge called, src_addr 12fc, dst 1300, edge type 2, looked up block [12c4, 1300)
 [Parser.C:1962] recording block [1300,1300)
 [Parser.C] parsing block 1300
 [Parser.C:1776] curAddr 0x1300: v_mov_b32 VGPR1, SGPR8 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1304: v_mov_b32 VGPR1, SGPR9 
+[Parser.C:1776] curAddr 0x1304: v_mov_b32 VGPR2, SGPR9 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1308: s_waitcnt  
@@ -603,19 +603,19 @@ hasCFT called
 [Parser.C:1776] curAddr 0x130c: v_mad_i64_i32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1314: v_mov_b32 VGPR1, 0x0 
+[Parser.C:1776] curAddr 0x1314: v_mov_b32 VGPR2, 0x0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1318: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x1318: v_readfirstlane_b32 VGPR38, VGPR0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x131c: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x131c: v_readfirstlane_b32 VGPR39, VGPR1 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1320: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1324: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2-3]) 
+[Parser.C:1776] curAddr 0x1324: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x132c: s_waitcnt  
@@ -639,13 +639,13 @@ hasCFT called
 [Parser.C:1776] curAddr 0x134c: v_addc_co_u32  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1350: s_nop_global (ADDRESS_MODE_32?VGPR8:VGPR[8-9]) 
+[Parser.C:1776] curAddr 0x1350: s_nop_global (ADDRESS_MODE_32?VGPR8:VGPR[8:9]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1358: s_nop_global (ADDRESS_MODE_32?VGPR8:VGPR[8-9]) 
+[Parser.C:1776] curAddr 0x1358: s_nop_global (ADDRESS_MODE_32?VGPR8:VGPR[8:9]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1360: s_nop_global (ADDRESS_MODE_32?VGPR10:VGPR[10-11]) 
+[Parser.C:1776] curAddr 0x1360: s_nop_global (ADDRESS_MODE_32?VGPR10:VGPR[10:11]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1368: s_waitcnt  
@@ -687,21 +687,21 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 13a0
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x-304) to 0x13a0...SUCCESS (CFT=0x1274)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x-304) to 0x13a0...SUCCESS (CFT=0x1274)
 Returned 2 edges
 		2 edges:
 			edge target 1274, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 13a0->1274
 resolveable_edge: 1, tailcall: 0, target: 1274
 [ParserDetails.C:583] pushing 1274 onto worklist
-[ParserDetails.C:584] new edge is 0x16124e0
-	 pushing work element for block (nil), edge 0x16124e0, target 0x1274
+[ParserDetails.C:584] new edge is 0x26f89a0
+	 pushing work element for block (nil), edge 0x26f89a0, target 0x1274
 			edge target 13a4, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 13a0->13a4
 resolveable_edge: 1, tailcall: 0, target: 13a4
 [ParserDetails.C:583] pushing 13a4 onto worklist
-[ParserDetails.C:584] new edge is 0x1612580
-	 pushing work element for block (nil), edge 0x1612580, target 0x13a4
+[ParserDetails.C:584] new edge is 0x26f8a40
+	 pushing work element for block (nil), edge 0x26f8a40, target 0x13a4
 	 add_edge called, src_addr 13a0, dst 13a4, edge type 2, looked up block [1300, 13a4)
 [Parser.C:1962] recording block [13a4,13a4)
 [Parser.C] parsing block 13a4
@@ -711,16 +711,16 @@ hasCFT called
 [Parser.C:1776] curAddr 0x13ac: ds_read_b128  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13b4: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20-21]) 
+[Parser.C:1776] curAddr 0x13b4: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20:21]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13bc: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20-21]) 
+[Parser.C:1776] curAddr 0x13bc: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20:21]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x13c4: s_mov_b32 SGPR40, 0x0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13c8: v_mov_b32 VGPR1, 0xfa0 
+[Parser.C:1776] curAddr 0x13c8: v_mov_b32 VGPR30, 0xfa0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x13d0: ds_read_b128  
@@ -729,10 +729,10 @@ hasCFT called
 [Parser.C:1776] curAddr 0x13d8: ds_read_b128  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13e0: v_mov_b32 VGPR1, 0xfca7ab0c 
+[Parser.C:1776] curAddr 0x13e0: v_mov_b32 VGPR43, 0xfca7ab0c 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13e8: v_mov_b32 VGPR1, 0x3e928af3 
+[Parser.C:1776] curAddr 0x13e8: v_mov_b32 VGPR44, 0x3e928af3 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x13f0: s_mov_b32 SGPR36, SGPR16 
@@ -750,7 +750,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1404: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x140c: v_mov_b32 VGPR1, 0x7ff00000 
+[Parser.C:1776] curAddr 0x140c: v_mov_b32 VGPR45, 0x7ff00000 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1414: s_nop  
@@ -786,7 +786,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x145c: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1464: s_nop VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x1464: s_nop VGPR39, VGPR39 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1468: s_nop  
@@ -795,7 +795,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1470: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1478: v_cvt_i32_f64 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x1478: v_cvt_i32_f64 VGPR39, VGPR39 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x147c: s_nop  
@@ -834,7 +834,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x14d4: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x14dc: v_mov_b32 VGPR1, SGPR40 
+[Parser.C:1776] curAddr 0x14dc: v_mov_b32 VGPR41, SGPR40 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x14e0: s_add_i32 SGPR40, 0x8, SGPR40 
@@ -891,28 +891,28 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 1548
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_scc1 ((PC + 0x4) + 0x-380) to 0x1548...SUCCESS (CFT=0x13d0)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_scc1 ((PC + 0x4) + 0x-380) to 0x1548...SUCCESS (CFT=0x13d0)
 Returned 2 edges
 		2 edges:
 			edge target 13d0, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1548->13d0
 resolveable_edge: 1, tailcall: 0, target: 13d0
 [ParserDetails.C:583] pushing 13d0 onto worklist
-[ParserDetails.C:584] new edge is 0x1612b10
-	 pushing work element for block (nil), edge 0x1612b10, target 0x13d0
+[ParserDetails.C:584] new edge is 0x26f8fd0
+	 pushing work element for block (nil), edge 0x26f8fd0, target 0x13d0
 			edge target 154c, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1548->154c
 resolveable_edge: 1, tailcall: 0, target: 154c
 [ParserDetails.C:583] pushing 154c onto worklist
-[ParserDetails.C:584] new edge is 0x1612b80
-	 pushing work element for block (nil), edge 0x1612b80, target 0x154c
+[ParserDetails.C:584] new edge is 0x26f9040
+	 pushing work element for block (nil), edge 0x26f9040, target 0x154c
 	 add_edge called, src_addr 1548, dst 154c, edge type 2, looked up block [13a4, 154c)
 [Parser.C:1962] recording block [154c,154c)
 [Parser.C] parsing block 154c
-[Parser.C:1776] curAddr 0x154c: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20-21]) 
+[Parser.C:1776] curAddr 0x154c: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20:21]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1554: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20-21]) 
+[Parser.C:1776] curAddr 0x1554: s_nop_global (ADDRESS_MODE_32?VGPR20:VGPR[20:21]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x155c: s_branch ((PC + 0x4) + 0x-748) 
@@ -920,7 +920,7 @@ hasCFT called
 Function kernel_gpu_cuda tries to set parsing edge at 1554
 [Parser.C:1796] nop-block ended at 155c
 [Parser.C:1798] pushing 155c onto worklist
-	 pushing work element for block (nil), edge 0x1612ad0, target 0x155c
+	 pushing work element for block (nil), edge 0x26f8f90, target 0x155c
 	 add_edge called, src_addr 1554, dst 155c, edge type 5, looked up block [154c, 155c)
 [Parser.C:1962] recording block [155c,155c)
 [Parser.C] parsing block 155c
@@ -928,7 +928,7 @@ Function kernel_gpu_cuda tries to set parsing edge at 1554
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 	 branch or return, ret true
-IA_IAPI.C[868]: binding PC PC in s_branch ((PC + 0x4) + 0x-748) to 0x155c...SUCCESS (CFT=0x1274)
+IA_IAPI.C[869]: binding PC PC in s_branch ((PC + 0x4) + 0x-748) to 0x155c...SUCCESS (CFT=0x1274)
 Function kernel_gpu_cuda tries to set parsing edge at 155c
 Getting edges
 Returned 1 edges
@@ -937,21 +937,21 @@ Returned 1 edges
 ParserDetails.C[87]: adding direct edge 155c->1274
 resolveable_edge: 1, tailcall: 0, target: 1274
 [ParserDetails.C:583] pushing 1274 onto worklist
-[ParserDetails.C:584] new edge is 0x1610d60
-	 pushing work element for block (nil), edge 0x1610d60, target 0x1274
+[ParserDetails.C:584] new edge is 0x26f7420
+	 pushing work element for block (nil), edge 0x26f7420, target 0x1274
 	 add_edge called, src_addr 13a0, dst 1274, edge type 1, looked up block [1300, 13a4)
 [Parser.C:1962] recording block [1274,1274)
 [Parser.C] parsing block 1274
 [Parser.C:1776] curAddr 0x1274: s_or_b64 EXEC_LO, SGPR38, EXEC_LO 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1278: v_mov_b32 0x7ff00000, 0x0 
+[Parser.C:1776] curAddr 0x1278: v_mov_b32 VGPR0, 0x0 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x127c: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x127c: v_readfirstlane_b32 VGPR2, VGPR16 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1280: v_readfirstlane_b32 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x1280: v_readfirstlane_b32 VGPR3, VGPR17 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1284: s_waitcnt  
@@ -969,7 +969,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1294: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1298: flat_load_dword_global (ADDRESS_MODE_32?VGPR0:VGPR[0-1]) 
+[Parser.C:1776] curAddr 0x1298: flat_load_dword_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x12a0: s_waitcnt  
@@ -990,21 +990,21 @@ hasCFT called
 	 branch or return, ret true
 Function kernel_gpu_cuda tries to set parsing edge at 12b0
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_vccz ((PC + 0x4) + 0x684) to 0x12b0...SUCCESS (CFT=0x1560)
+IA_IAPI.C[869]: binding PC PC in s_cbranch_vccz ((PC + 0x4) + 0x684) to 0x12b0...SUCCESS (CFT=0x1560)
 Returned 2 edges
 		2 edges:
 			edge target 1560, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 12b0->1560
 resolveable_edge: 1, tailcall: 0, target: 1560
 [ParserDetails.C:583] pushing 1560 onto worklist
-[ParserDetails.C:584] new edge is 0x160b530
-	 pushing work element for block (nil), edge 0x160b530, target 0x1560
+[ParserDetails.C:584] new edge is 0x26f7cc0
+	 pushing work element for block (nil), edge 0x26f7cc0, target 0x1560
 			edge target 12b4, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 12b0->12b4
 resolveable_edge: 1, tailcall: 0, target: 12b4
 [ParserDetails.C:583] pushing 12b4 onto worklist
-[ParserDetails.C:584] new edge is 0x1610730
-	 pushing work element for block (nil), edge 0x1610730, target 0x12b4
+[ParserDetails.C:584] new edge is 0x26f28a0
+	 pushing work element for block (nil), edge 0x26f28a0, target 0x12b4
 	 add_edge called, src_addr 12b0, dst 12b4, edge type 2, looked up block [1274, 12b4)
 [Parser.C] skipping locally parsed target at 12b4, [12b4, 12c4)
 	 add_edge called, src_addr 12c0, dst 12f8, edge type 1, looked up block [12b4, 12c4)
@@ -1052,10 +1052,10 @@ hasCFT called
 [Parser.C:1776] curAddr 0x13d8: ds_read_b128  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13e0: v_mov_b32 VGPR1, 0xfca7ab0c 
+[Parser.C:1776] curAddr 0x13e0: v_mov_b32 VGPR43, 0xfca7ab0c 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x13e8: v_mov_b32 VGPR1, 0x3e928af3 
+[Parser.C:1776] curAddr 0x13e8: v_mov_b32 VGPR44, 0x3e928af3 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x13f0: s_mov_b32 SGPR36, SGPR16 
@@ -1073,7 +1073,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1404: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x140c: v_mov_b32 VGPR1, 0x7ff00000 
+[Parser.C:1776] curAddr 0x140c: v_mov_b32 VGPR45, 0x7ff00000 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1414: s_nop  
@@ -1109,7 +1109,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x145c: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1464: s_nop VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x1464: s_nop VGPR39, VGPR39 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x1468: s_nop  
@@ -1118,7 +1118,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x1470: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x1478: v_cvt_i32_f64 VGPR1, VGPR1 
+[Parser.C:1776] curAddr 0x1478: v_cvt_i32_f64 VGPR39, VGPR39 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x147c: s_nop  
@@ -1157,7 +1157,7 @@ hasCFT called
 [Parser.C:1776] curAddr 0x14d4: s_nop  
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
-[Parser.C:1776] curAddr 0x14dc: v_mov_b32 VGPR1, SGPR40 
+[Parser.C:1776] curAddr 0x14dc: v_mov_b32 VGPR41, SGPR40 
 [Parser.C:1782] leaf 1 funcname kernel_gpu_cuda 
 hasCFT called
 [Parser.C:1776] curAddr 0x14e0: s_add_i32 SGPR40, 0x8, SGPR40 
@@ -1224,46 +1224,46 @@ Set function kernel_gpu_cuda at 1000 ret status from 0 to 1
 [/home/wuxx1279/mdyninst/parseAPI/src/Parser.C] kernel_gpu_cuda return status 1, no waiters
 [/home/wuxx1279/mdyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
 )[Parser.C] finalizing kernel_gpu_cuda (1000)
-	 Considering target block [0x1560,0x1564) from edge 0x160c2a0
+	 Considering target block [0x1560,0x1564) from edge 0x26f2900
 	 Adding target block [1560,1564) to worklist according to edge from 1020, type 1
-	 Considering target block [0x1024,0x1078) from edge 0x160c340
+	 Considering target block [0x1024,0x1078) from edge 0x26f29a0
 	 Adding target block [1024,1078) to worklist according to edge from 1020, type 2
-	 Considering target block [0x10c4,0x1120) from edge 0x160cfa0
+	 Considering target block [0x10c4,0x1120) from edge 0x26f35f0
 	 Adding target block [10c4,1120) to worklist according to edge from 1074, type 1
-	 Considering target block [0x1078,0x10c4) from edge 0x160d040
+	 Considering target block [0x1078,0x10c4) from edge 0x26f3690
 	 Adding target block [1078,10c4) to worklist according to edge from 1074, type 2
-	 Considering target block [0x10c4,0x1120) from edge 0x160cbb0
-	 Considering target block [0x1560,0x1564) from edge 0x160c110
-	 Considering target block [0x1120,0x1274) from edge 0x160c150
+	 Considering target block [0x10c4,0x1120) from edge 0x26f3200
+	 Considering target block [0x1560,0x1564) from edge 0x26f2770
+	 Considering target block [0x1120,0x1274) from edge 0x26f27b0
 	 Adding target block [1120,1274) to worklist according to edge from 111c, type 2
-	 Considering target block [0x12b4,0x12c4) from edge 0x1611520
+	 Considering target block [0x12b4,0x12c4) from edge 0x26f7be0
 	 Adding target block [12b4,12c4) to worklist according to edge from 1270, type 4
-	 Considering target block [0x12c4,0x12f8) from edge 0x160d0e0
+	 Considering target block [0x12c4,0x12f8) from edge 0x26f31c0
 	 Adding target block [12c4,12f8) to worklist according to edge from 12c0, type 2
-	 Considering target block [0x12f8,0x1300) from edge 0x1610450
+	 Considering target block [0x12f8,0x1300) from edge 0x26f6b40
 	 Adding target block [12f8,1300) to worklist according to edge from 12c0, type 1
-	 Considering target block [0x1300,0x138c) from edge 0x1611080
+	 Considering target block [0x1300,0x138c) from edge 0x26f7740
 	 Adding target block [1300,138c) to worklist according to edge from 12fc, type 2
-	 Considering target block [0x138c,0x13a4) from edge 0x16111d0
+	 Considering target block [0x138c,0x13a4) from edge 0x26f7890
 	 Adding target block [138c,13a4) to worklist according to edge from 12fc, type 1
-	 Considering target block [0x1274,0x12b4) from edge 0x16124e0
+	 Considering target block [0x1274,0x12b4) from edge 0x26f89a0
 	 Adding target block [1274,12b4) to worklist according to edge from 13a0, type 1
-	 Considering target block [0x13a4,0x13d0) from edge 0x1612580
+	 Considering target block [0x13a4,0x13d0) from edge 0x26f8a40
 	 Adding target block [13a4,13d0) to worklist according to edge from 13a0, type 2
-	 Considering target block [0x13d0,0x154c) from edge 0x1612620
+	 Considering target block [0x13d0,0x154c) from edge 0x26f8f10
 	 Adding target block [13d0,154c) to worklist according to edge from 13c8, type 5
-	 Considering target block [0x13d0,0x154c) from edge 0x1612b10
-	 Considering target block [0x154c,0x155c) from edge 0x1612b80
+	 Considering target block [0x13d0,0x154c) from edge 0x26f8fd0
+	 Considering target block [0x154c,0x155c) from edge 0x26f9040
 	 Adding target block [154c,155c) to worklist according to edge from 1548, type 2
-	 Considering target block [0x155c,0x1560) from edge 0x1612ad0
+	 Considering target block [0x155c,0x1560) from edge 0x26f8f90
 	 Adding target block [155c,1560) to worklist according to edge from 1554, type 5
-	 Considering target block [0x1274,0x12b4) from edge 0x1610d60
-	 Considering target block [0x1560,0x1564) from edge 0x160b530
-	 Considering target block [0x12b4,0x12c4) from edge 0x1610730
-	 Considering target block [0x138c,0x13a4) from edge 0x1610560
-	 Considering target block [0x12f8,0x1300) from edge 0x160bc20
+	 Considering target block [0x1274,0x12b4) from edge 0x26f7420
+	 Considering target block [0x12b4,0x12c4) from edge 0x26f28a0
+	 Considering target block [0x1560,0x1564) from edge 0x26f7cc0
+	 Considering target block [0x138c,0x13a4) from edge 0x26f7900
+	 Considering target block [0x12f8,0x1300) from edge 0x26f53d0
 No targets, exits func
 Adding block 0x1560 as exit
 1000 extent [1000,1564)
-[Parser.C:187] parsing complete for Parser 0x16011e0 with state 4
-[Parser.C:169] parse() called on Parser 0x16011e0 with state 4
+[Parser.C:187] parsing complete for Parser 0x26e78c0 with state 4
+[Parser.C:169] parse() called on Parser 0x26e78c0 with state 4

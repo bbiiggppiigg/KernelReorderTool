@@ -1,5 +1,5 @@
 #ifndef __KERNEL_ELF_HELPER__
-#define __KDERNEL_ELF_HELPER__
+#define __KERNEL_ELF_HELPER__
 #include <elf.h>
 #include <vector>
 #include <iostream>
@@ -15,8 +15,7 @@ void update_lds_usage(FILE * f, uint32_t new_lds_usage);
 void get_kds(FILE * f, vector<pair<uint64_t, string>> & ret);
 uint32_t get_bits(uint32_t value, uint32_t hi , uint32_t low);
 uint32_t set_bits(uint32_t old_bits, uint32_t hi, uint32_t low, uint32_t bits);
-
-
+void update_symtab_symbol_align(FILE * f, const char kernel_name [], uint32_t new_pos);
 
 // The behavior of the following two function depends on the Architecture, right now is written for GFX9 only
 void set_lds_usage(FILE* fp, uint32_t kd_offset , uint32_t new_lds_usage );
