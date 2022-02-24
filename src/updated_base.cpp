@@ -8,15 +8,12 @@
 #include "kernel_elf_helper.h"
 #include "INIReader.h"
 #include "../lib/AMDHSAKernelDescriptor.h"
-
 #include "config.h"
+
 using namespace std;
 using namespace Dyninst;
 using namespace ParseAPI;
 using namespace InstructionAPI;
-
-
-
 
 
 #define M0 124
@@ -125,11 +122,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.work_group_dim_x,true,insn_pool));  
     ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
 
-
-
-
-
-    ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR1,256,insn_pool));  // 256 is VGPR0 in this encoding
+    ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR1,256,insn_pool));  // 256 is VGPR1 in this encoding
     ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,false,insn_pool));
     // AFTER THIS STEP, we have a thread ID, now we want warp id , divide by 64
 
@@ -144,25 +137,6 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.wavefront_per_work_group ,true,insn_pool));
     ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,WORK_GROUP_ID,TMP_SGPR1,insn_pool));
     ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WAVEFRONT_ID,TMP_SGPR0,LOCAL_WAVEFRONT_ID,false,insn_pool));
-
-
-
-
-    ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
-
-
-    //* Here we initialize shared memory with 0, and vregs with 0 except one holding -1 for the purpose of ds_inc
-
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0, c.lds_base,true,insn_pool));
-    ret.push_back(InsnFactory::create_v_mov_b32(DS_ADDR , TMP_SGPR0, insn_pool)); 
-    ret.push_back(InsnFactory::create_v_mov_b32(DS_DATA_0 , S_0, insn_pool)); 
-    ret.push_back(InsnFactory::create_v_mov_b32(DS_DATA_1 , S_0, insn_pool)); 
-    ret.push_back(InsnFactory::create_v_mov_b32(V_MINUS_1 , S_MINUS_1, insn_pool)); 
-
-    for ( uint32_t i =0 ; i < c.num_branches; i++){
-        ret.push_back(InsnFactory::create_ds_write_b64(DS_ADDR,DS_DATA_0,insn_pool));   // ds[0:1]=0
-        ret.push_back(InsnFactory::create_v_add_u32(DS_ADDR,DS_ADDR,S_8,insn_pool)); 
-    }
 
 
     // Backup Writeback Address 
@@ -231,8 +205,6 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
     // DATA Collection is per warp, so we disabled rest of the threads
     ret.push_back(InsnFactory::create_s_mov_b64(EXEC,S_1,insn_pool)); // EXEC = 1 
 
-
-
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     //  simple
     ret.push_back(InsnFactory::create_v_mov_b32_const(c.DS_ADDR , c.lds_base, insn_pool)); 
@@ -243,8 +215,15 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
     //
     // GLOBAL_WRITEBACK_PTR should points to WRITEBACK_ADDR +  OFFSET + GLOBAL_WAVEFRONT_ID * NUM_BRANCHES * 8 
     //
+    //ret.push_back(InsnFactory::create_s_mul_i32(c.LOCAL_WAVEFRONT_ID, 8 + 128  ,c.num_branches+128,insn_pool)); 
+
+
 
     ret.push_back(InsnFactory::create_s_mul_i32(GLOBAL_WRITEBACK_PTR,c.GLOBAL_WAVEFRONT_ID,c.num_branches+2+128,insn_pool)); 
+    ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WRITEBACK_PTR   , GLOBAL_WRITEBACK_PTR , c.num_branches , true ,insn_pool));
+
+
+
     ret.push_back(InsnFactory::create_s_lshl_b32(GLOBAL_WRITEBACK_PTR,S_3, GLOBAL_WRITEBACK_PTR,insn_pool)); // LEFT SHIFT By 3 = times 8 
 
 
@@ -253,6 +232,9 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
 
     ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WRITEBACK_PTR   , GLOBAL_WRITEBACK_PTR , c.writeback_offset, true ,insn_pool));
     ret.push_back(InsnFactory::create_s_addc_u32(GLOBAL_WRITEBACK_PTR+1,                   S_0, GLOBAL_WRITEBACK_PTR +1, false ,insn_pool));  
+
+    //ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WRITEBACK_PTR   , GLOBAL_WRITEBACK_PTR , c.LOCAL_WAVEFRONT_ID, false, insn_pool));
+    //ret.push_back(InsnFactory::create_s_addc_u32(GLOBAL_WRITEBACK_PTR+1,                   S_0, GLOBAL_WRITEBACK_PTR +1, false ,insn_pool));  
 
     // Replace the add with 
 
@@ -264,17 +246,6 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
 }
 
 
-void per_branch_writeback(vector<MyInsn> & ret,  config c ,vector<char *> & insn_pool){
-
-    ret.push_back(InsnFactory::create_ds_read_b64(c.DS_ADDR,c.DS_DATA_0,insn_pool)); // from shared[0] read 64 bits = 2 32_bits, into v[2:3]
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,0,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
-
-    ret.push_back(InsnFactory::create_v_add_u32(c.DS_ADDR,c.DS_ADDR,S_8,insn_pool)); 
-    ret.push_back(InsnFactory::create_v_add_co_u32(c.v_global_addr,c.v_global_addr,S_8,insn_pool)); 
-    ret.push_back(InsnFactory::create_v_addc_co_u32(c.v_global_addr+1,c.v_global_addr+1,S_0,insn_pool)); 
-
-}
 
 void memtime_epilogue(vector<MyInsn> & ret,  config c ,vector<char *> & insn_pool){
 
@@ -305,9 +276,6 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c ,vector<char *> & insn_poo
 
 
 }
-
-
-
 
 
 int main(int argc, char **argv){
@@ -381,24 +349,11 @@ int main(int argc, char **argv){
         }
 
 
-        uint32_t branch_id =0 ;
-        for( const auto & pair_addr_sgpr : save_mask_insns){
-            auto addr = pair_addr_sgpr.first;
-            auto exec_cond_sgpr = pair_addr_sgpr.second;
-            //printf("branch id = %d, exec_cond_sgpr = %d\n",branch_id,exec_cond_sgpr);
-            vector<MyInsn> update_branch_statistic;
-            per_branch_instrumentation(update_branch_statistic, branch_id  , exec_cond_sgpr , c ,insn_pool);
-            inplace_insert(fp,func_start,text_end,update_branch_statistic,branches, addr + target_shift,kernel_bounds,insn_pool);
-            target_shift+= get_size(update_branch_statistic);
-            branch_id++;
-        }
+
         {
             vector<MyInsn> writeback_insns;
 
             setup_writeback(writeback_insns, c ,insn_pool);
-            for ( uint32_t i =0 ; i < num_branches ; i++)
-                per_branch_writeback(writeback_insns, c, insn_pool);
-
 
             memtime_epilogue(writeback_insns, c, insn_pool);
             printf("before inserting writeback\n");
@@ -443,3 +398,118 @@ int main(int argc, char **argv){
 
 
 
+
+
+/*
+int main(int argc, char **argv){
+
+    uint32_t text_start, text_end;
+    vector<CFG_EDGE> edges;
+    vector<pair<uint32_t, uint32_t >> save_mask_insns;
+    uint32_t after_waitcnt, before_endpgm;
+    vector < char *> insn_pool;
+
+
+
+    if(argc !=3){
+        printf("Usage: %s <binary path> <config_file>\n",argv[0]);
+    }
+
+    char *binaryPath = argv[1];
+    char *configPath = argv[2];
+
+    vector<pair<uint64_t, string>> kds;
+
+    FILE* fp = fopen(binaryPath,"rb+");
+    get_kds(fp,kds);
+
+    uint32_t last_instr;
+    vector<kernel_bound> kernel_bounds ; 
+    getKernelBounds(binaryPath,kernel_bounds,last_instr);
+    analyze_binary(binaryPath, text_start , text_end, edges, after_waitcnt, before_endpgm, save_mask_insns); 
+    vector<MyBranchInsn> branches;
+    for (auto & edge : edges ) {
+        branches.push_back(
+                InsnFactory::convert_to_branch_insn(edge.branch_address, edge.target_address, edge.cmd, edge.length, insn_pool)
+                );
+    }
+
+    vector<config> configs;
+    read_config(fp,configPath,configs,kernel_bounds);
+    fclose(fp);
+    for (auto & c : configs){
+
+
+        fp = fopen(binaryPath,"rb+");
+        uint32_t target_shift = 0;
+        uint32_t num_branches = save_mask_insns.size();
+        c.num_branches = num_branches;
+        uint32_t func_start = 0;
+        for( auto & kb : kernel_bounds){
+            if(kb.name == c.name){
+                func_start = kb.first;
+            }
+        }
+        if(func_start ==0){
+            assert(0 && " kernel name not found ");
+        }
+
+
+        {
+            vector<MyInsn> init_insns;
+            setup_initailization(init_insns,c,insn_pool);
+
+            inplace_insert(fp,text_start,text_end,init_insns,branches, func_start+ target_shift,kernel_bounds,insn_pool);
+            printf("patching start at address offset %u\n", func_start);
+            target_shift += get_size(init_insns);
+        }
+
+
+        {
+            vector<MyInsn> writeback_insns;
+
+            setup_writeback(writeback_insns, c ,insn_pool);
+
+            memtime_epilogue(writeback_insns, c, insn_pool);
+            inplace_insert(fp,text_start,text_end,writeback_insns,branches, before_endpgm+ target_shift,kernel_bounds,insn_pool);
+            target_shift+= get_size(writeback_insns);
+
+        }
+        printf("target_shift =%u\n",target_shift);
+        if(target_shift%256!=0){
+            uint32_t remain = 256 - (target_shift%256);
+            uint32_t num_nops = remain / 4;
+            vector<MyInsn> nops;
+            printf("number of remain = %u, num_nops = %u\n", remain,num_nops);
+            for(uint32_t i=0; i <num_nops ;i++){
+                nops.push_back(InsnFactory::create_s_nop(insn_pool));
+            }
+            inplace_insert(fp,text_start,text_end,nops,branches,before_endpgm+4+target_shift,kernel_bounds,insn_pool);
+            target_shift += get_size(nops);
+        }
+
+
+        extend_text(fp,text_end-text_start);
+        set_sgpr_vgpr_usage(fp,c.kd_addr,c.WORK_GROUP_ID+4,c.v_global_addr+4);
+        update_symtab_symbol_size(fp,c.name.c_str(),c.func_end - c.func_start + target_shift );
+        printf(" updating symbol for kernel %s to size = %u, real size = %u \n",c.name.c_str(),text_end - text_start, c.func_end - c.func_start + target_shift);
+
+
+
+    }
+
+    for (auto &p : insn_pool){
+        free(p);    
+    }
+
+
+
+    fclose(fp);
+    return 0;
+
+}
+
+
+
+
+*/

@@ -321,6 +321,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         uint32_t code_entry_offset = fkd.kernel_code_entry_byte_offset;
         c.code_entry_offset = code_entry_offset;
         c.wavefront_per_work_group = c.work_group_dim_x  * c.work_group_dim_y * c.work_group_dim_z / 64;
+        c.wavefront_per_work_group = c.warps_per_block;
 
 
 
@@ -385,11 +386,15 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         if(c.work_group_id_y_enabled){
             c.work_group_id_y = sgpr_count;
             sgpr_count +=1;
+
+            printf("workgroup_id_y = %u\n",c.work_group_id_y);
         }
 
         if(c.work_group_id_z_enabled){
             c.work_group_id_z = sgpr_count;
             sgpr_count +=1;
+
+            printf("workgroup_id_z = %u\n",c.work_group_id_z);
         }
 
 
