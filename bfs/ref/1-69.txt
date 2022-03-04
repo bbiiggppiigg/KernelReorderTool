@@ -1,0 +1,23 @@
+[Parser.C] finalizing Kernel (1000)
+	 Considering target block [0x12b4,0x135c) from edge 0x7f5e67e234c0
+	 Adding target block [12b4,135c) to worklist according to edge from 1100, type 1
+	 Considering target block [0x1104,0x1138) from edge 0x7f5e67e23520
+	 Adding target block [1104,1138) to worklist according to edge from 1100, type 2
+	 Considering target block [0x12b4,0x135c) from edge 0x7f5e67e230d0
+	 Considering target block [0x1138,0x1178) from edge 0x7f5e67e23a90
+	 Adding target block [1138,1178) to worklist according to edge from 1134, type 2
+	 Considering target block [0x1178,0x11b8) from edge 0x7f5e67e23ac0
+	 Adding target block [1178,11b8) to worklist according to edge from 1174, type 2
+	 Considering target block [0x12b4,0x135c) from edge 0x7f5e67e23c70
+	 Considering target block [0x11e0,0x1264) from edge 0x7f5e67e232e0
+	 Adding target block [11e0,1264) to worklist according to edge from 11b4, type 4
+	 Considering target block [0x11b8,0x11e0) from edge 0x7f5e67e22ad0
+	 Adding target block [11b8,11e0) to worklist according to edge from 1260, type 1
+	 Considering target block [0x1264,0x12b4) from edge 0x7f5e67e23e50
+	 Adding target block [1264,12b4) to worklist according to edge from 1260, type 2
+	 Considering target block [0x11b8,0x11e0) from edge 0x7f5e67e22770
+	 Considering target block [0x12b4,0x135c) from edge 0x7f5e67e238b0
+	 Considering target block [0x11e0,0x1264) from edge 0x7f5e67e239d0
+No targets, exits func
+Adding block 0x12b4 as exit
+1000 extent [1000,135c)

@@ -1,0 +1,2 @@
+[Parser.C:1949] recording block [1000,1000)
+	 pushing work element for block (nil), edge (nil), target 0x1000

@@ -1,0 +1,4 @@
+   200 .note [skipped]
+	<1400,Kernel2,[1000,149c)>
+Checking non-returning for Kernel2
+[CodeObject.C] adding hint 1400

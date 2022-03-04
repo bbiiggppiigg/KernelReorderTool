@@ -233,7 +233,7 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
 
 
 
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    //ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     //  simple
     ret.push_back(InsnFactory::create_v_mov_b32_const(c.DS_ADDR , c.lds_base, insn_pool)); 
 

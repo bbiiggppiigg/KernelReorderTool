@@ -1,0 +1,26 @@
+[SymtabCodeSource.C:429] processing 8 symtab regions in tmp_00.hsaco
+   1000 .text
+[SymtabCodeSource.C:483] processing 2 symtab hints
+	<1000,Kernel,[1000,149c)>
+[Parser.C:1949] recording block [ffffffffffffffff,ffffffffffffffff)
+Checking non-returning for Kernel
+[CodeObject.C] adding hint 1000
+[Parser.C:169] parse() called on Parser 0x7f5e67e44800 with state 0
+[Parser.C:283] entered parse_vanilla()
+	2 function hints
+[/home/wuxx1279/mdyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
+)[Parser.C] finalizing Kernel2 (1400)
+	 Considering target block [0x1424,0x1458) from edge 0x7f5e67e2ba90
+	 Adding target block [1424,1458) to worklist according to edge from 1420, type 2
+	 Considering target block [0x1498,0x149c) from edge 0x7f5e67e2baf0
+	 Adding target block [1498,149c) to worklist according to edge from 1420, type 1
+No targets, exits func
+Adding block 0x1498 as exit
+	 Considering target block [0x1458,0x149c) from edge 0x7f5e67e2beb0
+	 Adding target block [1458,149c) to worklist according to edge from 1454, type 2
+	 Considering target block [0x1498,0x149c) from edge 0x7f5e67e2bf10
+No targets, exits func
+Adding block 0x1458 as exit
+1400 extent [1400,149c)
+[Parser.C:187] parsing complete for Parser 0x7f5e67e44800 with state 4
+[Parser.C:169] parse() called on Parser 0x7f5e67e44800 with state 4
