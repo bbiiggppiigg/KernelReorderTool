@@ -1,5 +1,0 @@
-   c80 .rodata
-Add known data range [cc0, d00) from symbol _Z7Kernel2PbS_S_S_i.kd
-Add known data range [cc0, d00) from symbol _Z7Kernel2PbS_S_S_i.kd
-Add known data range [c80, cc0) from symbol _Z6KernelP4NodePiPbS2_S2_S1_i.kd
-Add known data range [c80, cc0) from symbol _Z6KernelP4NodePiPbS2_S2_S1_i.kd

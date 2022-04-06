@@ -102,6 +102,8 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     uint32_t DS_DATA_1 = c.DS_DATA_1;
     uint32_t V_MINUS_1 = c.V_MINUS_1;
 
+    ret.push_back(InsnFactory::create_s_mov_b64(c.TIMER_1,S_0,insn_pool)); // EXEC = 1 
+    ret.push_back(InsnFactory::create_s_mov_b64(c.TIMER_2,S_0,insn_pool)); // EXEC = 1 
     #ifdef m_CONSEQ
         ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
         ret.push_back(InsnFactory::create_s_memtime(c.TIMER_2,insn_pool));

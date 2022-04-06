@@ -89,6 +89,8 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     uint32_t DS_DATA_0 = c.DS_DATA_0;
     uint32_t DS_DATA_1 = c.DS_DATA_1;
     uint32_t V_MINUS_1 = c.V_MINUS_1;
+    
+    
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
     if(c.work_group_id_z_enabled){
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0,c.work_group_id_z,false,insn_pool));  

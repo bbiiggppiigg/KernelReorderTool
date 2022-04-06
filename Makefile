@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata update_note_modify_lds_size updated_insert_tramp updated_base measure_overhead m_init m_branch m_w m_wb_pb m_conseq
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata update_note_modify_lds_size updated_insert_tramp updated_base measure_overhead m_init m_branch m_wb m_wb_pb m_conseq
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -31,7 +31,7 @@ bin/m_init: src/measure_overhead.cpp lib/InsnFactory.h lib/kernel_elf_helper.o
 bin/m_branch: src/measure_overhead.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
 	g++ -g -Wall -Dm_BRANCH -I$(DYNINST_ROOT)/include -I$(TBB) src/measure_overhead.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o $@
 
-bin/m_w: src/measure_overhead.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
+bin/m_wb: src/measure_overhead.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
 	g++ -g -Wall -Dm_WRITEBACK -I$(DYNINST_ROOT)/include -I$(TBB) src/measure_overhead.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o $@
 
 bin/m_wb_pb: src/measure_overhead.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
