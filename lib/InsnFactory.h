@@ -644,7 +644,7 @@ class InsnFactory {
 			return MyInsn(cmd_ptr,8,std::string("s_store_dword_x2 "));
 		}
 		static MyInsn create_global_store_dword_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
-			uint32_t cmd_low = 0xdc000000;
+			uint32_t cmd_low = 0xdc030000;
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 29;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );

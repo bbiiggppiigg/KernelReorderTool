@@ -1,1 +1,3 @@
-./bfs.base.new ./graph1MW_6.txt
+./bfs.base.new ./data/graph1k.txt > base0.txt
+ROCR_VISIBLE_DEVICES=1 ./bfs.base1.new ./data/graph1k.txt  > base1.txt
+

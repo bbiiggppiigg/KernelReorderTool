@@ -207,6 +207,7 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
     uint32_t EXECCOND = execcond;
     uint32_t V_DS_ADDR_OFFSET = c.DS_ADDR;
     #ifdef m_BRANCH
+        ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
         if(TARGET_ID == branch_id)
             ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
     #endif

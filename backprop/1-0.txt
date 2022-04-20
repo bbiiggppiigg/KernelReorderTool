@@ -1,0 +1,1229 @@
+[SymtabCodeSource.C:429] processing 8 symtab regions in tmp_00.hsaco
+   1000 .text
+   200 .note [skipped]
+   b18 .dynsym [skipped]
+   b90 .gnu.hash [skipped]
+   bbc .hash [skipped]
+   bec .dynstr [skipped]
+   cc0 .rodata
+Add known data range [d00, d40) from symbol _Z24bpnn_adjust_weights_cudaPfiS_iS_S_.kd
+Add known data range [d00, d40) from symbol _Z24bpnn_adjust_weights_cudaPfiS_iS_S_.kd
+Add known data range [cc0, d00) from symbol _Z22bpnn_layerforward_CUDAPfS_S_S_ii.kd
+Add known data range [cc0, d00) from symbol _Z22bpnn_layerforward_CUDAPfS_S_S_ii.kd
+   2000 .dynamic [skipped]
+[SymtabCodeSource.C:482] processing 2 symtab hints
+	<1000,bpnn_layerforward_CUDA,[1000,154c)>
+	<1300,bpnn_adjust_weights_cuda,[1000,154c)>
+[Parser.C:1964] recording block [ffffffffffffffff,ffffffffffffffff)
+Checking non-returning for bpnn_layerforward_CUDA
+[CodeObject.C] adding hint 1000
+Checking non-returning for bpnn_adjust_weights_cuda
+[CodeObject.C] adding hint 1300
+[Parser.C:169] parse() called on Parser 0x118b2c0 with state 0
+[Parser.C:283] entered parse_vanilla()
+	2 function hints
+[Parser.C:1964] recording block [1000,1000)
+	 pushing work element for block (nil), edge (nil), target 0x1000
+[Parser.C:1964] recording block [1300,1300)
+	 pushing work element for block (nil), edge (nil), target 0x1300
+[Parser.C] ==== starting to parse frame 1000 ====
+Iteration 1 for function bpnn_layerforward_CUDA at 1000
+[Parser.C] parsing block 1000
+[Parser.C:1778] curAddr 0x1000: s_load_dwordx4 SGPR[8:11], [(SGPR[4:5], (0x10 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1008: s_load_dword SGPR6, [(SGPR[4:5], (0x24 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1010: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1018: v_cmp_eq_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x101c: v_lshlrev_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1020: s_and_saveexec_b64 SGPR2, VCC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1024: s_cbranch_execz ((PC + 0x4) + 0x68) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 1024
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x68) to 0x1024...SUCCESS (CFT=0x106c)
+Returned 2 edges
+		2 edges:
+			edge target 106c, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 1024->106c
+resolveable_edge: 1, tailcall: 0, target: 106c
+[ParserDetails.C:583] pushing 106c onto worklist
+[ParserDetails.C:584] new edge is 0x119c6e0
+	 pushing work element for block (nil), edge 0x119c6e0, target 0x106c
+			edge target 1028, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 1024->1028
+resolveable_edge: 1, tailcall: 0, target: 1028
+[ParserDetails.C:583] pushing 1028 onto worklist
+[ParserDetails.C:584] new edge is 0x119c780
+	 pushing work element for block (nil), edge 0x119c780, target 0x1028
+	 add_edge called, src_addr 1024, dst 1028, edge type 2, looked up block [1000, 1028)
+[Parser.C:1964] recording block [1028,1028)
+[Parser.C] parsing block 1028
+[Parser.C:1778] curAddr 0x1028: s_load_dwordx2 SGPR[0:1], [(SGPR[4:5], (0x0 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1030: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1034: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1038: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1040: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1044: v_mov_b32 VGPR3, SGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1048: v_add_co_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1050: v_addc_co_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1058: flat_load_dword_global (ADDRESS_MODE_32?VGPR5:VGPR[5:6]) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1060: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1064: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x106c: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1070: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1074: s_add_i32 SGPR0, 0x1, SGPR6 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1078: v_mul_lo_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1080: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1084: v_mov_b32 VGPR5, SGPR9 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1088: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x108c: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1094: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1098: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10a0: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10a4: v_add_co_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10ac: v_addc_co_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10b4: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10b8: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10c0: v_lshlrev_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10c4: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10cc: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10d0: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10d4: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10dc: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10e0: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10e8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10ec: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10f0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10f4: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10fc: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1104: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1108: v_mul_f32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x110c: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1114: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1118: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x111c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1120: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1124: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 1124
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x1124...SUCCESS (CFT=0x1140)
+Returned 2 edges
+		2 edges:
+			edge target 1140, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 1124->1140
+resolveable_edge: 1, tailcall: 0, target: 1140
+[ParserDetails.C:583] pushing 1140 onto worklist
+[ParserDetails.C:584] new edge is 0x119b920
+	 pushing work element for block (nil), edge 0x119b920, target 0x1140
+			edge target 1128, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 1124->1128
+resolveable_edge: 1, tailcall: 0, target: 1128
+[ParserDetails.C:583] pushing 1128 onto worklist
+[ParserDetails.C:584] new edge is 0x119d4e0
+	 pushing work element for block (nil), edge 0x119d4e0, target 0x1128
+	 add_edge called, src_addr 1124, dst 1128, edge type 2, looked up block [1028, 1128)
+[Parser.C:1964] recording block [1128,1128)
+[Parser.C] parsing block 1128
+[Parser.C:1778] curAddr 0x1128: ds_read2_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1130: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1134: v_add_f32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1138: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1140: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1144: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1148: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1150: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1154: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1158: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x115c: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1160: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 1160
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x1160...SUCCESS (CFT=0x117c)
+Returned 2 edges
+		2 edges:
+			edge target 117c, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 1160->117c
+resolveable_edge: 1, tailcall: 0, target: 117c
+[ParserDetails.C:583] pushing 117c onto worklist
+[ParserDetails.C:584] new edge is 0x119c010
+	 pushing work element for block (nil), edge 0x119c010, target 0x117c
+			edge target 1164, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 1160->1164
+resolveable_edge: 1, tailcall: 0, target: 1164
+[ParserDetails.C:583] pushing 1164 onto worklist
+[ParserDetails.C:584] new edge is 0x119d000
+	 pushing work element for block (nil), edge 0x119d000, target 0x1164
+	 add_edge called, src_addr 1160, dst 1164, edge type 2, looked up block [1128, 1164)
+[Parser.C:1964] recording block [1164,1164)
+[Parser.C] parsing block 1164
+[Parser.C:1778] curAddr 0x1164: ds_read2_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x116c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1170: v_add_f32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1174: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x117c: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1180: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1184: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x118c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1190: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1194: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1198: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x119c: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 119c
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x119c...SUCCESS (CFT=0x11b8)
+Returned 2 edges
+		2 edges:
+			edge target 11b8, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 119c->11b8
+resolveable_edge: 1, tailcall: 0, target: 11b8
+[ParserDetails.C:583] pushing 11b8 onto worklist
+[ParserDetails.C:584] new edge is 0x119b8a0
+	 pushing work element for block (nil), edge 0x119b8a0, target 0x11b8
+			edge target 11a0, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 119c->11a0
+resolveable_edge: 1, tailcall: 0, target: 11a0
+[ParserDetails.C:583] pushing 11a0 onto worklist
+[ParserDetails.C:584] new edge is 0x119b5d0
+	 pushing work element for block (nil), edge 0x119b5d0, target 0x11a0
+	 add_edge called, src_addr 119c, dst 11a0, edge type 2, looked up block [1164, 11a0)
+[Parser.C:1964] recording block [11a0,11a0)
+[Parser.C] parsing block 11a0
+[Parser.C:1778] curAddr 0x11a0: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11a8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+Function bpnn_layerforward_CUDA tries to set parsing edge at 11a0
+[Parser.C:1798] nop-block ended at 11a8
+[Parser.C:1800] pushing 11a8 onto worklist
+	 pushing work element for block (nil), edge 0x119cb70, target 0x11a8
+	 add_edge called, src_addr 11a0, dst 11a8, edge type 5, looked up block [11a0, 11a8)
+[Parser.C:1964] recording block [11a8,11a8)
+[Parser.C] parsing block 11a8
+[Parser.C:1778] curAddr 0x11a8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11ac: v_add_f32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11b0: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11b8: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11bc: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11c0: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11c8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11cc: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11d0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11d4: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11d8: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 11d8
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x11d8...SUCCESS (CFT=0x11f4)
+Returned 2 edges
+		2 edges:
+			edge target 11f4, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 11d8->11f4
+resolveable_edge: 1, tailcall: 0, target: 11f4
+[ParserDetails.C:583] pushing 11f4 onto worklist
+[ParserDetails.C:584] new edge is 0x119b650
+	 pushing work element for block (nil), edge 0x119b650, target 0x11f4
+			edge target 11dc, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 11d8->11dc
+resolveable_edge: 1, tailcall: 0, target: 11dc
+[ParserDetails.C:583] pushing 11dc onto worklist
+[ParserDetails.C:584] new edge is 0x119cf00
+	 pushing work element for block (nil), edge 0x119cf00, target 0x11dc
+	 add_edge called, src_addr 11d8, dst 11dc, edge type 2, looked up block [11a8, 11dc)
+[Parser.C:1964] recording block [11dc,11dc)
+[Parser.C] parsing block 11dc
+[Parser.C:1778] curAddr 0x11dc: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11e4: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+Function bpnn_layerforward_CUDA tries to set parsing edge at 11dc
+[Parser.C:1798] nop-block ended at 11e4
+[Parser.C:1800] pushing 11e4 onto worklist
+	 pushing work element for block (nil), edge 0x119d0b0, target 0x11e4
+	 add_edge called, src_addr 11dc, dst 11e4, edge type 5, looked up block [11dc, 11e4)
+[Parser.C:1964] recording block [11e4,11e4)
+[Parser.C] parsing block 11e4
+[Parser.C:1778] curAddr 0x11e4: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11e8: v_add_f32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11ec: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11f4: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11f8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11fc: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1200: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1204: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x120c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1210: flat_store_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1218: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x121c: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1220: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1224: s_and_saveexec_b64 SGPR0, VCC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1228: s_xor_b64 SGPR0, SGPR0, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x122c: s_cbranch_execz ((PC + 0x4) + 0x56) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 122c
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x56) to 0x122c...SUCCESS (CFT=0x1268)
+Returned 2 edges
+		2 edges:
+			edge target 1268, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 122c->1268
+resolveable_edge: 1, tailcall: 0, target: 1268
+[ParserDetails.C:583] pushing 1268 onto worklist
+[ParserDetails.C:584] new edge is 0x119ce00
+	 pushing work element for block (nil), edge 0x119ce00, target 0x1268
+			edge target 1230, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 122c->1230
+resolveable_edge: 1, tailcall: 0, target: 1230
+[ParserDetails.C:583] pushing 1230 onto worklist
+[ParserDetails.C:584] new edge is 0x119c290
+	 pushing work element for block (nil), edge 0x119c290, target 0x1230
+	 add_edge called, src_addr 122c, dst 1230, edge type 2, looked up block [11e4, 1230)
+[Parser.C:1964] recording block [1230,1230)
+[Parser.C] parsing block 1230
+[Parser.C:1778] curAddr 0x1230: v_lshlrev_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1234: s_mul_i32 SGPR7, SGPR6, SGPR7 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1238: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1240: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1244: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1248: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1250: v_mov_b32 VGPR3, SGPR11 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1254: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1258: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x125c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1260: flat_store_dword_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 add_edge called, src_addr 1024, dst 106c, edge type 1, looked up block [1000, 1028)
+[Parser.C:1964] recording block [106c,106c)
+[Parser.C] parsing block 106c
+[Parser.C:1778] curAddr 0x106c: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1070: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1074: s_add_i32 SGPR0, 0x1, SGPR6 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1078: v_mul_lo_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1080: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1084: v_mov_b32 VGPR5, SGPR9 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1088: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x108c: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1094: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1098: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10a0: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10a4: v_add_co_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10ac: v_addc_co_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10b4: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10b8: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10c0: v_lshlrev_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10c4: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10cc: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10d0: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10d4: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10dc: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10e0: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10e8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10ec: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10f0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10f4: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x10fc: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1104: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1108: v_mul_f32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x110c: ds_write_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1114: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1118: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x111c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1120: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1124: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 1124
+[Parser.C:2482] parsing edge at 1124 has started by another thread, function bpnn_layerforward_CUDA at 1000
+	 add_edge called, src_addr 1124, dst 1140, edge type 1, looked up block [106c, 1128)
+[Parser.C:1964] recording block [1140,1140)
+[Parser.C] parsing block 1140
+[Parser.C:1778] curAddr 0x1140: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1144: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1148: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1150: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1154: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1158: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x115c: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1160: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 1160
+[Parser.C:2482] parsing edge at 1160 has started by another thread, function bpnn_layerforward_CUDA at 1000
+	 add_edge called, src_addr 1160, dst 117c, edge type 1, looked up block [1140, 1164)
+[Parser.C:1964] recording block [117c,117c)
+[Parser.C] parsing block 117c
+[Parser.C:1778] curAddr 0x117c: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1180: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1184: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x118c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1190: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1194: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1198: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x119c: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 119c
+[Parser.C:2482] parsing edge at 119c has started by another thread, function bpnn_layerforward_CUDA at 1000
+	 add_edge called, src_addr 119c, dst 11b8, edge type 1, looked up block [117c, 11a0)
+[Parser.C:1964] recording block [11b8,11b8)
+[Parser.C] parsing block 11b8
+[Parser.C:1778] curAddr 0x11b8: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11bc: v_add_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11c0: v_cmp_eq_u32_e64  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11c8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11cc: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11d0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11d4: s_and_saveexec_b64 SGPR2, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11d8: s_cbranch_execz ((PC + 0x4) + 0x24) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 11d8
+[Parser.C:2482] parsing edge at 11d8 has started by another thread, function bpnn_layerforward_CUDA at 1000
+	 add_edge called, src_addr 11d8, dst 11f4, edge type 1, looked up block [11b8, 11dc)
+[Parser.C:1964] recording block [11f4,11f4)
+[Parser.C] parsing block 11f4
+[Parser.C:1778] curAddr 0x11f4: s_or_b64 EXEC_LO, SGPR2, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11f8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x11fc: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1200: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1204: ds_read_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x120c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1210: flat_store_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1218: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x121c: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1220: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1224: s_and_saveexec_b64 SGPR0, VCC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x1228: s_xor_b64 SGPR0, SGPR0, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+[Parser.C:1778] curAddr 0x122c: s_cbranch_execz ((PC + 0x4) + 0x56) 
+[Parser.C:1784] leaf 1 funcname bpnn_layerforward_CUDA 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_layerforward_CUDA tries to set parsing edge at 122c
+[Parser.C:2482] parsing edge at 122c has started by another thread, function bpnn_layerforward_CUDA at 1000
+	 add_edge called, src_addr 122c, dst 1268, edge type 1, looked up block [11f4, 1230)
+[Parser.C:1964] recording block [1268,1268)
+[Parser.C] parsing block 1268
+Checking non-returning for bpnn_layerforward_CUDA
+Set function bpnn_layerforward_CUDA at 1000 ret status from 0 to 1
+[Parser.C] frame 1000 complete, return status: 1
+[/home/wuxx1279/dyninst/parseAPI/src/Parser.C] bpnn_layerforward_CUDA return status 1, no waiters
+[Parser.C] ==== starting to parse frame 1300 ====
+Iteration 1 for function bpnn_adjust_weights_cuda at 1300
+[Parser.C] parsing block 1300
+[Parser.C:1778] curAddr 0x1300: s_load_dword SGPR0, [(SGPR[4:5], (0x8 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1308: s_load_dwordx2 SGPR[8:9], [(SGPR[4:5], (0x10 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1310: v_mov_b32 VGPR2, VGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1314: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x131c: v_lshlrev_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1320: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1324: s_add_i32 SGPR6, 0x1, SGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1328: s_load_dwordx2 SGPR[10:11], [(SGPR[4:5], (0x0 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1330: s_load_dwordx4 SGPR[0:3], [(SGPR[4:5], (0x20 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1338: v_mul_lo_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1340: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1344: v_mov_b32 VGPR13, SGPR9 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1348: s_mov_b32 SGPR4, 0x33333333 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1350: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1358: v_add_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x135c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1360: flat_load_dword_global (ADDRESS_MODE_32?VGPR15:VGPR[15:16]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1368: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x136c: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1374: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1378: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1380: v_mov_b32 VGPR8, SGPR3 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1384: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1388: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x138c: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1390: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1394: flat_load_dword_global (ADDRESS_MODE_32?VGPR7:VGPR[7:8]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x139c: v_mov_b32 VGPR16, SGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13a0: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13a4: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13a8: s_mov_b32 SGPR5, 0x3fd33333 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13b0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13b4: s_nop VGPR9, VGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13b8: flat_load_dword_global (ADDRESS_MODE_32?VGPR5:VGPR[5:6]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13c0: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13c8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13cc: s_nop VGPR11, VGPR11 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13d0: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13d8: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13dc: s_nop VGPR13, VGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13e0: flat_load_dword_global (ADDRESS_MODE_32?VGPR3:VGPR[3:4]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13e8: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13f0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13f4: s_nop VGPR11, VGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x13f8: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1400: s_nop VGPR1, VGPR9 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1404: flat_store_dword_global (ADDRESS_MODE_32?VGPR3:VGPR[3:4]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x140c: flat_load_dword_global (ADDRESS_MODE_32?VGPR15:VGPR[15:16]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1414: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1418: flat_load_dword_global (ADDRESS_MODE_32?VGPR7:VGPR[7:8]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1420: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1424: s_nop VGPR3, VGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1428: flat_load_dword_global (ADDRESS_MODE_32?VGPR5:VGPR[5:6]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1430: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1434: s_nop VGPR9, VGPR9 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1438: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1440: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1448: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x144c: s_nop VGPR5, VGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1450: v_mov_b32 VGPR1, 0x0 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1454: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x145c: v_or_b32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1460: v_mov_b32 VGPR5, 0x0 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1464: v_mov_b32 VGPR9, SGPR11 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1468: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x146c: s_nop VGPR4, VGPR3 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1470: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1474: v_cmp_eq_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1478: flat_store_dword_global (ADDRESS_MODE_32?VGPR7:VGPR[7:8]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1480: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1484: s_barrier  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1488: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x148c: s_and_saveexec_b64 SGPR6, VCC_LO 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1490: s_cbranch_execz ((PC + 0x4) + 0x180) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+	 branch or return, ret true
+Function bpnn_adjust_weights_cuda tries to set parsing edge at 1490
+Getting edges
+IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x180) to 0x1490...SUCCESS (CFT=0x1548)
+Returned 2 edges
+		2 edges:
+			edge target 1548, is_code 1, is_plt 0, edge type 1, dynamic_call 0
+ParserDetails.C[75]: adding conditional taken edge 1490->1548
+resolveable_edge: 1, tailcall: 0, target: 1548
+[ParserDetails.C:583] pushing 1548 onto worklist
+[ParserDetails.C:584] new edge is 0x11a39b0
+	 pushing work element for block (nil), edge 0x11a39b0, target 0x1548
+			edge target 1494, is_code 1, is_plt 0, edge type 2, dynamic_call 0
+ParserDetails.C[79]: adding conditional not taken edge 1490->1494
+resolveable_edge: 1, tailcall: 0, target: 1494
+[ParserDetails.C:583] pushing 1494 onto worklist
+[ParserDetails.C:584] new edge is 0x11a2fc0
+	 pushing work element for block (nil), edge 0x11a2fc0, target 0x1494
+	 add_edge called, src_addr 1490, dst 1494, edge type 2, looked up block [1300, 1494)
+[Parser.C:1964] recording block [1494,1494)
+[Parser.C] parsing block 1494
+[Parser.C:1778] curAddr 0x1494: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x149c: v_mov_b32 VGPR5, SGPR3 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14a0: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14a4: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14a8: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14b0: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14b8: v_mov_b32 VGPR10, SGPR1 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14bc: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14c0: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14c4: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14c8: s_nop VGPR6, VGPR6 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14cc: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14d0: s_nop VGPR8, VGPR8 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14d4: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14dc: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14e4: flat_load_dword_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14ec: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14f0: s_nop VGPR8, VGPR8 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14f4: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x14fc: s_nop VGPR6, VGPR6 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1500: flat_store_dword_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1508: flat_load_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1510: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1514: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x151c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1520: s_nop VGPR0, VGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1524: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1528: s_nop VGPR2, VGPR2 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x152c: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1534: s_nop  
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x153c: s_nop VGPR0, VGPR0 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+[Parser.C:1778] curAddr 0x1540: flat_store_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
+[Parser.C:1784] leaf 1 funcname bpnn_adjust_weights_cuda 
+hasCFT called
+	 add_edge called, src_addr 1490, dst 1548, edge type 1, looked up block [1300, 1494)
+[Parser.C:1964] recording block [1548,1548)
+[Parser.C] parsing block 1548
+Checking non-returning for bpnn_adjust_weights_cuda
+Set function bpnn_adjust_weights_cuda at 1300 ret status from 0 to 1
+[Parser.C] frame 1300 complete, return status: 1
+[/home/wuxx1279/dyninst/parseAPI/src/Parser.C] bpnn_adjust_weights_cuda return status 1, no waiters
+[/home/wuxx1279/dyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
+)[Parser.C] finalizing bpnn_layerforward_CUDA (1000)
+	 Considering target block [0x106c,0x1128) from edge 0x119c6e0
+	 Adding target block [106c,1128) to worklist according to edge from 1024, type 1
+	 Considering target block [0x1028,0x106c) from edge 0x119c780
+	 Adding target block [1028,106c) to worklist according to edge from 1024, type 2
+	 Considering target block [0x106c,0x1128) from edge 0x119c090
+	 Considering target block [0x1140,0x1164) from edge 0x119b920
+	 Adding target block [1140,1164) to worklist according to edge from 1124, type 1
+	 Considering target block [0x1128,0x1140) from edge 0x119d4e0
+	 Adding target block [1128,1140) to worklist according to edge from 1124, type 2
+	 Considering target block [0x1140,0x1164) from edge 0x119c9f0
+	 Considering target block [0x117c,0x11a0) from edge 0x119c010
+	 Adding target block [117c,11a0) to worklist according to edge from 1160, type 1
+	 Considering target block [0x1164,0x117c) from edge 0x119d000
+	 Adding target block [1164,117c) to worklist according to edge from 1160, type 2
+	 Considering target block [0x117c,0x11a0) from edge 0x119c050
+	 Considering target block [0x11a0,0x11a8) from edge 0x119b5d0
+	 Adding target block [11a0,11a8) to worklist according to edge from 119c, type 2
+	 Considering target block [0x11b8,0x11dc) from edge 0x119b8a0
+	 Adding target block [11b8,11dc) to worklist according to edge from 119c, type 1
+	 Considering target block [0x11f4,0x1230) from edge 0x119b650
+	 Adding target block [11f4,1230) to worklist according to edge from 11d8, type 1
+	 Considering target block [0x11dc,0x11e4) from edge 0x119cf00
+	 Adding target block [11dc,11e4) to worklist according to edge from 11d8, type 2
+	 Considering target block [0x11e4,0x11f4) from edge 0x119d0b0
+	 Adding target block [11e4,11f4) to worklist according to edge from 11dc, type 5
+	 Considering target block [0x11f4,0x1230) from edge 0x11a0fe0
+	 Considering target block [0x1230,0x126c) from edge 0x119c290
+	 Adding target block [1230,126c) to worklist according to edge from 122c, type 2
+	 Considering target block [0x1268,0x126c) from edge 0x119ce00
+	 Adding target block [1268,126c) to worklist according to edge from 122c, type 1
+No targets, exits func
+Adding block 0x1268 as exit
+No targets, exits func
+Adding block 0x1230 as exit
+	 Considering target block [0x11a8,0x11b8) from edge 0x119cb70
+	 Adding target block [11a8,11b8) to worklist according to edge from 11a0, type 5
+	 Considering target block [0x11b8,0x11dc) from edge 0x119b590
+1000 extent [1000,126c)
+[Parser.C] finalizing bpnn_adjust_weights_cuda (1300)
+	 Considering target block [0x1494,0x154c) from edge 0x11a2fc0
+	 Adding target block [1494,154c) to worklist according to edge from 1490, type 2
+	 Considering target block [0x1548,0x154c) from edge 0x11a39b0
+	 Adding target block [1548,154c) to worklist according to edge from 1490, type 1
+No targets, exits func
+Adding block 0x1548 as exit
+No targets, exits func
+Adding block 0x1494 as exit
+1300 extent [1300,154c)
+[Parser.C] finalizing bpnn_layerforward_CUDA (1000)
+	 Considering target block [0x106c,0x1128) from edge 0x119c6e0
+	 Adding target block [106c,1128) to worklist according to edge from 1024, type 1
+	 Considering target block [0x1028,0x106c) from edge 0x119c780
+	 Adding target block [1028,106c) to worklist according to edge from 1024, type 2
+	 Considering target block [0x106c,0x1128) from edge 0x119c090
+	 Considering target block [0x1140,0x1164) from edge 0x119b920
+	 Adding target block [1140,1164) to worklist according to edge from 1124, type 1
+	 Considering target block [0x1128,0x1140) from edge 0x119d4e0
+	 Adding target block [1128,1140) to worklist according to edge from 1124, type 2
+	 Considering target block [0x1140,0x1164) from edge 0x119c9f0
+	 Considering target block [0x117c,0x11a0) from edge 0x119c010
+	 Adding target block [117c,11a0) to worklist according to edge from 1160, type 1
+	 Considering target block [0x1164,0x117c) from edge 0x119d000
+	 Adding target block [1164,117c) to worklist according to edge from 1160, type 2
+	 Considering target block [0x117c,0x11a0) from edge 0x119c050
+	 Considering target block [0x11a0,0x11a8) from edge 0x119b5d0
+	 Adding target block [11a0,11a8) to worklist according to edge from 119c, type 2
+	 Considering target block [0x11b8,0x11dc) from edge 0x119b8a0
+	 Adding target block [11b8,11dc) to worklist according to edge from 119c, type 1
+	 Considering target block [0x11f4,0x1230) from edge 0x119b650
+	 Adding target block [11f4,1230) to worklist according to edge from 11d8, type 1
+	 Considering target block [0x11dc,0x11e4) from edge 0x119cf00
+	 Adding target block [11dc,11e4) to worklist according to edge from 11d8, type 2
+	 Considering target block [0x11e4,0x11f4) from edge 0x119d0b0
+	 Adding target block [11e4,11f4) to worklist according to edge from 11dc, type 5
+	 Considering target block [0x11f4,0x1230) from edge 0x11a0fe0
+	 Considering target block [0x1230,0x126c) from edge 0x119c290
+	 Adding target block [1230,126c) to worklist according to edge from 122c, type 2
+	 Considering target block [0x1268,0x126c) from edge 0x119ce00
+	 Adding target block [1268,126c) to worklist according to edge from 122c, type 1
+No targets, exits func
+Adding block 0x1268 as exit
+No targets, exits func
+Adding block 0x1230 as exit
+	 Considering target block [0x11a8,0x11b8) from edge 0x119cb70
+	 Adding target block [11a8,11b8) to worklist according to edge from 11a0, type 5
+	 Considering target block [0x11b8,0x11dc) from edge 0x119b590
+1000 extent [1000,126c)
+[Parser.C] finalizing bpnn_adjust_weights_cuda (1300)
+	 Considering target block [0x1494,0x154c) from edge 0x11a2fc0
+	 Adding target block [1494,154c) to worklist according to edge from 1490, type 2
+	 Considering target block [0x1548,0x154c) from edge 0x11a39b0
+	 Adding target block [1548,154c) to worklist according to edge from 1490, type 1
+No targets, exits func
+Adding block 0x1548 as exit
+No targets, exits func
+Adding block 0x1494 as exit
+1300 extent [1300,154c)
+[Parser.C:187] parsing complete for Parser 0x118b2c0 with state 4
+[Parser.C:169] parse() called on Parser 0x118b2c0 with state 4

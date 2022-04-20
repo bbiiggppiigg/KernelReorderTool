@@ -14,44 +14,44 @@ Add known data range [c80, cc0) from symbol _Z6KernelP4NodePiPbS2_S2_S1_i.kd
 [SymtabCodeSource.C:482] processing 2 symtab hints
 	<1000,Kernel,[1000,129c)>
 	<1200,Kernel2,[1000,129c)>
-[Parser.C:1949] recording block [ffffffffffffffff,ffffffffffffffff)
+[Parser.C:1964] recording block [ffffffffffffffff,ffffffffffffffff)
 Checking non-returning for Kernel
 [CodeObject.C] adding hint 1000
 Checking non-returning for Kernel2
 [CodeObject.C] adding hint 1200
-[Parser.C:169] parse() called on Parser 0xa0f710 with state 0
+[Parser.C:169] parse() called on Parser 0x1c33710 with state 0
 [Parser.C:283] entered parse_vanilla()
 	2 function hints
-[Parser.C:1949] recording block [1000,1000)
+[Parser.C:1964] recording block [1000,1000)
 	 pushing work element for block (nil), edge (nil), target 0x1000
-[Parser.C:1949] recording block [1200,1200)
+[Parser.C:1964] recording block [1200,1200)
 	 pushing work element for block (nil), edge (nil), target 0x1200
 [Parser.C] ==== starting to parse frame 1000 ====
 Iteration 1 for function Kernel at 1000
 [Parser.C] parsing block 1000
-[Parser.C:1763] curAddr 0x1000: s_load_dword SGPR2, [(SGPR[4:5], (0x30 + 0x0))] 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1000: s_load_dword SGPR2, [(SGPR[4:5], (0x30 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1008: s_mov_b32 SGPR7, 0x0 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1008: s_mov_b32 SGPR7, 0x0 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x100c: s_lshl_b64 SGPR0, 0x6, SGPR6 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x100c: s_lshl_b64 SGPR0, 0x6, SGPR6 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1010: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1010: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1014: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1014: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1018: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1018: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x101c: s_and_saveexec_b64 SGPR0, VCC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x101c: s_and_saveexec_b64 SGPR0, VCC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1020: s_cbranch_execz ((PC + 0x4) + 0x352) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1020: s_cbranch_execz ((PC + 0x4) + 0x352) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 Function Kernel tries to set parsing edge at 1020
@@ -63,49 +63,49 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1020->1184
 resolveable_edge: 1, tailcall: 0, target: 1184
 [ParserDetails.C:583] pushing 1184 onto worklist
-[ParserDetails.C:584] new edge is 0xa1d750
-	 pushing work element for block (nil), edge 0xa1d750, target 0x1184
+[ParserDetails.C:584] new edge is 0x1c41750
+	 pushing work element for block (nil), edge 0x1c41750, target 0x1184
 			edge target 1024, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1020->1024
 resolveable_edge: 1, tailcall: 0, target: 1024
 [ParserDetails.C:583] pushing 1024 onto worklist
-[ParserDetails.C:584] new edge is 0xa1d7f0
-	 pushing work element for block (nil), edge 0xa1d7f0, target 0x1024
+[ParserDetails.C:584] new edge is 0x1c417f0
+	 pushing work element for block (nil), edge 0x1c417f0, target 0x1024
 	 add_edge called, src_addr 1020, dst 1024, edge type 2, looked up block [1000, 1024)
-[Parser.C:1949] recording block [1024,1024)
+[Parser.C:1964] recording block [1024,1024)
 [Parser.C] parsing block 1024
-[Parser.C:1763] curAddr 0x1024: s_load_dwordx8 SGPR[8:15], [(SGPR[4:5], (0x0 + 0x0))] 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1024: s_load_dwordx8 SGPR[8:15], [(SGPR[4:5], (0x0 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x102c: v_ashrrev_i32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x102c: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1030: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1030: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1034: v_mov_b32 VGPR1, SGPR13 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1034: v_mov_b32 VGPR1, SGPR13 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1038: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1038: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x103c: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x103c: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1040: flat_load_ubyte_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1040: flat_load_ubyte_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1048: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1048: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x104c: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x104c: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1050: s_and_b64 EXEC_LO, VCC_LO, EXEC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1050: s_and_b64 EXEC_LO, VCC_LO, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1054: s_cbranch_execz ((PC + 0x4) + 0x300) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1054: s_cbranch_execz ((PC + 0x4) + 0x300) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 Function Kernel tries to set parsing edge at 1054
@@ -117,52 +117,52 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1054->1184
 resolveable_edge: 1, tailcall: 0, target: 1184
 [ParserDetails.C:583] pushing 1184 onto worklist
-[ParserDetails.C:584] new edge is 0xa1de40
-	 pushing work element for block (nil), edge 0xa1de40, target 0x1184
+[ParserDetails.C:584] new edge is 0x1c41e40
+	 pushing work element for block (nil), edge 0x1c41e40, target 0x1184
 			edge target 1058, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1054->1058
 resolveable_edge: 1, tailcall: 0, target: 1058
 [ParserDetails.C:583] pushing 1058 onto worklist
-[ParserDetails.C:584] new edge is 0xa1dee0
-	 pushing work element for block (nil), edge 0xa1dee0, target 0x1058
+[ParserDetails.C:584] new edge is 0x1c41ee0
+	 pushing work element for block (nil), edge 0x1c41ee0, target 0x1058
 	 add_edge called, src_addr 1054, dst 1058, edge type 2, looked up block [1024, 1058)
-[Parser.C:1949] recording block [1058,1058)
+[Parser.C:1964] recording block [1058,1058)
 [Parser.C] parsing block 1058
-[Parser.C:1763] curAddr 0x1058: v_mov_b32 VGPR4, 0x0 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1058: v_mov_b32 VGPR4, 0x0 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x105c: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x105c: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1064: v_lshlrev_b64  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1064: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x106c: v_mov_b32 VGPR4, SGPR9 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x106c: v_mov_b32 VGPR4, SGPR9 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1070: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1070: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1074: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1074: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1078: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1078: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1080: s_load_dwordx4 SGPR[0:3], [(SGPR[4:5], (0x20 + 0x0))] 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1080: s_load_dwordx4 SGPR[0:3], [(SGPR[4:5], (0x20 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1088: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1088: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x108c: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x108c: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1090: s_and_b64 EXEC_LO, VCC_LO, EXEC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1090: s_and_b64 EXEC_LO, VCC_LO, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1094: s_cbranch_execz ((PC + 0x4) + 0x236) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1094: s_cbranch_execz ((PC + 0x4) + 0x236) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 Function Kernel tries to set parsing edge at 1094
@@ -174,58 +174,58 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1094->1184
 resolveable_edge: 1, tailcall: 0, target: 1184
 [ParserDetails.C:583] pushing 1184 onto worklist
-[ParserDetails.C:584] new edge is 0xa1e530
-	 pushing work element for block (nil), edge 0xa1e530, target 0x1184
+[ParserDetails.C:584] new edge is 0x1c42530
+	 pushing work element for block (nil), edge 0x1c42530, target 0x1184
 			edge target 1098, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1094->1098
 resolveable_edge: 1, tailcall: 0, target: 1098
 [ParserDetails.C:583] pushing 1098 onto worklist
-[ParserDetails.C:584] new edge is 0xa1e5d0
-	 pushing work element for block (nil), edge 0xa1e5d0, target 0x1098
+[ParserDetails.C:584] new edge is 0x1c425d0
+	 pushing work element for block (nil), edge 0x1c425d0, target 0x1098
 	 add_edge called, src_addr 1094, dst 1098, edge type 2, looked up block [1058, 1098)
-[Parser.C:1949] recording block [1098,1098)
+[Parser.C:1964] recording block [1098,1098)
 [Parser.C] parsing block 1098
-[Parser.C:1763] curAddr 0x1098: v_lshlrev_b64  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1098: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10a0: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10a0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10a4: v_mov_b32 VGPR6, SGPR3 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10a4: v_mov_b32 VGPR6, SGPR3 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10a8: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10a8: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10ac: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10ac: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10b0: v_ashrrev_i32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10b0: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10b4: v_mov_b32 VGPR6, VGPR4 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10b4: v_mov_b32 VGPR6, VGPR4 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10b8: v_lshlrev_b64  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10b8: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10c0: v_mov_b32 VGPR8, SGPR11 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10c0: v_mov_b32 VGPR8, SGPR11 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10c4: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10c4: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10c8: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10c8: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10cc: s_mov_b64 SGPR4, 0x0 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10cc: s_mov_b64 SGPR4, 0x0 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10d0: v_mov_b32 VGPR10, VGPR4 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10d0: v_mov_b32 VGPR10, VGPR4 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10d4: s_branch ((PC + 0x4) + 0x40) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10d4: s_branch ((PC + 0x4) + 0x40) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 IA_IAPI.C[868]: binding PC PC in s_branch ((PC + 0x4) + 0x40) to 0x10d4...SUCCESS (CFT=0x1100)
@@ -237,50 +237,50 @@ Returned 1 edges
 ParserDetails.C[87]: adding direct edge 10d4->1100
 resolveable_edge: 1, tailcall: 0, target: 1100
 [ParserDetails.C:583] pushing 1100 onto worklist
-[ParserDetails.C:584] new edge is 0xa1e360
-	 pushing work element for block (nil), edge 0xa1e360, target 0x1100
+[ParserDetails.C:584] new edge is 0x1c42360
+	 pushing work element for block (nil), edge 0x1c42360, target 0x1100
 	 add_edge called, src_addr 1094, dst 1184, edge type 1, looked up block [1058, 1098)
-[Parser.C:1949] recording block [1184,1184)
+[Parser.C:1964] recording block [1184,1184)
 [Parser.C] parsing block 1184
 	 add_edge called, src_addr 1020, dst 1184, edge type 1, looked up block [1000, 1024)
 [Parser.C] skipping locally parsed target at 1184, [1184, 1188)
 	 add_edge called, src_addr 1054, dst 1184, edge type 1, looked up block [1024, 1058)
 [Parser.C] skipping locally parsed target at 1184, [1184, 1188)
 	 add_edge called, src_addr 10d4, dst 1100, edge type 4, looked up block [1098, 10d8)
-[Parser.C:1949] recording block [1100,1100)
+[Parser.C:1964] recording block [1100,1100)
 [Parser.C] parsing block 1100
-[Parser.C:1763] curAddr 0x1100: flat_load_dword_global (ADDRESS_MODE_32?VGPR6:VGPR[6:7]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1100: flat_load_dword_global (ADDRESS_MODE_32?VGPR6:VGPR[6:7]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1108: v_mov_b32 VGPR12, SGPR1 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1108: v_mov_b32 VGPR12, SGPR1 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x110c: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x110c: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1110: v_ashrrev_i32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1110: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1114: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1114: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1118: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1118: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x111c: flat_load_ubyte_global (ADDRESS_MODE_32?VGPR11:VGPR[11:12]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x111c: flat_load_ubyte_global (ADDRESS_MODE_32?VGPR11:VGPR[11:12]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1124: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1124: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1128: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1128: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x112c: s_and_saveexec_b64 SGPR6, VCC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x112c: s_and_saveexec_b64 SGPR6, VCC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1130: s_cbranch_execz ((PC + 0x4) + 0x-92) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1130: s_cbranch_execz ((PC + 0x4) + 0x-92) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 Function Kernel tries to set parsing edge at 1130
@@ -292,61 +292,61 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1130->10d8
 resolveable_edge: 1, tailcall: 0, target: 10d8
 [ParserDetails.C:583] pushing 10d8 onto worklist
-[ParserDetails.C:584] new edge is 0xa1e420
-	 pushing work element for block (nil), edge 0xa1e420, target 0x10d8
+[ParserDetails.C:584] new edge is 0x1c42420
+	 pushing work element for block (nil), edge 0x1c42420, target 0x10d8
 			edge target 1134, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1130->1134
 resolveable_edge: 1, tailcall: 0, target: 1134
 [ParserDetails.C:583] pushing 1134 onto worklist
-[ParserDetails.C:584] new edge is 0xa1e3e0
-	 pushing work element for block (nil), edge 0xa1e3e0, target 0x1134
+[ParserDetails.C:584] new edge is 0x1c423e0
+	 pushing work element for block (nil), edge 0x1c423e0, target 0x1134
 	 add_edge called, src_addr 1130, dst 1134, edge type 2, looked up block [1100, 1134)
-[Parser.C:1949] recording block [1134,1134)
+[Parser.C:1964] recording block [1134,1134)
 [Parser.C] parsing block 1134
-[Parser.C:1763] curAddr 0x1134: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1134: flat_load_dword_global (ADDRESS_MODE_32?VGPR2:VGPR[2:3]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x113c: v_lshlrev_b64  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x113c: v_lshlrev_b64  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1144: v_mov_b32 VGPR12, SGPR15 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1144: v_mov_b32 VGPR12, SGPR15 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1148: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1148: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x114c: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x114c: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1150: v_mov_b32 VGPR13, SGPR3 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1150: v_mov_b32 VGPR13, SGPR3 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1154: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1154: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1158: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1158: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x115c: v_mov_b32 VGPR14, 0x1 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x115c: v_mov_b32 VGPR14, 0x1 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1160: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1160: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1164: v_add_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1164: v_add_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1168: flat_store_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1168: flat_store_dword_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1170: s_nop_global (ADDRESS_MODE_32?VGPR8:VGPR[8:9]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1170: s_nop_global (ADDRESS_MODE_32?VGPR8:VGPR[8:9]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1178: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1178: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x1180: s_branch ((PC + 0x4) + 0x-172) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x1180: s_branch ((PC + 0x4) + 0x-172) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 IA_IAPI.C[868]: binding PC PC in s_branch ((PC + 0x4) + 0x-172) to 0x1180...SUCCESS (CFT=0x10d8)
@@ -358,40 +358,40 @@ Returned 1 edges
 ParserDetails.C[87]: adding direct edge 1180->10d8
 resolveable_edge: 1, tailcall: 0, target: 10d8
 [ParserDetails.C:583] pushing 10d8 onto worklist
-[ParserDetails.C:584] new edge is 0xa22570
-	 pushing work element for block (nil), edge 0xa22570, target 0x10d8
+[ParserDetails.C:584] new edge is 0x1c46570
+	 pushing work element for block (nil), edge 0x1c46570, target 0x10d8
 	 add_edge called, src_addr 1130, dst 10d8, edge type 1, looked up block [1100, 1134)
-[Parser.C:1949] recording block [10d8,10d8)
+[Parser.C:1964] recording block [10d8,10d8)
 [Parser.C] parsing block 10d8
-[Parser.C:1763] curAddr 0x10d8: s_or_b64 EXEC_LO, SGPR6, EXEC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10d8: s_or_b64 EXEC_LO, SGPR6, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10dc: v_add_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10dc: v_add_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10e0: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10e0: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10e4: v_add_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10e4: v_add_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10e8: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10e8: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10ec: s_or_b64 SGPR4, SGPR4, VCC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10ec: s_or_b64 SGPR4, SGPR4, VCC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10f0: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10f0: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10f4: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10f4: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10f8: s_andn2_b64 EXEC_LO, SGPR4, EXEC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10f8: s_andn2_b64 EXEC_LO, SGPR4, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
-[Parser.C:1763] curAddr 0x10fc: s_cbranch_execz ((PC + 0x4) + 0x132) 
-[Parser.C:1769] leaf 1 funcname Kernel 
+[Parser.C:1778] curAddr 0x10fc: s_cbranch_execz ((PC + 0x4) + 0x132) 
+[Parser.C:1784] leaf 1 funcname Kernel 
 hasCFT called
 	 branch or return, ret true
 Function Kernel tries to set parsing edge at 10fc
@@ -403,14 +403,14 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 10fc->1184
 resolveable_edge: 1, tailcall: 0, target: 1184
 [ParserDetails.C:583] pushing 1184 onto worklist
-[ParserDetails.C:584] new edge is 0xa1e320
-	 pushing work element for block (nil), edge 0xa1e320, target 0x1184
+[ParserDetails.C:584] new edge is 0x1c42320
+	 pushing work element for block (nil), edge 0x1c42320, target 0x1184
 			edge target 1100, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 10fc->1100
 resolveable_edge: 1, tailcall: 0, target: 1100
 [ParserDetails.C:583] pushing 1100 onto worklist
-[ParserDetails.C:584] new edge is 0xa1dbd0
-	 pushing work element for block (nil), edge 0xa1dbd0, target 0x1100
+[ParserDetails.C:584] new edge is 0x1c41bd0
+	 pushing work element for block (nil), edge 0x1c41bd0, target 0x1100
 	 add_edge called, src_addr 10fc, dst 1100, edge type 2, looked up block [10d8, 1100)
 [Parser.C] skipping locally parsed target at 1100, [1100, 1134)
 	 add_edge called, src_addr 10fc, dst 1184, edge type 1, looked up block [10d8, 1100)
@@ -424,29 +424,29 @@ Set function Kernel at 1000 ret status from 0 to 1
 [Parser.C] ==== starting to parse frame 1200 ====
 Iteration 1 for function Kernel2 at 1200
 [Parser.C] parsing block 1200
-[Parser.C:1763] curAddr 0x1200: s_load_dword SGPR2, [(SGPR[4:5], (0x20 + 0x0))] 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1200: s_load_dword SGPR2, [(SGPR[4:5], (0x20 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1208: s_mov_b32 SGPR7, 0x0 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1208: s_mov_b32 SGPR7, 0x0 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x120c: s_lshl_b64 SGPR0, 0x6, SGPR6 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x120c: s_lshl_b64 SGPR0, 0x6, SGPR6 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1210: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1210: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1214: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1214: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1218: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1218: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x121c: s_and_saveexec_b64 SGPR0, VCC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x121c: s_and_saveexec_b64 SGPR0, VCC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1220: s_cbranch_execz ((PC + 0x4) + 0x116) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1220: s_cbranch_execz ((PC + 0x4) + 0x116) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
 	 branch or return, ret true
 Function Kernel2 tries to set parsing edge at 1220
@@ -458,49 +458,49 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1220->1298
 resolveable_edge: 1, tailcall: 0, target: 1298
 [ParserDetails.C:583] pushing 1298 onto worklist
-[ParserDetails.C:584] new edge is 0xa22180
-	 pushing work element for block (nil), edge 0xa22180, target 0x1298
+[ParserDetails.C:584] new edge is 0x1c46180
+	 pushing work element for block (nil), edge 0x1c46180, target 0x1298
 			edge target 1224, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1220->1224
 resolveable_edge: 1, tailcall: 0, target: 1224
 [ParserDetails.C:583] pushing 1224 onto worklist
-[ParserDetails.C:584] new edge is 0xa22350
-	 pushing work element for block (nil), edge 0xa22350, target 0x1224
+[ParserDetails.C:584] new edge is 0x1c46350
+	 pushing work element for block (nil), edge 0x1c46350, target 0x1224
 	 add_edge called, src_addr 1220, dst 1224, edge type 2, looked up block [1200, 1224)
-[Parser.C:1949] recording block [1224,1224)
+[Parser.C:1964] recording block [1224,1224)
 [Parser.C] parsing block 1224
-[Parser.C:1763] curAddr 0x1224: s_load_dwordx8 SGPR[0:7], [(SGPR[4:5], (0x0 + 0x0))] 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1224: s_load_dwordx8 SGPR[0:7], [(SGPR[4:5], (0x0 + 0x0))] 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x122c: v_ashrrev_i32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x122c: v_ashrrev_i32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1230: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1230: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1234: v_mov_b32 VGPR2, SGPR3 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1234: v_mov_b32 VGPR2, SGPR3 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1238: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1238: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x123c: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x123c: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1240: flat_load_ubyte_global (ADDRESS_MODE_32?VGPR1:VGPR[1:2]) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1240: flat_load_ubyte_global (ADDRESS_MODE_32?VGPR1:VGPR[1:2]) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1248: s_waitcnt  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1248: s_waitcnt  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x124c: s_nop  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x124c: s_nop  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1250: s_and_b64 EXEC_LO, VCC_LO, EXEC_LO 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1250: s_and_b64 EXEC_LO, VCC_LO, EXEC_LO 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1254: s_cbranch_execz ((PC + 0x4) + 0x64) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1254: s_cbranch_execz ((PC + 0x4) + 0x64) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
 	 branch or return, ret true
 Function Kernel2 tries to set parsing edge at 1254
@@ -512,55 +512,55 @@ Returned 2 edges
 ParserDetails.C[75]: adding conditional taken edge 1254->1298
 resolveable_edge: 1, tailcall: 0, target: 1298
 [ParserDetails.C:583] pushing 1298 onto worklist
-[ParserDetails.C:584] new edge is 0xa20780
-	 pushing work element for block (nil), edge 0xa20780, target 0x1298
+[ParserDetails.C:584] new edge is 0x1c44780
+	 pushing work element for block (nil), edge 0x1c44780, target 0x1298
 			edge target 1258, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1254->1258
 resolveable_edge: 1, tailcall: 0, target: 1258
 [ParserDetails.C:583] pushing 1258 onto worklist
-[ParserDetails.C:584] new edge is 0xa20820
-	 pushing work element for block (nil), edge 0xa20820, target 0x1258
+[ParserDetails.C:584] new edge is 0x1c44820
+	 pushing work element for block (nil), edge 0x1c44820, target 0x1258
 	 add_edge called, src_addr 1254, dst 1258, edge type 2, looked up block [1224, 1258)
-[Parser.C:1949] recording block [1258,1258)
+[Parser.C:1964] recording block [1258,1258)
 [Parser.C] parsing block 1258
-[Parser.C:1763] curAddr 0x1258: v_mov_b32 VGPR5, SGPR5 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1258: v_mov_b32 VGPR5, SGPR5 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x125c: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x125c: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1260: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1260: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1264: v_add_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1264: v_add_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1268: v_mov_b32 VGPR7, SGPR1 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1268: v_mov_b32 VGPR7, SGPR1 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x126c: v_addc_co_u32  
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x126c: v_addc_co_u32  
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1270: v_mov_b32 VGPR3, 0x1 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1270: v_mov_b32 VGPR3, 0x1 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1274: v_mov_b32 VGPR0, 0x0 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1274: v_mov_b32 VGPR0, 0x0 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1278: s_nop_global (ADDRESS_MODE_32?VGPR6:VGPR[6:7]) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1278: s_nop_global (ADDRESS_MODE_32?VGPR6:VGPR[6:7]) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1280: s_nop_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1280: s_nop_global (ADDRESS_MODE_32?VGPR4:VGPR[4:5]) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1288: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1288: s_nop_global (ADDRESS_MODE_32?VGPR0:VGPR[0:1]) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
-[Parser.C:1763] curAddr 0x1290: s_nop_global (ADDRESS_MODE_32?VGPR1:VGPR[1:2]) 
-[Parser.C:1769] leaf 1 funcname Kernel2 
+[Parser.C:1778] curAddr 0x1290: s_nop_global (ADDRESS_MODE_32?VGPR1:VGPR[1:2]) 
+[Parser.C:1784] leaf 1 funcname Kernel2 
 hasCFT called
 	 add_edge called, src_addr 1254, dst 1298, edge type 1, looked up block [1224, 1258)
-[Parser.C:1949] recording block [1298,1298)
+[Parser.C:1964] recording block [1298,1298)
 [Parser.C] parsing block 1298
 	 add_edge called, src_addr 1220, dst 1298, edge type 1, looked up block [1200, 1224)
 [Parser.C] skipping locally parsed target at 1298, [1298, 129c)
@@ -570,40 +570,76 @@ Set function Kernel2 at 1200 ret status from 0 to 1
 [/home/wuxx1279/dyninst/parseAPI/src/Parser.C] Kernel2 return status 1, no waiters
 [/home/wuxx1279/dyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
 )[Parser.C] finalizing Kernel (1000)
-	 Considering target block [0x1184,0x1188) from edge 0xa1d750
+	 Considering target block [0x1184,0x1188) from edge 0x1c41750
 	 Adding target block [1184,1188) to worklist according to edge from 1020, type 1
-	 Considering target block [0x1024,0x1058) from edge 0xa1d7f0
+	 Considering target block [0x1024,0x1058) from edge 0x1c417f0
 	 Adding target block [1024,1058) to worklist according to edge from 1020, type 2
-	 Considering target block [0x1184,0x1188) from edge 0xa1de40
-	 Considering target block [0x1058,0x1098) from edge 0xa1dee0
+	 Considering target block [0x1184,0x1188) from edge 0x1c41e40
+	 Considering target block [0x1058,0x1098) from edge 0x1c41ee0
 	 Adding target block [1058,1098) to worklist according to edge from 1054, type 2
-	 Considering target block [0x1184,0x1188) from edge 0xa1e530
-	 Considering target block [0x1098,0x10d8) from edge 0xa1e5d0
+	 Considering target block [0x1184,0x1188) from edge 0x1c42530
+	 Considering target block [0x1098,0x10d8) from edge 0x1c425d0
 	 Adding target block [1098,10d8) to worklist according to edge from 1094, type 2
-	 Considering target block [0x1100,0x1134) from edge 0xa1e360
+	 Considering target block [0x1100,0x1134) from edge 0x1c42360
 	 Adding target block [1100,1134) to worklist according to edge from 10d4, type 4
-	 Considering target block [0x1134,0x1184) from edge 0xa1e3e0
+	 Considering target block [0x1134,0x1184) from edge 0x1c423e0
 	 Adding target block [1134,1184) to worklist according to edge from 1130, type 2
-	 Considering target block [0x10d8,0x1100) from edge 0xa1e420
+	 Considering target block [0x10d8,0x1100) from edge 0x1c42420
 	 Adding target block [10d8,1100) to worklist according to edge from 1130, type 1
-	 Considering target block [0x1100,0x1134) from edge 0xa1dbd0
-	 Considering target block [0x1184,0x1188) from edge 0xa1e320
-	 Considering target block [0x10d8,0x1100) from edge 0xa22570
+	 Considering target block [0x1100,0x1134) from edge 0x1c41bd0
+	 Considering target block [0x1184,0x1188) from edge 0x1c42320
+	 Considering target block [0x10d8,0x1100) from edge 0x1c46570
 No targets, exits func
 Adding block 0x1184 as exit
 1000 extent [1000,1188)
 [Parser.C] finalizing Kernel2 (1200)
-	 Considering target block [0x1298,0x129c) from edge 0xa22180
+	 Considering target block [0x1298,0x129c) from edge 0x1c46180
 	 Adding target block [1298,129c) to worklist according to edge from 1220, type 1
-	 Considering target block [0x1224,0x1258) from edge 0xa22350
+	 Considering target block [0x1224,0x1258) from edge 0x1c46350
 	 Adding target block [1224,1258) to worklist according to edge from 1220, type 2
-	 Considering target block [0x1298,0x129c) from edge 0xa20780
-	 Considering target block [0x1258,0x129c) from edge 0xa20820
+	 Considering target block [0x1298,0x129c) from edge 0x1c44780
+	 Considering target block [0x1258,0x129c) from edge 0x1c44820
 	 Adding target block [1258,129c) to worklist according to edge from 1254, type 2
 No targets, exits func
 Adding block 0x1258 as exit
 No targets, exits func
 Adding block 0x1298 as exit
 1200 extent [1200,129c)
-[Parser.C:187] parsing complete for Parser 0xa0f710 with state 4
-[Parser.C:169] parse() called on Parser 0xa0f710 with state 4
+[Parser.C] finalizing Kernel (1000)
+	 Considering target block [0x1184,0x1188) from edge 0x1c41750
+	 Adding target block [1184,1188) to worklist according to edge from 1020, type 1
+	 Considering target block [0x1024,0x1058) from edge 0x1c417f0
+	 Adding target block [1024,1058) to worklist according to edge from 1020, type 2
+	 Considering target block [0x1184,0x1188) from edge 0x1c41e40
+	 Considering target block [0x1058,0x1098) from edge 0x1c41ee0
+	 Adding target block [1058,1098) to worklist according to edge from 1054, type 2
+	 Considering target block [0x1184,0x1188) from edge 0x1c42530
+	 Considering target block [0x1098,0x10d8) from edge 0x1c425d0
+	 Adding target block [1098,10d8) to worklist according to edge from 1094, type 2
+	 Considering target block [0x1100,0x1134) from edge 0x1c42360
+	 Adding target block [1100,1134) to worklist according to edge from 10d4, type 4
+	 Considering target block [0x1134,0x1184) from edge 0x1c423e0
+	 Adding target block [1134,1184) to worklist according to edge from 1130, type 2
+	 Considering target block [0x10d8,0x1100) from edge 0x1c42420
+	 Adding target block [10d8,1100) to worklist according to edge from 1130, type 1
+	 Considering target block [0x1100,0x1134) from edge 0x1c41bd0
+	 Considering target block [0x1184,0x1188) from edge 0x1c42320
+	 Considering target block [0x10d8,0x1100) from edge 0x1c46570
+No targets, exits func
+Adding block 0x1184 as exit
+1000 extent [1000,1188)
+[Parser.C] finalizing Kernel2 (1200)
+	 Considering target block [0x1298,0x129c) from edge 0x1c46180
+	 Adding target block [1298,129c) to worklist according to edge from 1220, type 1
+	 Considering target block [0x1224,0x1258) from edge 0x1c46350
+	 Adding target block [1224,1258) to worklist according to edge from 1220, type 2
+	 Considering target block [0x1298,0x129c) from edge 0x1c44780
+	 Considering target block [0x1258,0x129c) from edge 0x1c44820
+	 Adding target block [1258,129c) to worklist according to edge from 1254, type 2
+No targets, exits func
+Adding block 0x1258 as exit
+No targets, exits func
+Adding block 0x1298 as exit
+1200 extent [1200,129c)
+[Parser.C:187] parsing complete for Parser 0x1c33710 with state 4
+[Parser.C:169] parse() called on Parser 0x1c33710 with state 4
