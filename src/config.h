@@ -267,6 +267,32 @@ void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std
 
 
 
+uint32_t get_sgpr(config &conf, bool pair = false ){
+
+    if(pair){
+        if((conf.sgpr_max & 1)   ==0){ // even, next is odd, skip one register ( say use up to 60), we should allocate 62,63
+            conf.sgpr_max+=1; // 61
+        }
+
+        conf.sgpr_max+=2;
+        return conf.sgpr_max-1;
+    }
+
+    conf.sgpr_max+=1;
+    return conf.sgpr_max;
+}
+
+uint32_t get_vgpr(config &conf, bool pair = false ){
+
+
+    if(pair){
+        conf.vgpr_max+=2;
+        return conf.vgpr_max-1;
+    }
+    conf.vgpr_max+=1;
+    return conf.vgpr_max;
+}
+
 
 void read_config(FILE * fp, char * configPath , vector<config> &configs , vector<kernel_bound> &kernel_bounds){
     INIReader reader(configPath);
@@ -400,27 +426,38 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
 
 
         uint32_t sgpr_max = c.sgpr_max;
-        if ( (sgpr_max %2) ){
-            sgpr_max +=1;
+        if ( !(sgpr_max %2) ){ // even
+            sgpr_max +=1;  // odd
         }
+        
+        c.BACKUP_WRITEBACK_ADDR = get_sgpr(c,true); // even
+        c.TIMER_1 = get_sgpr(c,true); // even
+        c.TIMER_2 = get_sgpr(c,true); // even
+        c.BACKUP_EXEC = get_sgpr(c,true); // even
+        c.WORK_GROUP_ID = get_sgpr(c); // odd
 
-        c.TMP_SGPR0 = sgpr_max +1;
-        c.TMP_SGPR1 = c.TMP_SGPR0 +1;
-        c.GLOBAL_WAVEFRONT_ID = c.TMP_SGPR1+1;
-        c.LOCAL_WAVEFRONT_ID = c.GLOBAL_WAVEFRONT_ID+1;
-        c.BACKUP_WRITEBACK_ADDR = c.LOCAL_WAVEFRONT_ID+2;
-        c.TIMER_1 = c.BACKUP_WRITEBACK_ADDR+2;
-        printf("timer 1 = %u\n",c.TIMER_1);
-        c.TIMER_2 = c.TIMER_1+2;
-        c.BACKUP_EXEC = c.TIMER_2 + 2;
-        c.WORK_GROUP_ID = c.BACKUP_EXEC +1;
+        c.TMP_SGPR0 = get_sgpr(c); // even
+        c.TMP_SGPR1 = get_sgpr(c); // odd
+        c.GLOBAL_WAVEFRONT_ID = get_sgpr(c); // even
+        c.LOCAL_WAVEFRONT_ID = get_sgpr(c); // odd
 
+       /* 
+        c.BACKUP_WRITEBACK_ADDR = sgpr_max+1; // even
+        c.TIMER_1 = c.BACKUP_WRITEBACK_ADDR+2; // even
+        c.TIMER_2 = c.TIMER_1+2; // even
+        c.BACKUP_EXEC = c.TIMER_2 + 2; // even
+        c.WORK_GROUP_ID = c.BACKUP_EXEC +1; // odd
 
-        c.DS_ADDR = c.vgpr_max + 1;
-        c.DS_DATA_0 = c.DS_ADDR + 1;
-        c.DS_DATA_1 = c.DS_DATA_0+1;
-        c.V_MINUS_1 = c.DS_DATA_1+1;
-        c.v_global_addr = c.V_MINUS_1+2;
+        c.TMP_SGPR0 = c.WORK_GROUP_ID +1; // even
+        c.TMP_SGPR1 = c.TMP_SGPR0 +1; // odd
+        c.GLOBAL_WAVEFRONT_ID = c.TMP_SGPR1+1; // even
+        c.LOCAL_WAVEFRONT_ID = c.GLOBAL_WAVEFRONT_ID+1; // odd
+*/
+        c.DS_ADDR = get_vgpr(c);
+        c.DS_DATA_0 = get_vgpr(c);
+        c.DS_DATA_1 = get_vgpr(c);
+        c.V_MINUS_1 = get_vgpr(c);
+        c.v_global_addr = get_vgpr(c,true);
         configs.push_back(c);
     }
 }
