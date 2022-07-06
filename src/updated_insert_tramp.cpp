@@ -90,8 +90,14 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     uint32_t DS_DATA_1 = c.DS_DATA_1;
     uint32_t V_MINUS_1 = c.V_MINUS_1;
     
-    
+     
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
+// Backup Writeback Address 
+    ret.push_back(InsnFactory::create_s_load_dwordx2(BACKUP_WRITEBACK_ADDR,c.kernarg_segment_ptr,c.writeback_param_offset,insn_pool)); 
+
+
+    ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
+
     if(c.work_group_id_z_enabled){
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0,c.work_group_id_z,false,insn_pool));  
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.grid_dim_y,true,insn_pool));
@@ -106,32 +112,44 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.grid_dim_x,true,insn_pool));  
     ret.push_back(InsnFactory::create_s_mul_i32(WORK_GROUP_ID,TMP_SGPR1,TMP_SGPR0,insn_pool));
 
+
     if(c.work_group_id_x_enabled){
         ret.push_back(InsnFactory::create_s_add_u32(WORK_GROUP_ID,WORK_GROUP_ID,c.work_group_id_x,false,insn_pool));
     }
-    // AFTER THIS STEP, a global WG_ID is stored in WORK_GROUP_ID 
+    // AFTER THIS STEP, a global WG_ID is stored in WORK_GROUP_ID = GRID_DIM_X * WG_ID_Y + WG_ID_X 
 
 
     // THREAD_ID = (THREAD_ID_Z * WG_DIM_Y +  TID_Y ) * WG_DIM_X + TID_x
     if(c.work_item_id_enabled > 1){ // vgpr2 enabled
-        ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR0,258,insn_pool));  // 258 is VGPR2 in this encoding
+
+    	ret.push_back(InsnFactory::create_v_readlane_b32(TMP_SGPR1,128,258,insn_pool));  // 258 is VGPR2 in this encoding
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.work_group_dim_y,true,insn_pool));
         ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
     }else{
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0,0,true,insn_pool));  
     }
     if(c.work_item_id_enabled > 0){ // vgpr2 enabled
-        ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR1,257,insn_pool));  // 257 is VGPR1 in this encoding
+
+
+        ret.push_back(InsnFactory::create_v_readlane_b32(TMP_SGPR1,128,257,insn_pool));  // 257 is VGPR1 in this encoding
+        ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
         ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,false,insn_pool));
     }
     ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.work_group_dim_x,true,insn_pool));  
+    
+
     ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
 
 
 
 
 
-    ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR1,256,insn_pool));  // 256 is VGPR0 in this encoding
+    ret.push_back(InsnFactory::create_v_readlane_b32(TMP_SGPR1,128,256,insn_pool));  // 257 is VGPR1 in this encoding
+
+    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    //ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR1,TMP_SGPR1,false,insn_pool));
+
+
     ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,false,insn_pool));
     // AFTER THIS STEP, we have a thread ID, now we want warp id , divide by 64
 
@@ -150,27 +168,50 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
 
 
 
-    ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
+    uint32_t DS_ADDR_OFFSET = c.lds_per_wavefront_offset; // temp scalar register used to calculate the lds address, which willl later be moved into a vector register
+    uint32_t data_size_per_wavefront = 8 * (c.num_branches);
+    ret.push_back(InsnFactory::create_s_mov_b32(DS_ADDR_OFFSET, data_size_per_wavefront,true,insn_pool));  
+    ret.push_back(InsnFactory::create_s_mul_i32(DS_ADDR_OFFSET,c.LOCAL_WAVEFRONT_ID, DS_ADDR_OFFSET ,insn_pool)); 
+    ret.push_back(InsnFactory::create_s_add_u32(DS_ADDR_OFFSET, DS_ADDR_OFFSET,c.lds_base,true  ,insn_pool)); // LDS_BASE +  LOCAL_WAVEFRONT_ID * (#BRANCHES)  * 8  + branchID * 8
+ 
 
 
     //* Here we initialize shared memory with 0, and vregs with 0 except one holding -1 for the purpose of ds_inc
 
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0, c.lds_base,true,insn_pool));
-    ret.push_back(InsnFactory::create_v_mov_b32(DS_ADDR , TMP_SGPR0, insn_pool)); 
+    ret.push_back(InsnFactory::create_v_mov_b32(DS_ADDR , DS_ADDR_OFFSET, insn_pool)); 
     ret.push_back(InsnFactory::create_v_mov_b32(DS_DATA_0 , S_0, insn_pool)); 
     ret.push_back(InsnFactory::create_v_mov_b32(DS_DATA_1 , S_0, insn_pool)); 
     ret.push_back(InsnFactory::create_v_mov_b32(V_MINUS_1 , S_MINUS_1, insn_pool)); 
-
+    uint32_t my_offset = 0;
     for ( uint32_t i =0 ; i < c.num_branches; i++){
-        ret.push_back(InsnFactory::create_ds_write_b64(DS_ADDR,DS_DATA_0,insn_pool));   // ds[0:1]=0
-        ret.push_back(InsnFactory::create_v_add_u32(DS_ADDR,DS_ADDR,S_8,insn_pool)); 
+        ret.push_back(InsnFactory::create_ds_write_b64(DS_ADDR,DS_DATA_0,insn_pool,my_offset));   // ds[0:1]=0
+        my_offset += 8;
     }
+   
+
+    uint32_t PER_WAVEFRONT_OFFSET = c.TMP_SGPR0; // we use TMP_SGPR0 TMP_SGPR1 as they are continuous pair of SGPR
+    //
+    // PER_WAVEFRONT_OFFSET should points to WRITEBACK_ADDR +  OFFSET + GLOBAL_WAVEFRONT_ID * NUM_BRANCHES * 8
+    //
+    uint32_t local_offset =  (c.num_branches + 2 ) * 8;
 
 
-    // Backup Writeback Address 
-    ret.push_back(InsnFactory::create_s_load_dwordx2(BACKUP_WRITEBACK_ADDR,c.kernarg_segment_ptr,c.writeback_param_offset,insn_pool)); 
+
+    ret.push_back(InsnFactory::create_s_mov_b32(PER_WAVEFRONT_OFFSET,local_offset ,true,insn_pool));
+    ret.push_back(InsnFactory::create_s_mul_i32(PER_WAVEFRONT_OFFSET,c.GLOBAL_WAVEFRONT_ID,PER_WAVEFRONT_OFFSET,insn_pool));
+    ret.push_back(InsnFactory::create_s_add_u32(PER_WAVEFRONT_OFFSET   , PER_WAVEFRONT_OFFSET , c.writeback_offset, true ,insn_pool));
+    ret.push_back(InsnFactory::create_s_addc_u32(PER_WAVEFRONT_OFFSET+1,                   S_0, PER_WAVEFRONT_OFFSET +1, false ,insn_pool));
+
+
+
+
+
+    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    ret.push_back(InsnFactory::create_s_add_u32(PER_WAVEFRONT_OFFSET   , PER_WAVEFRONT_OFFSET , c.BACKUP_WRITEBACK_ADDR , false ,insn_pool));
+    ret.push_back(InsnFactory::create_s_addc_u32(PER_WAVEFRONT_OFFSET+1,                   S_0, c.BACKUP_WRITEBACK_ADDR+1 , false ,insn_pool));
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
+    //ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR0,DS_ADDR_OFFSET,false,insn_pool));
 
 }
 
@@ -180,45 +221,69 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
 
 
     uint32_t BACKUP_EXEC = c.BACKUP_EXEC ;
-    uint32_t DS_ADDR_OFFSET = c.TMP_SGPR0; // temp scalar register used to calculate the lds address, which willl later be moved into a vector register
+    uint32_t S_LDS_PER_WAVEFRONT_OFFSET = c.lds_per_wavefront_offset;
     uint32_t DS_DATA = c.DS_DATA_0; 
     uint32_t EXECCOND = execcond;
     uint32_t V_DS_ADDR_OFFSET = c.DS_ADDR;
-
     ret.push_back(InsnFactory::create_s_mov_b64(BACKUP_EXEC,EXEC,insn_pool)); // backup EXEC
     ret.push_back(InsnFactory::create_s_mov_b64(EXEC,S_1,insn_pool)); // EXEC = 1 
-    ret.push_back(InsnFactory::create_s_mul_i32(DS_ADDR_OFFSET,c.LOCAL_WAVEFRONT_ID, c.num_branches+2 +128  ,insn_pool)); 
-    ret.push_back(InsnFactory::create_s_add_u32(DS_ADDR_OFFSET,DS_ADDR_OFFSET,branch_id+128,false,insn_pool));
-    ret.push_back(InsnFactory::create_s_lshl_b32(DS_ADDR_OFFSET,S_3, DS_ADDR_OFFSET  ,insn_pool)); // LEFT SHIFT By 3 = times 8 
-    ret.push_back(InsnFactory::create_s_add_u32(DS_ADDR_OFFSET, DS_ADDR_OFFSET,c.lds_base,true  ,insn_pool)); // LEFT SHIFT By 3 = times 8 
-
-    ret.push_back(InsnFactory::create_v_mov_b32(V_DS_ADDR_OFFSET, DS_ADDR_OFFSET, insn_pool)); //  vgpr stores the addr
-    // SO NOW THIS ADDRESS is basically 
-    //
-    // LDS usage is per work group, thus we only need to use local wavefront id to index it
-    // The problem is that the application can itself already be using shared memory , so we add and base to it
-    // Moreover, for each wavefront, for each branch, 8 bytes are required , thus
-    //
-    // DS_ADDR_OFFSET = (LOCAL_WAVEFRONT_ID * NUM_BRANCHES +  BRANCH_ID ) * 8 + LDS_BASE 
-    //
 
 
-    //instr_insns.push_back(InsnFactory::create_v_mov_b32(v_lds_addr, s_addr_cal, insn_pool)); //  vgpr stores the addr
+	uint32_t S_DS_ADDR_TMP = c.WORK_GROUP_ID;
+	
+	uint32_t local_offset = branch_id * 8;	
+
+	ret.push_back(InsnFactory::create_s_mov_b32(S_DS_ADDR_TMP,local_offset,true,insn_pool));
+    ret.push_back(InsnFactory::create_s_add_u32(S_DS_ADDR_TMP,S_DS_ADDR_TMP,S_LDS_PER_WAVEFRONT_OFFSET,false,insn_pool));
+    ret.push_back(InsnFactory::create_v_mov_b32(V_DS_ADDR_OFFSET, S_DS_ADDR_TMP, insn_pool)); //  vgpr stores the addr
 
 
-    ret.push_back(InsnFactory::create_s_cmp_eq_u64(BACKUP_EXEC,EXECCOND,insn_pool)); // CHECK IF backuped_exec == exec && cond
-    ret.push_back(InsnFactory::create_v_mov_b32( DS_DATA, SCC, insn_pool)); // vgpr stores the value (SCC)
-    ret.push_back(InsnFactory::create_ds_add_u32( V_DS_ADDR_OFFSET, DS_DATA,insn_pool)); // increment the counter
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    /*{		
+	    // So we make sure that all wavefront ids are computed correctly
+        //
+        //
+        ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR0, S_DS_ADDR_TMP,false,insn_pool));
+        ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR1, c.GLOBAL_WAVEFRONT_ID,false,insn_pool));
 
-    ret.push_back(InsnFactory::create_s_cmp_eq_u64(BACKUP_EXEC,S_0,insn_pool)); // CHECK IF S[16:17] == 0
-    ret.push_back(InsnFactory::create_v_mov_b32(DS_DATA , SCC, insn_pool)); // v3 stores the value (SCC)
-    ret.push_back(InsnFactory::create_ds_add_u32(V_DS_ADDR_OFFSET,DS_DATA,insn_pool));
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
-    ret.push_back(InsnFactory::create_v_add_u32(V_DS_ADDR_OFFSET,V_DS_ADDR_OFFSET,S_4,insn_pool)); 
-    ret.push_back(InsnFactory::create_ds_inc_u32(V_DS_ADDR_OFFSET,c.V_MINUS_1,insn_pool));
+        uint32_t S_ADDR = c.BACKUP_WRITEBACK_ADDR;
+        uint32_t PER_WAVEFRONT_OFFSET = c.TMP_SGPR0;
+        ret.push_back(InsnFactory::create_s_mov_b32(S_ADDR,local_offset,true,insn_pool));
+        ret.push_back(InsnFactory::create_s_add_u32(S_ADDR, S_ADDR, PER_WAVEFRONT_OFFSET, false  ,insn_pool)); // LEFT SHIFT By 3 = times 8
+        ret.push_back(InsnFactory::create_s_addc_u32(S_ADDR+1, S_0 , PER_WAVEFRONT_OFFSET+1,false  ,insn_pool)); // LEFT SHIFT By 3 = times 8
 
+        ret.push_back(InsnFactory::create_v_mov_b32(c.v_global_addr ,S_ADDR, insn_pool)); // v[0] = s[0]
+        ret.push_back(InsnFactory::create_v_mov_b32(c.v_global_addr+1 , S_ADDR+1, insn_pool)); // v[1 ]= s[1]
+
+        ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0, c.DEBUG_SGPR0, insn_pool)); // vgpr stores the value (SCC)
+        ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0+1, c.DEBUG_SGPR1 , insn_pool)); // vgpr stores the value (SCC)
+        ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,0,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
+    }*/
+
+
+
+    {
+        // SO NOW THIS ADDRESS is basically 
+        //
+        // LDS usage is per work group, thus we only need to use local wavefront id to index it
+        // The problem is that the application can itself already be using shared memory , so we add and base to it
+        // Moreover, for each wavefront, for each branch, 8 bytes are required , thus
+        //
+        // DS_ADDR_OFFSET = (LOCAL_WAVEFRONT_ID * NUM_BRANCHES +  BRANCH_ID ) * 8 + LDS_BASE 
+        //
+        
+        ret.push_back(InsnFactory::create_s_cmp_eq_u64(BACKUP_EXEC,EXECCOND,insn_pool)); // CHECK IF backuped_exec == exec && cond
+        ret.push_back(InsnFactory::create_v_mov_b32( DS_DATA, SCC, insn_pool)); // vgpr stores the value (SCC)
+        ret.push_back(InsnFactory::create_ds_add_u32( V_DS_ADDR_OFFSET, DS_DATA,insn_pool)); // increment the counter
+        ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+
+        ret.push_back(InsnFactory::create_s_cmp_eq_u64(BACKUP_EXEC,S_0,insn_pool)); // CHECK IF S[16:17] == 0
+        ret.push_back(InsnFactory::create_v_mov_b32(DS_DATA , SCC, insn_pool)); // v3 stores the value (SCC)
+        ret.push_back(InsnFactory::create_ds_add_u32(V_DS_ADDR_OFFSET,DS_DATA,insn_pool));
+
+        ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+        ret.push_back(InsnFactory::create_ds_inc_u32(V_DS_ADDR_OFFSET,c.V_MINUS_1,insn_pool,4));
+    }
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ret.push_back(InsnFactory::create_s_mov_b64(EXEC,BACKUP_EXEC,insn_pool)); // Use SGPR[16:17] to backup EXEC
 
@@ -230,55 +295,35 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
  * 2. Let WRITE_BACK_PTR points to WRITEBACK_ADDR + OFFSET
  */
 void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool){
-    // DATA Collection is per warp, so we disabled rest of the threads
     ret.push_back(InsnFactory::create_s_mov_b64(EXEC,S_1,insn_pool)); // EXEC = 1 
 
+    uint32_t PER_WAVEFRONT_OFFSET =c.TMP_SGPR0;
+	uint32_t PER_WAVEFRONT_LDS_OFFSET = c.lds_per_wavefront_offset;
+
+    ret.push_back(InsnFactory::create_v_mov_b32(c.v_global_addr , PER_WAVEFRONT_OFFSET, insn_pool)); // v[0] = s[0]
+    ret.push_back(InsnFactory::create_v_mov_b32(c.v_global_addr+1 , PER_WAVEFRONT_OFFSET+1, insn_pool)); // v[1 ]= s[1]
 
 
-    //ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    //  simple
-    ret.push_back(InsnFactory::create_v_mov_b32_const(c.DS_ADDR , c.lds_base, insn_pool)); 
-
-
-
-    uint32_t GLOBAL_WRITEBACK_PTR = c.TMP_SGPR0; // we use TMP_SGPR0 TMP_SGPR1 as they are continuous pair of SGPR
-    //
-    // GLOBAL_WRITEBACK_PTR should points to WRITEBACK_ADDR +  OFFSET + GLOBAL_WAVEFRONT_ID * NUM_BRANCHES * 8 
-    //
-
-    ret.push_back(InsnFactory::create_s_mul_i32(GLOBAL_WRITEBACK_PTR,c.GLOBAL_WAVEFRONT_ID,c.num_branches+2+128,insn_pool)); 
-    ret.push_back(InsnFactory::create_s_lshl_b32(GLOBAL_WRITEBACK_PTR,S_3, GLOBAL_WRITEBACK_PTR,insn_pool)); // LEFT SHIFT By 3 = times 8 
-
-
-    ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WRITEBACK_PTR   , GLOBAL_WRITEBACK_PTR , c.BACKUP_WRITEBACK_ADDR , false ,insn_pool));
-    ret.push_back(InsnFactory::create_s_addc_u32(GLOBAL_WRITEBACK_PTR+1,                   S_0, c.BACKUP_WRITEBACK_ADDR+1 , false ,insn_pool));  
-
-    ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WRITEBACK_PTR   , GLOBAL_WRITEBACK_PTR , c.writeback_offset, true ,insn_pool));
-    ret.push_back(InsnFactory::create_s_addc_u32(GLOBAL_WRITEBACK_PTR+1,                   S_0, GLOBAL_WRITEBACK_PTR +1, false ,insn_pool));  
-
-    // Replace the add with 
-
-    ret.push_back(InsnFactory::create_v_mov_b32(c.v_global_addr , GLOBAL_WRITEBACK_PTR, insn_pool)); // v[0] = s[0]
-    ret.push_back(InsnFactory::create_v_mov_b32(c.v_global_addr+1 , GLOBAL_WRITEBACK_PTR+1, insn_pool)); // v[1 ]= s[1] 
-
-
+    ret.push_back(InsnFactory::create_v_mov_b32(c.DS_ADDR , PER_WAVEFRONT_LDS_OFFSET, insn_pool)); 
 
 }
 
 
-void per_branch_writeback(vector<MyInsn> & ret,  config c ,vector<char *> & insn_pool){
+void per_branch_writeback(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vector<char *> & insn_pool){
 
-    ret.push_back(InsnFactory::create_ds_read_b64(c.DS_ADDR,c.DS_DATA_0,insn_pool)); // from shared[0] read 64 bits = 2 32_bits, into v[2:3]
+    ret.push_back(InsnFactory::create_ds_read_b64(c.DS_ADDR,c.DS_DATA_0,insn_pool, my_offset )); // from shared[0] read 64 bits = 2 32_bits, into v[2:3]
+    
+    
+    //ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0, c.lds_per_wavefront_offset, insn_pool)); // vgpr stores the value (SCC)
+    //ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0+1, 191  , insn_pool)); // vgpr stores the value (SCC)
+    
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,0,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
+    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr, my_offset ,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
 
-    ret.push_back(InsnFactory::create_v_add_u32(c.DS_ADDR,c.DS_ADDR,S_8,insn_pool)); 
-    ret.push_back(InsnFactory::create_v_add_co_u32(c.v_global_addr,c.v_global_addr,S_8,insn_pool)); 
-    ret.push_back(InsnFactory::create_v_addc_co_u32(c.v_global_addr+1,c.v_global_addr+1,S_0,insn_pool)); 
-
+    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 }
 
-void memtime_epilogue(vector<MyInsn> & ret,  config c ,vector<char *> & insn_pool){
+void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset , vector<char *> & insn_pool){
 
 
 
@@ -292,20 +337,24 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c ,vector<char *> & insn_poo
     ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_0 , c.TIMER_1 , insn_pool)); 
     ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_1 , c.TIMER_1+1, insn_pool)); 
 
-    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,0,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
-
-    ret.push_back(InsnFactory::create_v_add_co_u32(c.v_global_addr,c.v_global_addr,S_8,insn_pool)); 
-    ret.push_back(InsnFactory::create_v_addc_co_u32(c.v_global_addr+1,c.v_global_addr+1,S_0,insn_pool)); 
 
 
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    //ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0, c.DEBUG_SGPR0, insn_pool)); // vgpr stores the value (SCC)
+    //ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0+1, S_0 , insn_pool)); // vgpr stores the value (SCC)
+ 
+    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,my_offset,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
+    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool)); // wait for the metime counter value to be ready
 
     ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_0 , c.TIMER_2 , insn_pool)); // v[0] = s[0]
     ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_1 , c.TIMER_2+1, insn_pool)); // v[1 ]= s[1] 
+    
 
-    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,0,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
 
 
+    //ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0, c.DEBUG_SGPR1, insn_pool)); // vgpr stores the value (SCC)
+    //ret.push_back(InsnFactory::create_v_mov_b32( c.DS_DATA_0+1, S_0 , insn_pool)); // vgpr stores the value (SCC)
+ 
+    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,my_offset+8,insn_pool)); // store v[2:3] in to address poitned by v[0:1]
 }
 
 
@@ -398,14 +447,17 @@ int main(int argc, char **argv){
             vector<MyInsn> writeback_insns;
 
             setup_writeback(writeback_insns, c ,insn_pool);
-            for ( uint32_t i =0 ; i < num_branches ; i++)
-                per_branch_writeback(writeback_insns, c, insn_pool);
+            uint32_t my_offset = 0;
+            for ( uint32_t i =0 ; i < num_branches ; i++){
+                per_branch_writeback(writeback_insns, c, my_offset , insn_pool);
+                my_offset += 8;
+            }
 
-
-            memtime_epilogue(writeback_insns, c, insn_pool);
+            memtime_epilogue(writeback_insns, c, my_offset, insn_pool);
             printf("before inserting writeback\n");
             inplace_insert(fp,func_start,text_end,writeback_insns,branches, func_end - 4 + target_shift,kernel_bounds,insn_pool);
             target_shift+= get_size(writeback_insns);
+            
 
         }
         printf("target_shift =%u\n",target_shift);
@@ -425,7 +477,7 @@ int main(int argc, char **argv){
 
 
         extend_text(fp,target_shift+target_shift);
-        set_sgpr_vgpr_usage(fp,c.kd_addr,c.sgpr_max,c.vgpr_max);
+        set_sgpr_vgpr_usage(fp,c.kd_addr,c.sgpr_max+2,c.vgpr_max);
         update_symtab_symbol_size(fp,c.name.c_str(), func_end - func_start + target_shift );
         printf(" increase symbol for kernel %s of size = %u, with size %u instrumentation \n", c.name.c_str(), func_end - func_start, target_shift);
         fclose(fp);

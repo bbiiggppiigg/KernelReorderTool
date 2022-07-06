@@ -1,6 +1,7 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata update_note_modify_lds_size updated_insert_tramp updated_base measure_overhead m_init m_branch m_wb m_wb_pb m_conseq
+targets=split_kernel edit_kernel merge_kernel set_register_usage extend_text extend_symbol test_acc test_counter test_getreg move_block report_kd test_time analyze_metadata update_note_modify_lds_size updated_insert_tramp updated_base measure_overhead m_init m_branch m_wb m_wb_pb m_conseq use_global
+
 
 TARGETS=$(addprefix bin/,$(targets))
 
@@ -41,13 +42,15 @@ bin/m_conseq: src/measure_overhead.cpp lib/InsnFactory.h lib/kernel_elf_helper.o
 	g++ -g -Wall -Dm_CONSEQ -I$(DYNINST_ROOT)/include -I$(TBB) src/measure_overhead.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o $@
 
 
+bin/use_global: src/use_global.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
+	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) src/use_global.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/use_global
 
 
 bin/updated_insert_tramp: src/updated_insert_tramp.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_insert_tramp
+	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_insert_tramp.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_insert_tramp
 
-bin/updated_base: src/updated_base.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
-	g++ -g -Wall -I$(DYNINST_ROOT)/include -I$(TBB) src/updated_base.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_base
+bin/updated_base: src/baseline.cpp lib/InsnFactory.h lib/kernel_elf_helper.o 
+	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) src/baseline.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/updated_base
 
 
 MatrixMultiplication: $(mmpath)

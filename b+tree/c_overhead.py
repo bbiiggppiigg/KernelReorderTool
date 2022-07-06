@@ -63,7 +63,9 @@ def parse_time(filename):
         return sum(times)/ len(times)
 
 
-k1_base = parse_time("result.base.k1.txt")
-k1_instr = parse_time("result.instr.k1.txt")
+k1_base = parse_time("base.txt")
+k1_lds = parse_time("lds.txt")
+k1_global = parse_time("global.txt")
 
-print("kernel 1 native = %f, instr = %f, overhead %f"%(k1_base,k1_instr, (k1_instr-k1_base)/k1_base))
+print("kernel 1 native = %f, lds = %f, overhead %f"%(k1_base,k1_lds, (k1_lds-k1_base)/k1_base))
+print("kernel 1 native = %f, global = %f, overhead %f"%(k1_base,k1_global, (k1_global-k1_base)/k1_base))

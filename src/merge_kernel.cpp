@@ -12,7 +12,8 @@ int main(int argc, char ** argv){
     char filename[1000];
     char orig_name[1000];
     char cmd [1000];
-
+    printf("argc = %d\n",argc);
+    
     FILE * fmeta = fopen("fmeta_data.txt","r");
 
     fscanf(fmeta,"%s",orig_name);
@@ -25,8 +26,19 @@ int main(int argc, char ** argv){
         kernels.push_back(make_pair(offset,size));
     }
     fclose(fmeta);
-    sprintf(filename,"%s.new",orig_name);
+
+
+
+
+    if( argc == 2){
+        strncpy(filename,argv[1],1000);    
+    }else{
+        sprintf(filename,"%s.new",orig_name);
+    }
     sprintf(cmd,"cp %s %s",orig_name,filename);
+
+
+
     system(cmd);
 
 

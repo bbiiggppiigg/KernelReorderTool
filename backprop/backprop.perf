@@ -1,9 +1,9 @@
-CPU, Malloc Time, ONEOFF, 0.326435, 20
-CPU, CPU to GPU Transfer Time, ONEOFF, 0.001343, 20
-CPU, COMPUTE:Kernel Execution Time, ONEOFF, 0.000408, 20
-CPU, GPU to CPU Transfer Time, ONEOFF, 0.075861, 20
-CPU, Malloc Time 2, ONEOFF, 0.000074, 20
-CPU, CPU to GPU Transfer Time, ONEOFF, 0.001297, 20
-CPU, COMPUTE:Kernel Execution Time, ONEOFF, 0.000009, 20
-CPU, GPU to CPU Transfer Time, ONEOFF, 0.053747, 20
-CPU, Overall CPU Time, ONEOFF, 0.461733, 20
+CPU, Malloc Time, ONEOFF, 0.299965, 222
+CPU, CPU to GPU Transfer Time, ONEOFF, 0.001257, 222
+CPU, COMPUTE:Kernel Execution Time, ONEOFF, 0.000532, 222
+CPU, GPU to CPU Transfer Time, ONEOFF, 0.041119, 222
+CPU, Malloc Time 2, ONEOFF, 0.000085, 222
+CPU, CPU to GPU Transfer Time, ONEOFF, 0.001292, 222
+CPU, COMPUTE:Kernel Execution Time, ONEOFF, 0.000034, 222
+CPU, GPU to CPU Transfer Time, ONEOFF, 0.023518, 222
+CPU, Overall CPU Time, ONEOFF, 0.371622, 222

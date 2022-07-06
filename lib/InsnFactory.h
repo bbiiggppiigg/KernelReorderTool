@@ -36,7 +36,7 @@ class MyBranchInsn : public MyInsn{
         void update_for_insertion(uint32_t insert_loc, uint32_t insert_size){
 
 
-            uint32_t cmd_value = *(uint32_t*) ptr;
+            //uint32_t cmd_value = *(uint32_t*) ptr;
             
 
             if (insert_loc <= _branch_addr )
@@ -51,7 +51,7 @@ class MyBranchInsn : public MyInsn{
                 int16_t simm16 = ( (int32_t) _target_addr - 4 - (int32_t) _branch_addr ) >> 2;
                 memcpy(ptr,&simm16,2);
             }
-            uint32_t new_value = *(uint32_t*) ptr;
+            //uint32_t new_value = *(uint32_t*) ptr;
 
         }
 		void write_to_file(FILE* fp){
@@ -657,6 +657,43 @@ class InsnFactory {
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x2 "));
 
 		}
+		static MyInsn create_global_atomic_add( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xde000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 66;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 18 )  | (2 << 14) | offset );
+
+			cmd_high = ( cmd_high | (0x7f << 16) |s_data_pair << 8 | s_base_pair );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+
+
+
+            printf("Creating atomic_add instr, cmd = %lx\n",*(uint64_t *)cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x2 "));
+
+		}
+
+
+		static MyInsn create_global_atomic_inc( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xde000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 75;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 18 )  | (2 << 14) | offset );
+
+			cmd_high = ( cmd_high | (0x7f << 16) |s_data_pair << 8 | s_base_pair );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+
+            printf("Creating atomic_inc instr, cmd = %lx\n",*(uint64_t *)cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x2 "));
+
+		}
+
 		static MyInsn create_flat_store_dword_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
 			uint32_t cmd_low = 0xdc000000;
 			uint32_t cmd_high = 0x0;
@@ -698,12 +735,13 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
-		static MyInsn create_ds_add_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+		static MyInsn create_ds_add_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool , uint32_t offset = 0){
+            
             uint32_t cmd_low = 0xda000000;
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 0;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
-			cmd_low = (cmd_low | (op<< 17 )  );
+			cmd_low = (cmd_low | (op<< 17 ) | offset );
 
 			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
 			memcpy( cmd_ptr ,&cmd_low,  4 );
@@ -711,12 +749,12 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
-		static MyInsn create_ds_inc_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+		static MyInsn create_ds_inc_u32( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool , uint32_t offset = 0){
             uint32_t cmd_low = 0xda000000;
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 3;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
-			cmd_low = (cmd_low | (op<< 17 )  );
+			cmd_low = (cmd_low | (op<< 17 ) | offset  );
 
 			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
 			memcpy( cmd_ptr ,&cmd_low,  4 );
@@ -738,12 +776,12 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
-		static MyInsn create_ds_write_b64( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool ){
+		static MyInsn create_ds_write_b64( uint32_t vgpr_addr , uint32_t vgpr_data   ,vector<char *> & insn_pool , uint32_t offset = 0){
             uint32_t cmd_low = 0xda000000;
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 77;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
-			cmd_low = (cmd_low | (op<< 17 )  );
+			cmd_low = (cmd_low | (op<< 17 ) | offset );
 
 			cmd_high = ( cmd_high | vgpr_data << 8 | vgpr_addr );
 			memcpy( cmd_ptr ,&cmd_low,  4 );
@@ -752,12 +790,12 @@ class InsnFactory {
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
 
-		static MyInsn create_ds_read_b64( uint32_t vgpr_addr , uint32_t vdst   ,vector<char *> & insn_pool ){
+		static MyInsn create_ds_read_b64( uint32_t vgpr_addr , uint32_t vdst   ,vector<char *> & insn_pool , uint32_t offset =0){
             uint32_t cmd_low = 0xda000000;
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 118;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
-			cmd_low = (cmd_low | (op<< 17 )  );
+			cmd_low = (cmd_low | (op<< 17 )  | offset );
 
 			cmd_high = ( cmd_high | vdst << 24 | vgpr_addr );
 			memcpy( cmd_ptr ,&cmd_low,  4 );
@@ -765,6 +803,20 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
 		}
+		static MyInsn create_v_readlane_b32( uint32_t vdst , uint32_t src1 , uint32_t src0  ,vector<char *> & insn_pool){
+            uint32_t cmd_low = 0xd0000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 649;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 16 )  | vdst );
+
+			cmd_high = ( cmd_high | src1 << 9 | src0);
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword "));
+		}
+
 
 
 

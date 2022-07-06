@@ -64,8 +64,15 @@ def parse_time(filename):
 
 k1_base = parse_time("result.base.k1.txt")
 k2_base = parse_time("result.base.k2.txt")
-k1_instr = parse_time("result.instr.k1.txt")
-k2_instr = parse_time("result.instr.k2.txt")
+k1_instr = parse_time("result.lds.k1.txt")
+k2_instr = parse_time("result.lds.k2.txt")
+k1_global = parse_time("result.global.k1.txt")
+k2_global = parse_time("result.global.k2.txt")
 
-print("kernel 1 native = %f, instr = %f, overhead %f"%(k1_base,k1_instr, (k1_instr-k1_base)/k1_base))
-print("kernel 2 native = %f, instr = %f, overhead %f"%(k2_base,k2_instr, (k2_instr-k2_base)/k2_base))
+
+print("kernel 1 native = %f, instr = %f, global = %f , lds overhead = %f, global overehead = "%(k1_base,k1_instr,k1_global, (k1_instr-k1_base)/k1_base),(k1_global-k1_base)/k1_base)
+print("kernel 1 native = %f, instr = %f, global = %f , lds overhead = %f, global overehead = "%(k2_base,k2_instr,k2_global, (k2_instr-k2_base)/k2_base),(k2_global-k2_base)/k2_base)
+
+
+
+

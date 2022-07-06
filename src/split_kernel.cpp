@@ -52,9 +52,11 @@ void setup(FILE * f, vector<pair<long long int, long long int >> &ret ){
     free(strtable);
     long long int kernel_end = tmp_hdr.sh_offset + tmp_hdr.sh_size;
     
-
     long long int current_blob_offset = tmp_hdr.sh_offset;
-    while(1){
+
+    while(current_blob_offset < kernel_end){
+
+    printf("current_blob_offset = %lld kernel_end = %lld\n",current_blob_offset,kernel_end);
         current_blob_offset =  (( current_blob_offset + 7)/8) *8;
 
         //printf("current blob offset = %d\n",current_blob_offset);
@@ -70,9 +72,9 @@ void setup(FILE * f, vector<pair<long long int, long long int >> &ret ){
         fread(&num_bundles,8,1,f);
         char triple[100];
 
-        //printf("number of bundles: %d\n",num_bundles);
+        printf("number of bundles: %d\n",num_bundles);
 
-        long long int offset,size,triple_size;
+        long long int offset  = 0 ,size = 0 ,triple_size = 0;
         for (unsigned int i =0; i < num_bundles ; i++){
             fread(&offset,8,1,f);
             fread(&size,8,1,f);
@@ -80,11 +82,13 @@ void setup(FILE * f, vector<pair<long long int, long long int >> &ret ){
             fread(triple,triple_size,1,f);
 	    printf("triple = %s\n",triple);
             if(strncmp(triple,"hcc",3)==0 || strncmp(triple,"hip",3)==0){
-                //printf("\t bundle %d: offset=%d, size = %d, triple_size = %d, triple = %s\n",i,current_blob_offset+offset,size,triple_size,triple);
+                printf("\t bundle %d: offset=%d, size = %d, triple_size = %d, triple = %s\n",i,current_blob_offset+offset,size,triple_size,triple);
                 ret.push_back(make_pair(current_blob_offset + offset, size));
             }
         }
         current_blob_offset = current_blob_offset + offset + size;
+        current_blob_offset = (current_blob_offset+ 4095)/4096 * 4096;
+        printf("current_blob_offset = %d\n",current_blob_offset);
     }
 }
 

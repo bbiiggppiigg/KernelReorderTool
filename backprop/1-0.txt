@@ -6,9 +6,9 @@
    bbc .hash [skipped]
    bec .dynstr [skipped]
    cc0 .rodata
-Add known data range [d00, d40) from symbol _Z24bpnn_adjust_weights_cudaPfiS_iS_S_.kd
-Add known data range [d00, d40) from symbol _Z24bpnn_adjust_weights_cudaPfiS_iS_S_.kd
 Add known data range [cc0, d00) from symbol _Z22bpnn_layerforward_CUDAPfS_S_S_ii.kd
+Add known data range [d00, d40) from symbol _Z24bpnn_adjust_weights_cudaPfiS_iS_S_.kd
+Add known data range [d00, d40) from symbol _Z24bpnn_adjust_weights_cudaPfiS_iS_S_.kd
 Add known data range [cc0, d00) from symbol _Z22bpnn_layerforward_CUDAPfS_S_S_ii.kd
    2000 .dynamic [skipped]
 [SymtabCodeSource.C:482] processing 2 symtab hints
@@ -19,7 +19,7 @@ Checking non-returning for bpnn_layerforward_CUDA
 [CodeObject.C] adding hint 1000
 Checking non-returning for bpnn_adjust_weights_cuda
 [CodeObject.C] adding hint 1300
-[Parser.C:169] parse() called on Parser 0x118b2c0 with state 0
+[Parser.C:169] parse() called on Parser 0x1b54f40 with state 0
 [Parser.C:283] entered parse_vanilla()
 	2 function hints
 [Parser.C:1964] recording block [1000,1000)
@@ -53,21 +53,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_layerforward_CUDA tries to set parsing edge at 1024
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x68) to 0x1024...SUCCESS (CFT=0x106c)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x68) to 0x1024...SUCCESS (CFT=0x106c)
 Returned 2 edges
 		2 edges:
 			edge target 106c, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1024->106c
 resolveable_edge: 1, tailcall: 0, target: 106c
 [ParserDetails.C:583] pushing 106c onto worklist
-[ParserDetails.C:584] new edge is 0x119c6e0
-	 pushing work element for block (nil), edge 0x119c6e0, target 0x106c
+[ParserDetails.C:584] new edge is 0x1b66570
+	 pushing work element for block (nil), edge 0x1b66570, target 0x106c
 			edge target 1028, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1024->1028
 resolveable_edge: 1, tailcall: 0, target: 1028
 [ParserDetails.C:583] pushing 1028 onto worklist
-[ParserDetails.C:584] new edge is 0x119c780
-	 pushing work element for block (nil), edge 0x119c780, target 0x1028
+[ParserDetails.C:584] new edge is 0x1b66610
+	 pushing work element for block (nil), edge 0x1b66610, target 0x1028
 	 add_edge called, src_addr 1024, dst 1028, edge type 2, looked up block [1000, 1028)
 [Parser.C:1964] recording block [1028,1028)
 [Parser.C] parsing block 1028
@@ -212,21 +212,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_layerforward_CUDA tries to set parsing edge at 1124
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x1124...SUCCESS (CFT=0x1140)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x1124...SUCCESS (CFT=0x1140)
 Returned 2 edges
 		2 edges:
 			edge target 1140, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1124->1140
 resolveable_edge: 1, tailcall: 0, target: 1140
 [ParserDetails.C:583] pushing 1140 onto worklist
-[ParserDetails.C:584] new edge is 0x119b920
-	 pushing work element for block (nil), edge 0x119b920, target 0x1140
+[ParserDetails.C:584] new edge is 0x1b657b0
+	 pushing work element for block (nil), edge 0x1b657b0, target 0x1140
 			edge target 1128, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1124->1128
 resolveable_edge: 1, tailcall: 0, target: 1128
 [ParserDetails.C:583] pushing 1128 onto worklist
-[ParserDetails.C:584] new edge is 0x119d4e0
-	 pushing work element for block (nil), edge 0x119d4e0, target 0x1128
+[ParserDetails.C:584] new edge is 0x1b67370
+	 pushing work element for block (nil), edge 0x1b67370, target 0x1128
 	 add_edge called, src_addr 1124, dst 1128, edge type 2, looked up block [1028, 1128)
 [Parser.C:1964] recording block [1128,1128)
 [Parser.C] parsing block 1128
@@ -269,21 +269,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_layerforward_CUDA tries to set parsing edge at 1160
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x1160...SUCCESS (CFT=0x117c)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x1160...SUCCESS (CFT=0x117c)
 Returned 2 edges
 		2 edges:
 			edge target 117c, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1160->117c
 resolveable_edge: 1, tailcall: 0, target: 117c
 [ParserDetails.C:583] pushing 117c onto worklist
-[ParserDetails.C:584] new edge is 0x119c010
-	 pushing work element for block (nil), edge 0x119c010, target 0x117c
+[ParserDetails.C:584] new edge is 0x1b65ea0
+	 pushing work element for block (nil), edge 0x1b65ea0, target 0x117c
 			edge target 1164, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1160->1164
 resolveable_edge: 1, tailcall: 0, target: 1164
 [ParserDetails.C:583] pushing 1164 onto worklist
-[ParserDetails.C:584] new edge is 0x119d000
-	 pushing work element for block (nil), edge 0x119d000, target 0x1164
+[ParserDetails.C:584] new edge is 0x1b66e90
+	 pushing work element for block (nil), edge 0x1b66e90, target 0x1164
 	 add_edge called, src_addr 1160, dst 1164, edge type 2, looked up block [1128, 1164)
 [Parser.C:1964] recording block [1164,1164)
 [Parser.C] parsing block 1164
@@ -326,21 +326,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_layerforward_CUDA tries to set parsing edge at 119c
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x119c...SUCCESS (CFT=0x11b8)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x119c...SUCCESS (CFT=0x11b8)
 Returned 2 edges
 		2 edges:
 			edge target 11b8, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 119c->11b8
 resolveable_edge: 1, tailcall: 0, target: 11b8
 [ParserDetails.C:583] pushing 11b8 onto worklist
-[ParserDetails.C:584] new edge is 0x119b8a0
-	 pushing work element for block (nil), edge 0x119b8a0, target 0x11b8
+[ParserDetails.C:584] new edge is 0x1b65730
+	 pushing work element for block (nil), edge 0x1b65730, target 0x11b8
 			edge target 11a0, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 119c->11a0
 resolveable_edge: 1, tailcall: 0, target: 11a0
 [ParserDetails.C:583] pushing 11a0 onto worklist
-[ParserDetails.C:584] new edge is 0x119b5d0
-	 pushing work element for block (nil), edge 0x119b5d0, target 0x11a0
+[ParserDetails.C:584] new edge is 0x1b65460
+	 pushing work element for block (nil), edge 0x1b65460, target 0x11a0
 	 add_edge called, src_addr 119c, dst 11a0, edge type 2, looked up block [1164, 11a0)
 [Parser.C:1964] recording block [11a0,11a0)
 [Parser.C] parsing block 11a0
@@ -352,7 +352,7 @@ hasCFT called
 Function bpnn_layerforward_CUDA tries to set parsing edge at 11a0
 [Parser.C:1798] nop-block ended at 11a8
 [Parser.C:1800] pushing 11a8 onto worklist
-	 pushing work element for block (nil), edge 0x119cb70, target 0x11a8
+	 pushing work element for block (nil), edge 0x1b66a00, target 0x11a8
 	 add_edge called, src_addr 11a0, dst 11a8, edge type 5, looked up block [11a0, 11a8)
 [Parser.C:1964] recording block [11a8,11a8)
 [Parser.C] parsing block 11a8
@@ -392,21 +392,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_layerforward_CUDA tries to set parsing edge at 11d8
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x11d8...SUCCESS (CFT=0x11f4)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x24) to 0x11d8...SUCCESS (CFT=0x11f4)
 Returned 2 edges
 		2 edges:
 			edge target 11f4, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 11d8->11f4
 resolveable_edge: 1, tailcall: 0, target: 11f4
 [ParserDetails.C:583] pushing 11f4 onto worklist
-[ParserDetails.C:584] new edge is 0x119b650
-	 pushing work element for block (nil), edge 0x119b650, target 0x11f4
+[ParserDetails.C:584] new edge is 0x1b654e0
+	 pushing work element for block (nil), edge 0x1b654e0, target 0x11f4
 			edge target 11dc, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 11d8->11dc
 resolveable_edge: 1, tailcall: 0, target: 11dc
 [ParserDetails.C:583] pushing 11dc onto worklist
-[ParserDetails.C:584] new edge is 0x119cf00
-	 pushing work element for block (nil), edge 0x119cf00, target 0x11dc
+[ParserDetails.C:584] new edge is 0x1b66d90
+	 pushing work element for block (nil), edge 0x1b66d90, target 0x11dc
 	 add_edge called, src_addr 11d8, dst 11dc, edge type 2, looked up block [11a8, 11dc)
 [Parser.C:1964] recording block [11dc,11dc)
 [Parser.C] parsing block 11dc
@@ -418,7 +418,7 @@ hasCFT called
 Function bpnn_layerforward_CUDA tries to set parsing edge at 11dc
 [Parser.C:1798] nop-block ended at 11e4
 [Parser.C:1800] pushing 11e4 onto worklist
-	 pushing work element for block (nil), edge 0x119d0b0, target 0x11e4
+	 pushing work element for block (nil), edge 0x1b66f40, target 0x11e4
 	 add_edge called, src_addr 11dc, dst 11e4, edge type 5, looked up block [11dc, 11e4)
 [Parser.C:1964] recording block [11e4,11e4)
 [Parser.C] parsing block 11e4
@@ -473,21 +473,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_layerforward_CUDA tries to set parsing edge at 122c
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x56) to 0x122c...SUCCESS (CFT=0x1268)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x56) to 0x122c...SUCCESS (CFT=0x1268)
 Returned 2 edges
 		2 edges:
 			edge target 1268, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 122c->1268
 resolveable_edge: 1, tailcall: 0, target: 1268
 [ParserDetails.C:583] pushing 1268 onto worklist
-[ParserDetails.C:584] new edge is 0x119ce00
-	 pushing work element for block (nil), edge 0x119ce00, target 0x1268
+[ParserDetails.C:584] new edge is 0x1b66c90
+	 pushing work element for block (nil), edge 0x1b66c90, target 0x1268
 			edge target 1230, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 122c->1230
 resolveable_edge: 1, tailcall: 0, target: 1230
 [ParserDetails.C:583] pushing 1230 onto worklist
-[ParserDetails.C:584] new edge is 0x119c290
-	 pushing work element for block (nil), edge 0x119c290, target 0x1230
+[ParserDetails.C:584] new edge is 0x1b66120
+	 pushing work element for block (nil), edge 0x1b66120, target 0x1230
 	 add_edge called, src_addr 122c, dst 1230, edge type 2, looked up block [11e4, 1230)
 [Parser.C:1964] recording block [1230,1230)
 [Parser.C] parsing block 1230
@@ -1005,21 +1005,21 @@ hasCFT called
 	 branch or return, ret true
 Function bpnn_adjust_weights_cuda tries to set parsing edge at 1490
 Getting edges
-IA_IAPI.C[868]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x180) to 0x1490...SUCCESS (CFT=0x1548)
+IA_IAPI.C[870]: binding PC PC in s_cbranch_execz ((PC + 0x4) + 0x180) to 0x1490...SUCCESS (CFT=0x1548)
 Returned 2 edges
 		2 edges:
 			edge target 1548, is_code 1, is_plt 0, edge type 1, dynamic_call 0
 ParserDetails.C[75]: adding conditional taken edge 1490->1548
 resolveable_edge: 1, tailcall: 0, target: 1548
 [ParserDetails.C:583] pushing 1548 onto worklist
-[ParserDetails.C:584] new edge is 0x11a39b0
-	 pushing work element for block (nil), edge 0x11a39b0, target 0x1548
+[ParserDetails.C:584] new edge is 0x1b6d730
+	 pushing work element for block (nil), edge 0x1b6d730, target 0x1548
 			edge target 1494, is_code 1, is_plt 0, edge type 2, dynamic_call 0
 ParserDetails.C[79]: adding conditional not taken edge 1490->1494
 resolveable_edge: 1, tailcall: 0, target: 1494
 [ParserDetails.C:583] pushing 1494 onto worklist
-[ParserDetails.C:584] new edge is 0x11a2fc0
-	 pushing work element for block (nil), edge 0x11a2fc0, target 0x1494
+[ParserDetails.C:584] new edge is 0x1b6cd40
+	 pushing work element for block (nil), edge 0x1b6cd40, target 0x1494
 	 add_edge called, src_addr 1490, dst 1494, edge type 2, looked up block [1300, 1494)
 [Parser.C:1964] recording block [1494,1494)
 [Parser.C] parsing block 1494
@@ -1128,48 +1128,48 @@ Set function bpnn_adjust_weights_cuda at 1300 ret status from 0 to 1
 [/home/wuxx1279/dyninst/parseAPI/src/Parser.C] bpnn_adjust_weights_cuda return status 1, no waiters
 [/home/wuxx1279/dyninst/parseAPI/src/Parser.C] Fixed point reached (0 funcs with unknown return status)
 )[Parser.C] finalizing bpnn_layerforward_CUDA (1000)
-	 Considering target block [0x106c,0x1128) from edge 0x119c6e0
+	 Considering target block [0x106c,0x1128) from edge 0x1b66570
 	 Adding target block [106c,1128) to worklist according to edge from 1024, type 1
-	 Considering target block [0x1028,0x106c) from edge 0x119c780
+	 Considering target block [0x1028,0x106c) from edge 0x1b66610
 	 Adding target block [1028,106c) to worklist according to edge from 1024, type 2
-	 Considering target block [0x106c,0x1128) from edge 0x119c090
-	 Considering target block [0x1140,0x1164) from edge 0x119b920
+	 Considering target block [0x106c,0x1128) from edge 0x1b65f20
+	 Considering target block [0x1140,0x1164) from edge 0x1b657b0
 	 Adding target block [1140,1164) to worklist according to edge from 1124, type 1
-	 Considering target block [0x1128,0x1140) from edge 0x119d4e0
+	 Considering target block [0x1128,0x1140) from edge 0x1b67370
 	 Adding target block [1128,1140) to worklist according to edge from 1124, type 2
-	 Considering target block [0x1140,0x1164) from edge 0x119c9f0
-	 Considering target block [0x117c,0x11a0) from edge 0x119c010
+	 Considering target block [0x1140,0x1164) from edge 0x1b66880
+	 Considering target block [0x117c,0x11a0) from edge 0x1b65ea0
 	 Adding target block [117c,11a0) to worklist according to edge from 1160, type 1
-	 Considering target block [0x1164,0x117c) from edge 0x119d000
+	 Considering target block [0x1164,0x117c) from edge 0x1b66e90
 	 Adding target block [1164,117c) to worklist according to edge from 1160, type 2
-	 Considering target block [0x117c,0x11a0) from edge 0x119c050
-	 Considering target block [0x11a0,0x11a8) from edge 0x119b5d0
+	 Considering target block [0x117c,0x11a0) from edge 0x1b65ee0
+	 Considering target block [0x11a0,0x11a8) from edge 0x1b65460
 	 Adding target block [11a0,11a8) to worklist according to edge from 119c, type 2
-	 Considering target block [0x11b8,0x11dc) from edge 0x119b8a0
+	 Considering target block [0x11b8,0x11dc) from edge 0x1b65730
 	 Adding target block [11b8,11dc) to worklist according to edge from 119c, type 1
-	 Considering target block [0x11f4,0x1230) from edge 0x119b650
+	 Considering target block [0x11f4,0x1230) from edge 0x1b654e0
 	 Adding target block [11f4,1230) to worklist according to edge from 11d8, type 1
-	 Considering target block [0x11dc,0x11e4) from edge 0x119cf00
+	 Considering target block [0x11dc,0x11e4) from edge 0x1b66d90
 	 Adding target block [11dc,11e4) to worklist according to edge from 11d8, type 2
-	 Considering target block [0x11e4,0x11f4) from edge 0x119d0b0
+	 Considering target block [0x11e4,0x11f4) from edge 0x1b66f40
 	 Adding target block [11e4,11f4) to worklist according to edge from 11dc, type 5
-	 Considering target block [0x11f4,0x1230) from edge 0x11a0fe0
-	 Considering target block [0x1230,0x126c) from edge 0x119c290
+	 Considering target block [0x11f4,0x1230) from edge 0x1b6ae70
+	 Considering target block [0x1230,0x126c) from edge 0x1b66120
 	 Adding target block [1230,126c) to worklist according to edge from 122c, type 2
-	 Considering target block [0x1268,0x126c) from edge 0x119ce00
+	 Considering target block [0x1268,0x126c) from edge 0x1b66c90
 	 Adding target block [1268,126c) to worklist according to edge from 122c, type 1
 No targets, exits func
 Adding block 0x1268 as exit
 No targets, exits func
 Adding block 0x1230 as exit
-	 Considering target block [0x11a8,0x11b8) from edge 0x119cb70
+	 Considering target block [0x11a8,0x11b8) from edge 0x1b66a00
 	 Adding target block [11a8,11b8) to worklist according to edge from 11a0, type 5
-	 Considering target block [0x11b8,0x11dc) from edge 0x119b590
+	 Considering target block [0x11b8,0x11dc) from edge 0x1b65420
 1000 extent [1000,126c)
 [Parser.C] finalizing bpnn_adjust_weights_cuda (1300)
-	 Considering target block [0x1494,0x154c) from edge 0x11a2fc0
+	 Considering target block [0x1494,0x154c) from edge 0x1b6cd40
 	 Adding target block [1494,154c) to worklist according to edge from 1490, type 2
-	 Considering target block [0x1548,0x154c) from edge 0x11a39b0
+	 Considering target block [0x1548,0x154c) from edge 0x1b6d730
 	 Adding target block [1548,154c) to worklist according to edge from 1490, type 1
 No targets, exits func
 Adding block 0x1548 as exit
@@ -1177,53 +1177,53 @@ No targets, exits func
 Adding block 0x1494 as exit
 1300 extent [1300,154c)
 [Parser.C] finalizing bpnn_layerforward_CUDA (1000)
-	 Considering target block [0x106c,0x1128) from edge 0x119c6e0
+	 Considering target block [0x106c,0x1128) from edge 0x1b66570
 	 Adding target block [106c,1128) to worklist according to edge from 1024, type 1
-	 Considering target block [0x1028,0x106c) from edge 0x119c780
+	 Considering target block [0x1028,0x106c) from edge 0x1b66610
 	 Adding target block [1028,106c) to worklist according to edge from 1024, type 2
-	 Considering target block [0x106c,0x1128) from edge 0x119c090
-	 Considering target block [0x1140,0x1164) from edge 0x119b920
+	 Considering target block [0x106c,0x1128) from edge 0x1b65f20
+	 Considering target block [0x1140,0x1164) from edge 0x1b657b0
 	 Adding target block [1140,1164) to worklist according to edge from 1124, type 1
-	 Considering target block [0x1128,0x1140) from edge 0x119d4e0
+	 Considering target block [0x1128,0x1140) from edge 0x1b67370
 	 Adding target block [1128,1140) to worklist according to edge from 1124, type 2
-	 Considering target block [0x1140,0x1164) from edge 0x119c9f0
-	 Considering target block [0x117c,0x11a0) from edge 0x119c010
+	 Considering target block [0x1140,0x1164) from edge 0x1b66880
+	 Considering target block [0x117c,0x11a0) from edge 0x1b65ea0
 	 Adding target block [117c,11a0) to worklist according to edge from 1160, type 1
-	 Considering target block [0x1164,0x117c) from edge 0x119d000
+	 Considering target block [0x1164,0x117c) from edge 0x1b66e90
 	 Adding target block [1164,117c) to worklist according to edge from 1160, type 2
-	 Considering target block [0x117c,0x11a0) from edge 0x119c050
-	 Considering target block [0x11a0,0x11a8) from edge 0x119b5d0
+	 Considering target block [0x117c,0x11a0) from edge 0x1b65ee0
+	 Considering target block [0x11a0,0x11a8) from edge 0x1b65460
 	 Adding target block [11a0,11a8) to worklist according to edge from 119c, type 2
-	 Considering target block [0x11b8,0x11dc) from edge 0x119b8a0
+	 Considering target block [0x11b8,0x11dc) from edge 0x1b65730
 	 Adding target block [11b8,11dc) to worklist according to edge from 119c, type 1
-	 Considering target block [0x11f4,0x1230) from edge 0x119b650
+	 Considering target block [0x11f4,0x1230) from edge 0x1b654e0
 	 Adding target block [11f4,1230) to worklist according to edge from 11d8, type 1
-	 Considering target block [0x11dc,0x11e4) from edge 0x119cf00
+	 Considering target block [0x11dc,0x11e4) from edge 0x1b66d90
 	 Adding target block [11dc,11e4) to worklist according to edge from 11d8, type 2
-	 Considering target block [0x11e4,0x11f4) from edge 0x119d0b0
+	 Considering target block [0x11e4,0x11f4) from edge 0x1b66f40
 	 Adding target block [11e4,11f4) to worklist according to edge from 11dc, type 5
-	 Considering target block [0x11f4,0x1230) from edge 0x11a0fe0
-	 Considering target block [0x1230,0x126c) from edge 0x119c290
+	 Considering target block [0x11f4,0x1230) from edge 0x1b6ae70
+	 Considering target block [0x1230,0x126c) from edge 0x1b66120
 	 Adding target block [1230,126c) to worklist according to edge from 122c, type 2
-	 Considering target block [0x1268,0x126c) from edge 0x119ce00
+	 Considering target block [0x1268,0x126c) from edge 0x1b66c90
 	 Adding target block [1268,126c) to worklist according to edge from 122c, type 1
 No targets, exits func
 Adding block 0x1268 as exit
 No targets, exits func
 Adding block 0x1230 as exit
-	 Considering target block [0x11a8,0x11b8) from edge 0x119cb70
+	 Considering target block [0x11a8,0x11b8) from edge 0x1b66a00
 	 Adding target block [11a8,11b8) to worklist according to edge from 11a0, type 5
-	 Considering target block [0x11b8,0x11dc) from edge 0x119b590
+	 Considering target block [0x11b8,0x11dc) from edge 0x1b65420
 1000 extent [1000,126c)
 [Parser.C] finalizing bpnn_adjust_weights_cuda (1300)
-	 Considering target block [0x1494,0x154c) from edge 0x11a2fc0
+	 Considering target block [0x1494,0x154c) from edge 0x1b6cd40
 	 Adding target block [1494,154c) to worklist according to edge from 1490, type 2
-	 Considering target block [0x1548,0x154c) from edge 0x11a39b0
+	 Considering target block [0x1548,0x154c) from edge 0x1b6d730
 	 Adding target block [1548,154c) to worklist according to edge from 1490, type 1
 No targets, exits func
 Adding block 0x1548 as exit
 No targets, exits func
 Adding block 0x1494 as exit
 1300 extent [1300,154c)
-[Parser.C:187] parsing complete for Parser 0x118b2c0 with state 4
-[Parser.C:169] parse() called on Parser 0x118b2c0 with state 4
+[Parser.C:187] parsing complete for Parser 0x1b54f40 with state 4
+[Parser.C:169] parse() called on Parser 0x1b54f40 with state 4

@@ -65,6 +65,11 @@ typedef struct {
     uint32_t WORK_GROUP_ID;
     uint32_t BACKUP_WRITEBACK_ADDR;
 
+    uint32_t DEBUG_SGPR0;
+    uint32_t DEBUG_SGPR1;
+
+    uint32_t lds_per_wavefront_offset;
+
     // VGPRS
     uint32_t DS_ADDR;
     uint32_t DS_DATA_0;
@@ -188,7 +193,7 @@ void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std
         Function * f = * fit;
         if(f->addr() != func_start)
             continue;
-        printf("Creating a decoder, parsing region addr = %x, len = %lu\n",f->addr(), InstructionDecoder::maxInstructionLength);
+        printf("Creating a decoder, parsing region addr = %lx, len = %u\n",f->addr(), InstructionDecoder::maxInstructionLength);
         InstructionDecoder decoder(f->isrc()->getPtrToInstruction(f->addr()),InstructionDecoder::maxInstructionLength,f->region()->getArch());
 
         auto bit = f->blocks().begin();
@@ -440,6 +445,10 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         c.TMP_SGPR1 = get_sgpr(c); // odd
         c.GLOBAL_WAVEFRONT_ID = get_sgpr(c); // even
         c.LOCAL_WAVEFRONT_ID = get_sgpr(c); // odd
+        c.DEBUG_SGPR0 = get_sgpr(c);
+        c.DEBUG_SGPR1 = get_sgpr(c);
+
+        c.lds_per_wavefront_offset = get_sgpr(c);
 
        /* 
         c.BACKUP_WRITEBACK_ADDR = sgpr_max+1; // even
