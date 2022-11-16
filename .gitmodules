@@ -4,3 +4,6 @@
 [submodule "lib/amdgpu-tooling"]
 	path = lib/amdgpu-tooling
 	url = https://github.com/rochauha/amdgpu-tooling
+[submodule "lib/exec-rw"]
+	path = lib/exec-rw
+	url = https://github.com/rochauha/exec-rw
