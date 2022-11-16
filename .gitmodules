@@ -1,0 +1,6 @@
+[submodule "lib/inih"]
+	path = lib/inih
+	url = https://github.com/jtilly/inih
+[submodule "lib/amdgpu-tooling"]
+	path = lib/amdgpu-tooling
+	url = https://github.com/rochauha/amdgpu-tooling
