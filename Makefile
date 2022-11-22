@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=split_kernel_v2 merge_kernel_v2 preload_global expand_args update_note_phdr report_args_loc disassemble
+srcs=split_kernel_v2 merge_kernel_v2 preload_global expand_args update_note_phdr report_args_loc disassemble preload_base
 libs=kernel_elf_helper.o InstrUtil.o
 
 BINS=$(addprefix bin/,$(srcs))
@@ -21,8 +21,12 @@ lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_
 lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp 
 	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/  -I/opt/intel-tbb/include
 
-bin/preload_global: src/preload_global.cpp lib/InsnFactory.h lib/kernel_elf_helper.o lib/InstrUtil.o 
-	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/preload_global.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/preload_global
+bin/preload_global: src/preload_global.cpp src/config.cpp lib/InsnFactory.h lib/kernel_elf_helper.o lib/InstrUtil.o
+	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/config.cpp src/preload_global.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o  $(lDyninst) -o bin/preload_global
+
+bin/preload_base: src/preload_global.cpp src/config.cpp lib/InsnFactory.h lib/kernel_elf_helper.o lib/InstrUtil.o
+	g++ -g -DMEASURE_BASE -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/config.cpp src/preload_global.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o  $(lDyninst) -o bin/preload_base
+
 
 lib/InstrUtil.o: lib/InstrUtil.cpp lib/InsnFactory.h
 	g++ -g -Wall  -c lib/InstrUtil.cpp -o lib/InstrUtil.o
