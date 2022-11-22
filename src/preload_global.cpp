@@ -102,7 +102,13 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
     //ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
     printf("first uninitialized sgpr = %u\n",c.first_uninitalized_sgpr);
-    ret.push_back(InsnFactory::create_s_load_dwordx4(c.first_uninitalized_sgpr,c.kernarg_segment_ptr, c.old_kernarg_size+12 ,insn_pool));
+    if((c.first_uninitalized_sgpr % 4) == 0){
+        ret.push_back(InsnFactory::create_s_load_dwordx4(c.first_uninitalized_sgpr,c.kernarg_segment_ptr, c.old_kernarg_size+12 ,insn_pool));
+    }else{
+        ret.push_back(InsnFactory::create_s_load_dwordx2(c.first_uninitalized_sgpr,c.kernarg_segment_ptr, c.old_kernarg_size+12 ,insn_pool));
+        ret.push_back(InsnFactory::create_s_load_dwordx2(c.first_uninitalized_sgpr+2,c.kernarg_segment_ptr, c.old_kernarg_size+28 ,insn_pool));
+    }
+
     ret.push_back(InsnFactory::create_s_load_dwordx2(BACKUP_WRITEBACK_ADDR,c.kernarg_segment_ptr, c.old_kernarg_size ,insn_pool));
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
@@ -315,7 +321,8 @@ int main(int argc, char **argv){
 
         vector<CFG_EDGE> edges;
         vector<pair<uint32_t, uint32_t >> save_mask_insns;
-        analyze_binary(binaryPath, edges,  save_mask_insns, func_start , func_end); 
+        vector<uint32_t> endpgms;
+        analyze_binary(binaryPath, edges,  save_mask_insns, func_start , func_end, endpgms); 
 
 
         vector<MyBranchInsn> branches;
@@ -334,7 +341,7 @@ int main(int argc, char **argv){
             vector<MyInsn> init_insns;
             setup_initailization(init_insns,c,insn_pool);
 
-            inplace_insert(fp,func_start,text_end,init_insns,branches, func_start+ target_shift,kernel_bounds,insn_pool);
+            inplace_insert(fp,func_start,text_end,init_insns,branches, func_start+ target_shift,kernel_bounds,endpgms,insn_pool);
             printf("patching start at address offset %u\n", func_start);
             target_shift += get_size(init_insns);
         }
@@ -347,21 +354,34 @@ int main(int argc, char **argv){
             printf("branch id = %d, exec_cond_sgpr = %d\n",branch_id,exec_cond_sgpr);
             vector<MyInsn> update_branch_statistic;
             per_branch_instrumentation(update_branch_statistic, branch_id  , exec_cond_sgpr , c ,insn_pool);
-            inplace_insert(fp,func_start,text_end,update_branch_statistic,branches, addr + target_shift,kernel_bounds,insn_pool);
+            inplace_insert(fp,func_start,text_end,update_branch_statistic,branches, addr + target_shift,kernel_bounds,endpgms,insn_pool);
             target_shift+= get_size(update_branch_statistic);
             branch_id++;
         }
 #endif
-        {
+        vector<MyInsn> writeback_insns;
+        uint32_t my_offset = num_branches * 8;
+        setup_writeback(writeback_insns, c ,insn_pool);
+        memtime_epilogue(writeback_insns, c, my_offset , insn_pool);
+        printf("before inserting writeback\n");
+
+        for (const auto & endpgm : endpgms){
+            //printf("before ending, endpgms position = %p\n",endpgm);
+            inplace_insert(fp,func_start,text_end,writeback_insns,branches, endpgm ,kernel_bounds,endpgms,insn_pool);
+            target_shift+= get_size(writeback_insns);
+
+
+        }
+        /*{
             vector<MyInsn> writeback_insns;
             uint32_t my_offset = num_branches * 8;
             setup_writeback(writeback_insns, c ,insn_pool);
             memtime_epilogue(writeback_insns, c, my_offset , insn_pool);
             printf("before inserting writeback\n");
-            inplace_insert(fp,func_start,text_end,writeback_insns,branches, func_end - 4 + target_shift,kernel_bounds,insn_pool);
+            inplace_insert(fp,func_start,text_end,writeback_insns,branches, func_end - 4 + target_shift,kernel_bounds,endpgms,insn_pool);
             target_shift+= get_size(writeback_insns);
 
-        }
+        }*/
         
         printf("target_shift =%u\n",target_shift);
         uint32_t nop_size = 0;
@@ -373,7 +393,7 @@ int main(int argc, char **argv){
             for(uint32_t i=0; i <num_nops ;i++){
                 nops.push_back(InsnFactory::create_s_nop(insn_pool));
             }
-            inplace_insert(fp,func_start,text_end,nops,branches, func_end +target_shift,kernel_bounds,insn_pool);
+            inplace_insert(fp,func_start,text_end,nops,branches, func_end +target_shift,kernel_bounds,endpgms,insn_pool);
             nop_size += get_size(nops);
         }
         // 0x10b0

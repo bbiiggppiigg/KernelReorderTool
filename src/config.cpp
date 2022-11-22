@@ -101,7 +101,7 @@ void getKernelBounds(char * binaryPath, vector<kernel_bound> & kernel_bounds, ui
  *
  */
 
-void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std::pair<uint32_t,uint32_t>>  & save_mask_insns , uint32_t func_start , uint32_t func_end ){
+void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std::pair<uint32_t,uint32_t>>  & save_mask_insns , uint32_t func_start , uint32_t func_end , vector<uint32_t> & endpgms ){
     map<Address,bool> seen;
     vector<Function *> funcs;
     SymtabCodeSource * sts;
@@ -199,12 +199,15 @@ void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std
 
                 }
             }
+        }else if(instr.format().find("S_ENDPGM") != string::npos){
+            endpgms.push_back(baseAddr+offset);
         }
         offset += instr.size();
     }
     delete co;
     delete sts;
     printf("return from %s\n" , __func__);
+    
 }
 
 
@@ -412,7 +415,13 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
 void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , uint32_t insert_loc , uint32_t insert_size);
 
 
-
+void update_endpgms(FILE* fp , vector<uint32_t> & endpgms, uint32_t insert_loc , uint32_t insert_size){
+   for ( auto & endpgm : endpgms){
+        if(insert_loc < endpgm){
+            endpgm+= insert_size;
+        }
+    } 
+}
 void update_branches(FILE* fp , vector<MyBranchInsn> &branches, uint32_t insert_loc , uint32_t insert_size){
     for ( auto & branch : branches ){
         branch.update_for_insertion(insert_loc,insert_size);
@@ -434,7 +443,7 @@ void update_branches(FILE* fp , vector<MyBranchInsn> &branches, uint32_t insert_
 //
 //
 //
-void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs ,vector<char *> &insn_pool){    
+void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &insn_pool){    
 
 
     uint32_t buffer_size = text_end - insert_location;
@@ -452,6 +461,8 @@ void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end 
     fwrite(file_buffer,1,buffer_size,fp);
     update_symtab_symbols(fp, text_start ,text_end, insert_location, size_acc);
     update_branches(fp,branches,insert_location,size_acc);
+    update_endpgms(fp,endpgms,insert_location,size_acc);
+    
     text_end += size_acc;
     printf("updating kernel bounds\n");
     for(auto & kb : kbs){

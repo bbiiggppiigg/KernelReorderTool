@@ -113,7 +113,7 @@ void getKernelBounds(char * binaryPath, vector<kernel_bound> & kernel_bounds, ui
  *
  */
 
-void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std::pair<uint32_t,uint32_t>>  & save_mask_insns , uint32_t func_start , uint32_t func_end );
+void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std::pair<uint32_t,uint32_t>>  & save_mask_insns , uint32_t func_start , uint32_t func_end , vector<uint32_t> & endpgms);
 
 
 uint32_t get_sgpr(config &conf, bool pair = false );
@@ -140,7 +140,7 @@ void update_branches(FILE* fp , vector<MyBranchInsn> &branches, uint32_t insert_
 //
 //
 //
-void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs ,vector<char *> &insn_pool);
+void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs ,vector<uint32_t> &endpgms,vector<char *> &insn_pool);
    
 uint32_t get_size(vector<MyInsn> &insns);
 
