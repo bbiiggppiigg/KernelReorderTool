@@ -22,18 +22,7 @@ using namespace InstructionAPI;
 typedef struct {
     uint32_t sgpr_max; // id of highest used scalar register in the binary
     uint32_t vgpr_max; // id of highest used vector register in the binary
-    uint32_t warps_per_block; // number of wavefront per thread block
-    uint32_t writeback_param_offset; // byte offset to the parameter that stores address to perform writeback
-    uint32_t writeback_offset; // offset to the first address after the original address bound, where we store data to be write back
-    uint32_t lds_base; // amount of shared memory used in the uninstrumented binary, we will use shared memory space after this address
-
-    uint32_t work_group_dim_x;
-    uint32_t work_group_dim_y;
-    uint32_t work_group_dim_z;
-
-    uint32_t grid_dim_x; // here this means number of blocks along x -axis
-    uint32_t grid_dim_y;
-    uint32_t grid_dim_z;
+    uint32_t old_kernarg_size;
 
     uint32_t work_group_id_x_enabled;
     uint32_t work_group_id_y_enabled;
@@ -72,7 +61,6 @@ typedef struct {
     uint32_t DEBUG_SGPR0;
     uint32_t DEBUG_SGPR1;
 
-    uint32_t lds_per_wavefront_offset;
 
     // VGPRS
     uint32_t DS_ADDR;
@@ -91,6 +79,7 @@ typedef struct {
     uint32_t func_start;
     uint32_t func_end;
     
+    uint32_t first_uninitalized_sgpr;
     // 
     //
 } config;
@@ -142,7 +131,64 @@ void getKernelBounds(char * binaryPath, vector<kernel_bound> & kernel_bounds, ui
   Elf_X *elfHeader = Elf_X::newElf_X(buffer, length);  printf("before calling getAllModules \n");
     symTab->getAllModules(modules);
     last_instr = 0;
+    printf("num of modules = %d\n",modules.size());
+
+{
+        vector<SymtabAPI::Symbol *> symbols;
+        symTab->getAllSymbols(symbols);
+
+        for(const auto & symbol : symbols){
+         if (symbol->getType() == SymtabAPI::Symbol::ST_FUNCTION && symbol->isInSymtab()){
+            uint32_t offset = symbol->getOffset();
+            uint32_t size = symbol->getSize();
+            string name = symbol->getMangledName();
+            bool found = false;
+            string kd_name = name + ".kd";
+            Address kdAddr;
+
+            kernel_bound kb;
+            for (const auto & symbol2 : symbols){
+                string name2 = symbol2->getMangledName();
+
+                std::cout << " mangeled names = " << name2 << " type = " << symbol2->getType() << std::endl;
+                if(name2 == kd_name){
+                    found = true;
+                    kdAddr = symbol2->getOffset();
+                     
+                    kb.kd = new KernelDescriptor(symbol2,elfHeader);
+                    break;
+                }
+            }
+            if(!found){
+                printf("failed to find corresponding kernel descriptor");
+                exit(-1);
+            }
+
+            kb.first = offset;
+            kb.last = offset + size;
+            kb.name = name;
+            kb.kdAddr = kdAddr;
+            kernel_bounds.push_back(kb);
+            //std::cout <<" symbol name = " << name << " offset = " << offset << " size = " << size << std::endl;
+
+            if(kb.last > last_instr){
+                last_instr = kb.last;
+            }
+        } 
+        }
+}
+/*
     for (const auto & module : modules){
+        std::cout << "module name = " << module->fullName() << std::endl; 
+        vector<SymtabAPI::Symbol *> symbols;
+        module->getAllSymbols(symbols);
+ 
+        for(const auto & symbol : symbols){
+            std::string name = symbol->getMangledName();
+            std::cout << " mangeled names = " << name << " type = " << symbol->getType() << std::endl;
+        }
+    }*/
+/*    for (const auto & module : modules){
         vector<SymtabAPI::Symbol *> symbols;
         module->getAllSymbols(symbols);
         for(const auto & symbol : symbols){
@@ -157,10 +203,12 @@ void getKernelBounds(char * binaryPath, vector<kernel_bound> & kernel_bounds, ui
                 kernel_bound kb;
                 for (const auto & symbol2 : symbols){
                     string name2 = symbol2->getMangledName();
+
+                    std::cout << " mangeled names = " << name2 << " type = " << symbol2->getType() << std::endl;
                     if(name2 == kd_name){
                         found = true;
                         kdAddr = symbol2->getOffset();
-                        
+                         
                         kb.kd = new KernelDescriptor(symbol2,elfHeader);
                         break;
                     }
@@ -182,7 +230,7 @@ void getKernelBounds(char * binaryPath, vector<kernel_bound> & kernel_bounds, ui
                 }
             }
         }
-    }
+    }*/
     printf("before closing symtab\n");
     SymtabAPI::Symtab::closeSymtab(symTab);
     printf("after closing symtab\n");
@@ -274,18 +322,23 @@ void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std
         printf("decoding instruction at address %lx\n", baseAddr + offset);
         instr = decoder.decode((unsigned char * ) f->isrc()->getPtrToInstruction(baseAddr + offset));
         printf("instruction is %s\n", instr.format().c_str());
-        if(instr.format().find("s_and_saveexec") != string::npos){
+        if(instr.format().find("S_AND_SAVEEXEC") != string::npos){
             std::vector < InstructionAPI::Operand> operands;
             instr.getOperands(operands);
             for (auto & opr : operands){
 
                 if(opr.isWritten()){
                     auto name = opr.format(Arch_amdgpu_cdna2);
-                    auto pos = name.find("%sgpr");
-                    uint32_t sgpr;
-                    sscanf(name.substr(pos+5).c_str(),"%d",&sgpr);
-                    printf("s and save exec address = %lx , sgpr %d\n",baseAddr + offset + instr.size()  ,sgpr);
-                    save_mask_insns.push_back(make_pair(baseAddr+offset + instr.size() , sgpr));
+                    uint32_t start ,end ;
+
+                    if(sscanf(name.c_str(),"S[%d:%d]",&start,&end)==2){
+
+                        std::cout << "OPRNAMEZ" << name<<"Z" << std::endl;
+                        uint32_t sgpr = start;
+                        //sscanf(name.substr(pos+5).c_str(),"%d",&sgpr);
+                        printf("s and save exec address = %lx , sgpr %d\n",baseAddr + offset + instr.size()  ,sgpr);
+                        save_mask_insns.push_back(make_pair(baseAddr+offset + instr.size() , sgpr));
+                    }
 
                 }
             }
@@ -328,7 +381,7 @@ uint32_t get_vgpr(config &conf, bool pair = false ){
 
 void read_config(FILE * fp, char * configPath , vector<config> &configs , vector<kernel_bound> &kernel_bounds){
     puts("reading config");
-    INIReader reader(configPath);
+   INIReader reader(configPath);
     if(reader.ParseError() !=0){
         std::cout << "Can't load " << std::string(configPath)  << std::endl;     
 
@@ -364,28 +417,18 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         }
         c.sgpr_max = reader.GetInteger(section,"sgpr_max",-1); 
         c.vgpr_max = reader.GetInteger(section,"vgpr_max",-1); 
-        c.grid_dim_x = reader.GetInteger(section,"grid_dim_x",-1); 
-        c.warps_per_block = reader.GetInteger(section,"warps_per_block",-1); 
-        c.writeback_param_offset = reader.GetInteger(section,"writeback_param_offset",-1); 
-        c.writeback_offset = reader.GetInteger(section,"writeback_offset",-1); 
-        c.lds_base = reader.GetInteger(section,"lds_base",-1);
-
-        c.work_group_dim_x = reader.GetInteger(section,"work_group_dim_x",1);
-        c.work_group_dim_y = reader.GetInteger(section,"work_group_dim_y",1);
-        c.work_group_dim_z = reader.GetInteger(section,"work_group_dim_z",1);
-
-        c.grid_dim_x = reader.GetInteger(section,"grid_dim_x",1);
-        c.grid_dim_y = reader.GetInteger(section,"grid_dim_y",1);
-        c.grid_dim_z = reader.GetInteger(section,"grid_dim_z",1);
 
         llvm::amdhsa::kernel_descriptor_t fkd;
         fseek(fp,kd_offset,SEEK_SET);
         fread(&fkd,sizeof(fkd),1,fp);
         uint32_t code_entry_offset = fkd.kernel_code_entry_byte_offset;
         c.code_entry_offset = code_entry_offset;
-        c.wavefront_per_work_group = c.work_group_dim_x  * c.work_group_dim_y * c.work_group_dim_z / 64;
-        c.wavefront_per_work_group = c.warps_per_block;
-
+        FILE * fpp = fopen("args.ini","r");
+        fscanf(fpp,"%d",&c.old_kernarg_size);
+        fclose(fpp);
+        if(c.old_kernarg_size %8){
+            c.old_kernarg_size = ((c.old_kernarg_size>>3) + 1)<<3;
+        } 
 
 
         c.work_group_id_x_enabled = AMDHSA_BITS_GET(fkd.compute_pgm_rsrc2,llvm::amdhsa::COMPUTE_PGM_RSRC2_ENABLE_SGPR_WORKGROUP_ID_X);
@@ -448,7 +491,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         if(c.work_group_id_x_enabled){
             c.work_group_id_x = sgpr_count;
             sgpr_count +=1;
-            printf("workgroup_id_x = %u\n",c.work_group_id_x);
+            printf("workgroup_id_x = %u, sgpr_count = %u\n",c.work_group_id_x,sgpr_count);
         }
 
         if(c.work_group_id_y_enabled){
@@ -465,12 +508,14 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
             printf("workgroup_id_z = %u\n",c.work_group_id_z);
         }
 
-
-
-        uint32_t sgpr_max = c.sgpr_max;
-        if ( !(sgpr_max %2) ){ // even
-            sgpr_max +=1;  // odd
+        c.first_uninitalized_sgpr = sgpr_count;
+        if(sgpr_count %2)
+            c.first_uninitalized_sgpr+=1;
+         
+        if(c.first_uninitalized_sgpr+4 > c.sgpr_max){
+            c.sgpr_max = c.first_uninitalized_sgpr+4;
         }
+
         
         c.BACKUP_WRITEBACK_ADDR = get_sgpr(c,true); // even
         c.TIMER_1 = get_sgpr(c,true); // even
@@ -485,7 +530,6 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         c.DEBUG_SGPR0 = get_sgpr(c);
         c.DEBUG_SGPR1 = get_sgpr(c);
 
-        c.lds_per_wavefront_offset = get_sgpr(c);
 
        /* 
         c.BACKUP_WRITEBACK_ADDR = sgpr_max+1; // even

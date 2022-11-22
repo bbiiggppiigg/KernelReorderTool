@@ -100,14 +100,16 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     
     
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
-    ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
-    ret.push_back(InsnFactory::create_s_load_dwordx2(BACKUP_WRITEBACK_ADDR,c.kernarg_segment_ptr, 32 ,insn_pool));
+    //ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
+    printf("first uninitialized sgpr = %u\n",c.first_uninitalized_sgpr);
+    ret.push_back(InsnFactory::create_s_load_dwordx4(c.first_uninitalized_sgpr,c.kernarg_segment_ptr, c.old_kernarg_size+12 ,insn_pool));
+    ret.push_back(InsnFactory::create_s_load_dwordx2(BACKUP_WRITEBACK_ADDR,c.kernarg_segment_ptr, c.old_kernarg_size ,insn_pool));
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
     if(c.work_group_id_z_enabled){
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0,c.work_group_id_z,false,insn_pool));  
-        ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.grid_dim_y,true,insn_pool));
-        ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
+        //ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.grid_dim_y,true,insn_pool));
+        ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,c.first_uninitalized_sgpr+1,TMP_SGPR0,insn_pool));
     }else{
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0,0,true,insn_pool));  
     }
@@ -115,8 +117,10 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     if(c.work_group_id_y_enabled){
         ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR0,c.work_group_id_y,false,insn_pool));
     }
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.grid_dim_x,true,insn_pool));  
-    ret.push_back(InsnFactory::create_s_mul_i32(WORK_GROUP_ID,TMP_SGPR1,TMP_SGPR0,insn_pool));
+    //ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.grid_dim_x,true,insn_pool));  
+    ret.push_back(InsnFactory::create_s_mul_i32(WORK_GROUP_ID,c.first_uninitalized_sgpr,TMP_SGPR0,insn_pool));
+
+    ret.push_back(InsnFactory::create_s_load_dword(c.first_uninitalized_sgpr,c.kernarg_segment_ptr, c.old_kernarg_size+8 ,insn_pool));
 
     if(c.work_group_id_x_enabled){
         ret.push_back(InsnFactory::create_s_add_u32(WORK_GROUP_ID,WORK_GROUP_ID,c.work_group_id_x,false,insn_pool));
@@ -127,25 +131,25 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     // THREAD_ID = (THREAD_ID_Z * WG_DIM_Y +  TID_Y ) * WG_DIM_X + TID_x
     if(c.work_item_id_enabled > 1){ // TID_Z
         ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR0,258,insn_pool));  // 258 is VGPR2 in this encoding
-        ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.work_group_dim_y,true,insn_pool));
-        ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
+        //ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.work_group_dim_y,true,insn_pool));
+        ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,c.first_uninitalized_sgpr+3,TMP_SGPR0,insn_pool));
     }else{
         ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR0,0,true,insn_pool));  
     }
     if(c.work_item_id_enabled > 0){ // TID_Y
         //ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR1,257,insn_pool));  // 257 is VGPR1 in this encoding
         ret.push_back(InsnFactory::create_v_readlane_b32(TMP_SGPR1,128,257,insn_pool));
-        ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR0,TMP_SGPR1,false,insn_pool));
+        //ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR0,TMP_SGPR1,false,insn_pool));
         ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,false,insn_pool));
     }
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.work_group_dim_x,true,insn_pool));  
+    ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.first_uninitalized_sgpr+2,true,insn_pool));  
     ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
 
 
 
     ret.push_back(InsnFactory::create_v_readlane_b32(TMP_SGPR1,128,256,insn_pool));
     //ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR1,256,insn_pool));  // 256 is VGPR0 in this encoding
-    ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR1,TMP_SGPR1,false,insn_pool));
+    //ret.push_back(InsnFactory::create_s_mov_b32(c.DEBUG_SGPR1,TMP_SGPR1,false,insn_pool));
     ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,false,insn_pool));
     // AFTER THIS STEP, we have a thread ID, now we want warp id , divide by 64
 
@@ -157,8 +161,9 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     //
 
 
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.wavefront_per_work_group ,true,insn_pool));
-    ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,WORK_GROUP_ID,TMP_SGPR1,insn_pool));
+    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+    //ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.wavefront_per_work_group ,true,insn_pool));
+    ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,WORK_GROUP_ID,c.first_uninitalized_sgpr,insn_pool));
     ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WAVEFRONT_ID,TMP_SGPR0,LOCAL_WAVEFRONT_ID,false,insn_pool));
 
 
@@ -373,7 +378,7 @@ int main(int argc, char **argv){
         for( const auto & pair_addr_sgpr : save_mask_insns){
             auto addr = pair_addr_sgpr.first;
             auto exec_cond_sgpr = pair_addr_sgpr.second;
-            //printf("branch id = %d, exec_cond_sgpr = %d\n",branch_id,exec_cond_sgpr);
+            printf("branch id = %d, exec_cond_sgpr = %d\n",branch_id,exec_cond_sgpr);
             vector<MyInsn> update_branch_statistic;
             per_branch_instrumentation(update_branch_statistic, branch_id  , exec_cond_sgpr , c ,insn_pool);
             inplace_insert(fp,func_start,text_end,update_branch_statistic,branches, addr + target_shift,kernel_bounds,insn_pool);

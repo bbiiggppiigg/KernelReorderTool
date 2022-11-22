@@ -7,3 +7,6 @@
 [submodule "lib/exec-rw"]
 	path = lib/exec-rw
 	url = https://github.com/rochauha/exec-rw
+[submodule "lib/msgpack-c"]
+	path = lib/msgpack-c
+	url = https://github.com/msgpack/msgpack-c.git

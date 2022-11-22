@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=split_kernel split_kernel_v2 merge_kernel merge_kernel_v2 preload_global
+srcs=split_kernel_v2 merge_kernel_v2 preload_global expand_args update_note_phdr report_args_loc disassemble
 libs=kernel_elf_helper.o InstrUtil.o
 
 BINS=$(addprefix bin/,$(srcs))
@@ -21,7 +21,7 @@ lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_
 lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp 
 	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/  -I/opt/intel-tbb/include
 
-bin/preload_global: src/preload_global.cpp lib/InsnFactory.h lib/kernel_elf_helper.o  
+bin/preload_global: src/preload_global.cpp lib/InsnFactory.h lib/kernel_elf_helper.o lib/InstrUtil.o 
 	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/preload_global.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/InstrUtil.o lib/kernel_elf_helper.o $(lDyninst) -o bin/preload_global
 
 lib/InstrUtil.o: lib/InstrUtil.cpp lib/InsnFactory.h
@@ -33,6 +33,18 @@ bin/split_kernel_v2: src/split_kernel_v2.cpp
 bin/merge_kernel_v2: src/merge_kernel_v2.cpp
 	g++ -o $@ $<
 
+bin/expand_args: src/expand_args.cpp
+	g++ -I lib/msgpack-c/include/ -I /opt/rocm/include -Wl,--demangle -Wl,-rpath,/opt/rocm/lib/ -L/opt/rocm/lib/-lamd_comgr $< -o $@
+
+bin/report_args_loc: src/report_args_loc.cpp
+	g++ -I lib/msgpack-c/include/ -I /opt/rocm/include -Wl,--demangle -Wl,-rpath,/opt/rocm/lib/ -L/opt/rocm/lib/-lamd_comgr $< -o $@
+
+
+bin/update_note_phdr: src/update_note_phdr.cpp
+	g++ $< -o $@
+
+bin/disassemble: src/disassemble.cpp
+	g++ $< -o $@ -I$(DYNINST_ROOT)/include -I/opt/intel-tbb/include -L$(DYNINST_ROOT)/lib $(lDyninst)
 clean:
 	rm -f *.bundle *.hsaco *.isa src/*.o lib/*.o bin/*
 
