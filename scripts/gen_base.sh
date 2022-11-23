@@ -29,7 +29,7 @@ $BIN/merge_kernel_v2
 llvm-objdump -d $CO | sed 's/\/\/.*//g'> tmp_clean.s
 llvm-objdump -d $CO > tmp.s
 ~/exec-rw/exec-rw ../$TARGET ./bundle.txt ./base
-chmod +x ./new
+chmod +x ./base
 
 
 

@@ -283,9 +283,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         fread(&fkd,sizeof(fkd),1,fp);
         uint32_t code_entry_offset = fkd.kernel_code_entry_byte_offset;
         c.code_entry_offset = code_entry_offset;
-        FILE * fpp = fopen("args.ini","r");
-        fscanf(fpp,"%d",&c.old_kernarg_size);
-        fclose(fpp);
+        c.old_kernarg_size = reader.GetInteger(section,"kernarg_size",0);
         if(c.old_kernarg_size %8){
             c.old_kernarg_size = ((c.old_kernarg_size>>3) + 1)<<3;
         } 

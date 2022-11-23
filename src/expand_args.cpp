@@ -4,11 +4,16 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+//#include "INIReader.h"
 
 void expand_args(const char * filename)
 {
 
-
+    /*INIReader reader("config.ini");
+    auto &sections = reader.Sections();
+    for (auto & section : sections){
+    
+    }*/
     size_t len = strlen(filename);
     char newfile_name[len+20];
     sprintf(newfile_name,"%s.expanded.new\0",filename);
@@ -56,7 +61,39 @@ void expand_args(const char * filename)
     msgpack::object map_root = oh.get();
     map_root.convert(kvmap);
     kvmap["amdhsa.kernels"].convert(kernarg_list);
-    kernarg_list[0].convert(kernarg_list_map);
+
+    for ( uint32_t k_list_i = 0 ; k_list_i < kernarg_list.size(); k_list_i++){
+        kernarg_list[k_list_i].convert(kernarg_list_map);
+        uint32_t old_kernarg_size = 0;
+        size_t i =0 ;
+        old_kernarg_size = kernarg_list_map[".kernarg_segment_size"].convert(old_kernarg_size);
+        kernarg_list_map[".args"].convert(arg_list_map);
+        int old_kernarg_num  = arg_list_map.size();
+        std::cout<< old_kernarg_size << " " << arg_list_map.size() << std::endl;
+        uint32_t new_kernarg_size = old_kernarg_size;
+        if(old_kernarg_size % 8)
+            new_kernarg_size = ((old_kernarg_size >>3 ) +1)<<3;
+        std::map<std::string, msgpack::object> newarg;
+        newarg[".address_space"]= msgpack::object( std::string("global"),z);
+        newarg[".offset"]= msgpack::object( new_kernarg_size,z);
+        newarg[".size"]= msgpack::object( 8,z);
+        newarg[".value_kind"]= msgpack::object( std::string("global_buffer"),z);
+        arg_list_map.push_back(msgpack::object(newarg,z)); 
+        new_kernarg_size = new_kernarg_size+ 8;
+        std::map<std::string, msgpack::object> newarg2;
+        for (int xx =0 ; xx < 5 ; xx++){
+            newarg2[".offset"]= msgpack::object( new_kernarg_size,z);
+            newarg2[".size"]= msgpack::object( 4,z);
+            newarg2[".value_kind"]= msgpack::object( std::string("by_value"),z);
+            arg_list_map.push_back(msgpack::object(newarg2,z)); 
+            new_kernarg_size = new_kernarg_size+ 4;
+        }
+        kernarg_list_map[".args"] = msgpack::object(arg_list_map,z);
+        kernarg_list_map[".kernarg_segment_size"] = msgpack::object(new_kernarg_size,z);
+        kernarg_list[k_list_i] = msgpack::object(kernarg_list_map,z);
+
+    }
+    /*kernarg_list[0].convert(kernarg_list_map);
     std::cout << kernarg_list_map[".args"] << std::endl;
     std::cout<< "  before convert " << std::endl;
     kernarg_list_map[".args"].convert(arg_list_map);
@@ -66,28 +103,25 @@ void expand_args(const char * filename)
     std::cout<< old_kernarg_size << " " << arg_list_map.size() << std::endl;
     int old_kernarg_num  = arg_list_map.size();
     size_t i =0 ;
-    /*for (  ; i < arg_list_map.size() ;i++){
-        std::cout << arg_list_map[i] << std::endl;    
-    }*/
-
+    
     uint32_t new_kernarg_size = old_kernarg_size;
     if(old_kernarg_size % 8)
         new_kernarg_size = ((old_kernarg_size >>3 ) +1)<<3;
 
-    std::map<std::string, msgpack::object> newArg;
-    newArg[".address_space"]= msgpack::object( std::string("global"),z);
-    newArg[".offset"]= msgpack::object( new_kernarg_size,z);
-    newArg[".size"]= msgpack::object( 8,z);
-    newArg[".value_kind"]= msgpack::object( std::string("global_buffer"),z);
-    arg_list_map.push_back(msgpack::object(newArg,z)); 
+    std::map<std::string, msgpack::object> newarg;
+    newarg[".address_space"]= msgpack::object( std::string("global"),z);
+    newarg[".offset"]= msgpack::object( new_kernarg_size,z);
+    newarg[".size"]= msgpack::object( 8,z);
+    newarg[".value_kind"]= msgpack::object( std::string("global_buffer"),z);
+    arg_list_map.push_back(msgpack::object(newarg,z)); 
     new_kernarg_size = new_kernarg_size+ 8;
 
-    std::map<std::string, msgpack::object> newArg2;
+    std::map<std::string, msgpack::object> newarg2;
     for (int xx =0 ; xx < 5 ; xx++){
-        newArg2[".offset"]= msgpack::object( new_kernarg_size,z);
-        newArg2[".size"]= msgpack::object( 4,z);
-        newArg2[".value_kind"]= msgpack::object( std::string("by_value"),z);
-        arg_list_map.push_back(msgpack::object(newArg2,z)); 
+        newarg2[".offset"]= msgpack::object( new_kernarg_size,z);
+        newarg2[".size"]= msgpack::object( 4,z);
+        newarg2[".value_kind"]= msgpack::object( std::string("by_value"),z);
+        arg_list_map.push_back(msgpack::object(newarg2,z)); 
         new_kernarg_size = new_kernarg_size+ 4;
     }
 
@@ -95,6 +129,7 @@ void expand_args(const char * filename)
     kernarg_list_map[".args"] = msgpack::object(arg_list_map,z);
     kernarg_list_map[".kernarg_segment_size"] = msgpack::object(new_kernarg_size,z);
     kernarg_list[0] = msgpack::object(kernarg_list_map,z);
+    */
     kvmap["amdhsa.kernels"] = msgpack::object(kernarg_list,z);
     msgpack::sbuffer outbuffer;
     msgpack::pack(outbuffer,kvmap);
@@ -130,10 +165,6 @@ void expand_args(const char * filename)
    
     myfile.close();
     
-    FILE * fpp = fopen("args.ini","w+");
-    fprintf(fpp,"%d\n",old_kernarg_size);
-    fprintf(fpp,"%d\n",old_kernarg_num);
-    fclose(fpp);
 }
 
 int main(int argc, char * argv[]){

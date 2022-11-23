@@ -84,7 +84,7 @@ void list_args(const char * filename)
 
 int main(int argc, char * argv[]){
     if(argc < 2){
-        printf("usage shrink_args <name of .note file>\n");
+        printf("usage list_args <name of .note file>\n");
         return -1;
     }
     list_args(argv[1]);
