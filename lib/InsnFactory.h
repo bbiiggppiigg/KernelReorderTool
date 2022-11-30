@@ -157,12 +157,12 @@ class InsnFactory {
                     }
                                    
                 }else{
-                    std::cout << std::hex << (and_result) <<std::endl;
+                    std::cout << std::hex << cmd_value << " "<<(and_result) <<std::endl;
                 }
             }else{
                 ////printf("length = %u\n",length);
             }
-            //printf("exiting because of unsupport branch\n");
+            printf("exiting because of unsupport branch\n");
             exit(-1);
         }
 
@@ -571,6 +571,35 @@ class InsnFactory {
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("s_memtime ")+std::to_string(sgpr_pair));
 		}
+		static MyInsn create_s_atomic_add( uint32_t sgpr_target_pair, uint32_t sgpr_addr_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xc0000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 130;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			uint32_t imm = 1;
+			cmd_low = ( cmd_low | (op << 18) | (imm << 17) |   sgpr_target_pair << 6 | (sgpr_addr_pair >> 1) );
+
+			cmd_high = ( cmd_high | offset );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("s_load_dword")+std::to_string(sgpr_target_pair));
+		}
+		static MyInsn create_s_atomic_inc( uint32_t sgpr_target_pair, uint32_t sgpr_addr_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xc0000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 139;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			uint32_t imm = 1;
+			cmd_low = ( cmd_low | (op << 18) | (imm << 17) |   sgpr_target_pair << 6 | (sgpr_addr_pair >> 1) );
+
+			cmd_high = ( cmd_high | offset );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("s_load_dword")+std::to_string(sgpr_target_pair));
+		}
+
 		static MyInsn create_s_load_dword( uint32_t sgpr_target_pair, uint32_t sgpr_addr_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
 			uint32_t cmd_low = 0xc0000000;
 			uint32_t cmd_high = 0x0;

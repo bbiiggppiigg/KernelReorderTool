@@ -211,7 +211,6 @@ void analyze_binary(char * binaryPath, vector<CFG_EDGE> & ret_edges , vector<std
 }
 
 
-
 uint32_t get_sgpr(config &conf, bool pair ){
 
     if(pair){
@@ -381,7 +380,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         c.BACKUP_EXEC = get_sgpr(c,true); // even
         c.WORK_GROUP_ID = get_sgpr(c); // odd
 
-        c.TMP_SGPR0 = get_sgpr(c); // even
+        c.TMP_SGPR0 = get_sgpr(c,true); // even
         c.TMP_SGPR1 = get_sgpr(c); // odd
         c.GLOBAL_WAVEFRONT_ID = get_sgpr(c); // even
         c.LOCAL_WAVEFRONT_ID = get_sgpr(c); // odd
