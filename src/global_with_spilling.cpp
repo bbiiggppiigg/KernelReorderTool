@@ -96,7 +96,6 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     uint32_t LOCAL_WAVEFRONT_ID = c.LOCAL_WAVEFRONT_ID;
     uint32_t WORK_GROUP_ID = c.WORK_GROUP_ID;
     uint32_t BACKUP_WRITEBACK_ADDR = c.BACKUP_WRITEBACK_ADDR;
-    uint32_t V_MINUS_1 = c.V_MINUS_1;
     
     
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
@@ -164,7 +163,6 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WAVEFRONT_ID,TMP_SGPR0,LOCAL_WAVEFRONT_ID,false,insn_pool));
 
 
-    ret.push_back(InsnFactory::create_v_mov_b32(V_MINUS_1 , S_MINUS_1, insn_pool)); 
 
 
     uint32_t PER_WAVEFRONT_OFFSET = c.TMP_SGPR0; 
@@ -188,28 +186,22 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
 void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint32_t execcond , config c, vector<char *> & insn_pool){
 
 
-    uint32_t BACKUP_EXEC = c.BACKUP_EXEC ;
-    uint32_t EXECCOND = execcond;
-    uint32_t PER_WAVEFRONT_OFFSET =c.TMP_SGPR0;
-    uint32_t S_ADDR = PER_WAVEFRONT_OFFSET;
+    uint32_t SDATA  = c.BACKUP_EXEC ; // 1 
+    uint32_t EXECCOND = execcond; // 2
+    uint32_t S_ADDR = c.TMP_SGPR0; // 2
     uint32_t local_offset = (branch_id)  * 8;
 
     // S_ADDR_PAIR = PER_WAVEFRONT_BASE + ( BRANCH_ID * 8 ( each branch takes 8 bytes ) )
     
-    //ret.push_back(InsnFactory::create_s_mov_b32(S_ADDR,local_offset,true,insn_pool));  
-    //ret.push_back(InsnFactory::create_s_add_u32(S_ADDR, S_ADDR, PER_WAVEFRONT_OFFSET, false  ,insn_pool)); 
-    //ret.push_back(InsnFactory::create_s_addc_u32(S_ADDR+1, S_0 , PER_WAVEFRONT_OFFSET+1,false  ,insn_pool));
-
     ret.push_back(InsnFactory::create_s_cmp_eq_u64(EXEC,EXECCOND,insn_pool)); // CHECK IF backuped_exec == exec && cond
-    ret.push_back(InsnFactory::create_s_mov_b32(BACKUP_EXEC, SCC, false ,insn_pool));
-    ret.push_back(InsnFactory::create_s_atomic_add(BACKUP_EXEC, S_ADDR , local_offset , insn_pool));
+    ret.push_back(InsnFactory::create_s_mov_b32(SDATA, SCC, false ,insn_pool));
+    ret.push_back(InsnFactory::create_s_atomic_add(SDATA, S_ADDR , local_offset , insn_pool));
     ret.push_back(InsnFactory::create_s_cmp_eq_u64(EXEC,S_0,insn_pool)); // CHECK IF backuped_exec = 0
-    ret.push_back(InsnFactory::create_s_mov_b32(BACKUP_EXEC, SCC, false ,insn_pool));
-    ret.push_back(InsnFactory::create_s_atomic_add(BACKUP_EXEC, S_ADDR , local_offset , insn_pool));
-    ret.push_back(InsnFactory::create_s_mov_b32(BACKUP_EXEC, 193, false ,insn_pool));
-    ret.push_back(InsnFactory::create_s_atomic_inc(BACKUP_EXEC, S_ADDR , local_offset+4 , insn_pool));
+    ret.push_back(InsnFactory::create_s_mov_b32(SDATA, SCC, false ,insn_pool));
+    ret.push_back(InsnFactory::create_s_atomic_add(SDATA, S_ADDR , local_offset , insn_pool));
+    ret.push_back(InsnFactory::create_s_mov_b32(SDATA, 193, false ,insn_pool));
+    ret.push_back(InsnFactory::create_s_atomic_inc(SDATA, S_ADDR , local_offset+4 , insn_pool));
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    //ret.push_back(InsnFactory::create_s_mov_b64(EXEC,BACKUP_EXEC,insn_pool)); // restore EXEC
 }
 
 /*
@@ -238,15 +230,13 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vect
 
 
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_2,insn_pool));
+
+    ret.push_back(InsnFactory::create_s_store_dword_x2(c.TIMER_1 ,c.TMP_SGPR0, my_offset, insn_pool)); 
+
     // HERE WE REUSE the Vector Register for DS_DATA to write back results
-    ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_0 , c.TIMER_1 , insn_pool)); 
-    ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_1 , c.TIMER_1+1, insn_pool)); 
-    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,my_offset,insn_pool)); 
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
-    ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_0 , c.TIMER_2 , insn_pool)); 
-    ret.push_back(InsnFactory::create_v_mov_b32(c.DS_DATA_1 , c.TIMER_2+1, insn_pool)); 
-    ret.push_back(InsnFactory::create_global_store_dword_x2(c.DS_DATA_0,c.v_global_addr,my_offset + 8,insn_pool)); 
+    ret.push_back(InsnFactory::create_s_store_dword_x2(c.TIMER_2 ,c.TMP_SGPR0, my_offset+8, insn_pool)); 
 }
 
 

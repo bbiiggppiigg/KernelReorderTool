@@ -678,7 +678,7 @@ class InsnFactory {
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 17;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
-			uint32_t imm = 0;
+			uint32_t imm = 1;
 			cmd_low = ( cmd_low | (op << 18) | (imm << 17) |   s_data_pair << 6 | (s_base_pair >> 1) );
 
 			cmd_high = ( cmd_high | offset );

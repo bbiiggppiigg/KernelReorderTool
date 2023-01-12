@@ -1,0 +1,52 @@
+set env LD_PRELOAD /home/wuxx1279/example/preload.so
+maint set lane-divergence-support off
+set breakpoint pending on
+b ihipLaunchKernel_validate
+r
+b KernelParameters::set
+c
+p/x $rsi
+p/x $rdx
+p/x $rcx
+x/x $rcx
+c
+p/x $rsi
+p/x $rdx
+p/x $rcx
+x/x $rcx
+c
+p/x $rsi
+p/x $rdx
+p/x $rcx
+x/x $rcx
+c
+p/x $rsi
+p/x $rdx
+p/x $rcx
+x/x $rcx
+c
+p/x $rsi
+p/x $rdx
+p/x $rcx
+x/x $rcx
+c
+p/x $rsi
+p/x $rdx
+p/x $rcx
+x/x $rcx
+
+
+
+
+
+
+
+
+
+
+
+
+b _Z12vectoradd_k1PfPKfS1_ii
+#r
+
+
