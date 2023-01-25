@@ -5,4 +5,4 @@ cp tmp_01.hsaco backup.hsaco
 ../build/bin/snippetReader
 ../build/bin/snippetInserter tmp_01.hsaco
 ../../bin/merge_kernel_v2 
-~/exec-rw/exec-rw vectoradd_hip.exe tmp_01.hsaco new
+~/exec-rw/exec-rw vectoradd_hip.exe bundle.txt new

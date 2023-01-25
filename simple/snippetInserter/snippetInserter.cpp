@@ -62,8 +62,9 @@ int main(int argc, char * argv[]){
     getKernelBounds(binaryPath,kernel_bounds,text_end);
     uint32_t sid = 0;
     uint32_t target_shift  = 0;
-    uint32_t per_kernel_size_sum  = 0;
     for (auto kb : kernel_bounds){
+
+        uint32_t per_kernel_size_sum  = 0;
         uint32_t func_start = kb.first;
         uint32_t func_end = kb.last;
         vector<CFG_EDGE> edges;
@@ -84,7 +85,7 @@ int main(int argc, char * argv[]){
             void * ptr = snippets[sid]._ptr;
             if (addr < func_start || addr > func_end)
                 break;
-           inplace_insert(f_binary,func_start,text_end, addr + target_shift, size , ptr ,branches, kernel_bounds,endpgms,insn_pool);
+           inplace_insert(f_binary,func_start,func_end, addr , size , ptr ,branches, kernel_bounds,endpgms,insn_pool);
            target_shift += size;
            per_kernel_size_sum += size;
         }
@@ -99,7 +100,7 @@ int main(int argc, char * argv[]){
             for(uint32_t i=0; i <num_nops ;i++){
                 nops.push_back(InsnFactory::create_s_nop(insn_pool));
             }
-            inplace_insert(f_binary,func_start,text_end,nops,branches, func_end +target_shift,kernel_bounds,endpgms,insn_pool);
+            inplace_insert(f_binary,func_start,func_end,nops,branches, func_end +target_shift,kernel_bounds,endpgms,insn_pool);
             nop_size += get_size(nops);
             per_kernel_size_sum += get_size(nops);
         }
