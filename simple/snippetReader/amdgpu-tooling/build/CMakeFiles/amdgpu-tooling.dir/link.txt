@@ -1,0 +1,2 @@
+/usr/bin/ar qc libamdgpu-tooling.a CMakeFiles/amdgpu-tooling.dir/KernelDescriptor.cpp.o CMakeFiles/amdgpu-tooling.dir/KdUtils.cpp.o
+/usr/bin/ranlib libamdgpu-tooling.a

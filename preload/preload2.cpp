@@ -12,7 +12,8 @@
 #include <map>
 #include "INIReader.h"
 #include <iostream>
-
+#include <stdio.h>
+#include <mutex>
 /*
    typedef struct dim3 {
    uint32_t x;  ///< x
@@ -33,7 +34,7 @@ unsigned z;  ///< z
 int old_kernarg_size;
 int old_kernarg_num;
 
-
+FILE * fdata;
 typedef struct klt_result_t{
     uint32_t * records;
     uint32_t kid;
@@ -98,12 +99,13 @@ typedef struct config {
     uint32_t kernarg_size ;
     uint32_t kernarg_num ;
     uint32_t branch_count ;
+    uint32_t kid;
 }config;
 std::map<const void * , config* > FuncLookup;
 std::map<std::string, config *> metaLookup; 
 std::map<int ,int > testMap;
 registerFunc_t realRegisterFunction;
-
+int g_kid = 0;
 extern "C" void __hipRegisterFunction(
         void** modules,
         const void*  hostFunction,
@@ -132,6 +134,8 @@ extern "C" void __hipRegisterFunction(
             c->kernarg_size = reader.GetInteger(section,"kernarg_size",-1);
             c->kernarg_num  = reader.GetInteger(section,"kernarg_num",-1);
             c->branch_count = reader.GetInteger(section,"branch_count",-1);
+            c->kid = g_kid;
+            g_kid ++;
             std::cout << "kname : " << kname << std::endl;
             metaLookup[kname] = c;
         }
@@ -160,16 +164,20 @@ typedef uint32_t (*launch_t)(const void *hostFunction,
 launch_t realLaunch;
 
 void print_result(uint32_t * records, uint32_t kid ,uint32_t num_records, uint32_t num_branches){
-    printf("ALOHA num_records = %u\n",num_records);
+    fprintf(fdata,"num_records = %u\n",num_records);
+    printf("num_records = %u\n",num_records);
     uint32_t m_stride = (num_branches+2) * 2;
     for (uint32_t i =0; i < num_records ;i += m_stride){
         uint32_t j =0;
         for(; j < num_branches ; j++){
-            printf("\tK%d:%u %u\n",kid,records[i+j*2],records[i+j*2+1]);
+#ifdef PRINT_DETAIL
+            fprintf(fdata,"\tK%d:%u %u\n",kid,records[i+j*2],records[i+j*2+1]);
+#endif
         }
         uint64_t * mem_time = (uint64_t * ) & records [i+j*2];
-        printf("K%d#: %lu %lu\n",kid,mem_time[0],mem_time[1]);
+        fprintf(fdata,"%u: %lu %lu\n",kid,mem_time[0],mem_time[1]);
     }
+    fprintf(fdata,"done\n");
 }
 
 void callback (hipStream_t stream, hipError_t status, void *userData){
@@ -199,7 +207,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         realLaunch = (launch_t)  dlsym(RTLD_NEXT, "hipLaunchKernel");
     }
 
-    printf("hip Launch Kernel Called, hostFunction = %p , stream = %u\n",hostFunction,stream);
+    printf("hip Launch Kernel Called, hostFunction = %p\n",hostFunction);
     printf("x y z = %u %u %u\n",gridDim.x , gridDim.y , gridDim.z);
     printf("x y z = %u %u %u\n",blockDim.x , blockDim.y , blockDim.z);
 
@@ -237,7 +245,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         }
         klt_ptr->data_size = data_size;
         klt_ptr->status = 1;
-        klt_ptr->result.kid =0 ;
+        klt_ptr->result.kid = c->kid ;
         klt_ptr->result.num_records = no_records ;
         klt_ptr->result.num_branches =num_branches ;
 
@@ -257,18 +265,19 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         *(newArgs+c->kernarg_num+3) = &(gridDim.y);
         *(newArgs+c->kernarg_num+4) = &(blockDim.x);
         *(newArgs+c->kernarg_num+5) = &(blockDim.y);
-
+        printf("launching kernel with newargs\n");
         realLaunch(hostFunction,gridDim,blockDim, newArgs, sharedMemBytes, stream);
 
         kernel_launch_tracker * klt = (kernel_launch_tracker *) klt_ptr;
         klt_result_t * klt_result = (klt_result_t*) &(klt->result);
         hipMemcpy(klt_ptr->data_h,klt_ptr->data,klt_ptr->data_size,hipMemcpyDeviceToHost);
+        printf("before printing result\n");
         print_result (klt_result->records, klt_result->kid , klt_result -> num_records, klt_result->num_branches);
         klt_ptr->status=2;
 
         return hipSuccess;
     }else{
-
+        printf("config not found, using old args\n");
         realLaunch(hostFunction,gridDim,blockDim, args, sharedMemBytes, stream);
 
         return hipSuccess;
@@ -276,14 +285,6 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
 }
 
 
-extern "C" hipError_t hipSetupArgument(
-        const void *arg,
-        size_t size,
-        size_t offset){
-    printf("testing setup argument\n");
-    exit(-1);
-    return hipSuccess;
-}
 // hip_memory.cpp
 //
 typedef  hipError_t (* malloc_t ) ( void ** ptr , size_t sizeBytes);
@@ -308,22 +309,9 @@ hipError_t hipMemcpy(void* dst, const void* src, size_t sizeBytes, hipMemcpyKind
 }*/
 
 
-hipError_t ihipLaunchKernelCommand(void*& command, hipFunction_t f,
-        uint32_t globalWorkSizeX, uint32_t globalWorkSizeY,
-        uint32_t globalWorkSizeZ, uint32_t blockDimX, uint32_t blockDimY,
-        uint32_t blockDimZ, uint32_t sharedMemBytes,
-        void* queue, void** kernelParams, void** extra,
-        hipEvent_t startEvent = nullptr, hipEvent_t stopEvent = nullptr,
-        uint32_t flags = 0, uint32_t params = 0, uint32_t gridId = 0,
-        uint32_t numGrids = 0, uint64_t prevGridSum = 0,
-        uint64_t allGridSum = 0, uint32_t firstDevice = 0) {
-    exit(-1);
-    return hipSuccess;
-}
 
-
-
-
+int gct=0;
+std::mutex g_mtx;
 __attribute__((constructor)) static void setup(void){
     realLaunch = 0;
     //realRegisterFunction = 0;
@@ -342,8 +330,12 @@ __attribute__((constructor)) static void setup(void){
       fread(fatbin_data,1,fatbin_size,f_fatbin);
       fclose(f_fatbin);
       */
-
-    printf("calling setup\n");
+    g_mtx.lock();
+    if(gct ==0 ){
+        printf("calling setup, gct = %d\n",gct++);
+        fdata = fopen("measure_result.txt","w");
+    }
+    g_mtx.unlock();
 }
 
 
@@ -359,5 +351,6 @@ __attribute__((destructor)) static void fini(void){
         }
         it = mempool.erase(it);
     }
+    fclose(fdata);
 }
 
