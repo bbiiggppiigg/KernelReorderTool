@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=split_kernel_v2 merge_kernel_v2 preload_global expand_args update_note_phdr report_args_loc disassemble preload_base preload_global_v2
+srcs=split_kernel_v2 merge_kernel_v2 preload_global expand_args update_note_phdr report_args_loc disassemble preload_base preload_global_v2 split_kernel_v3 merge_kernel_v3
 libs=kernel_elf_helper.o
 
 BINS=$(addprefix bin/,$(srcs))
@@ -34,8 +34,15 @@ bin/preload_global_v2: src/global_with_spilling.cpp src/config.cpp lib/InsnFacto
 bin/split_kernel_v2: src/split_kernel_v2.cpp
 	g++ -o $@ $<
 
+bin/split_kernel_v3: src/split_kernel_v3.cpp
+	g++ -o $@ $<
+
+
 bin/merge_kernel_v2: src/merge_kernel_v2.cpp
 	g++ -o $@ $<
+bin/merge_kernel_v3: src/merge_kernel_v3.cpp
+	g++ -g -o $@ $<
+
 
 bin/expand_args: src/expand_args.cpp
 	g++ -I lib/msgpack-c/include/ -I /opt/rocm/include -Wl,--demangle -Wl,-rpath,/opt/rocm/lib/ -L/opt/rocm/lib/-lamd_comgr $< -o $@
