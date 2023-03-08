@@ -141,8 +141,8 @@ int main(int argc, char ** argv){
         FILE * tmpfile = fopen(path,"wb");
         fwrite(buffer,meta.size,1,tmpfile);
         fclose(tmpfile);
-
         free(buffer);
+        printf("freeing buffer\n");
     }
     fclose(fmeta);
     /*

@@ -1,0 +1,3 @@
+/home/wuxx1279/KR/simple/build/bin/snippetInserter
+/home/wuxx1279/KR/simple/build/bin/snippetGenerator
+/home/wuxx1279/KR/simple/build/bin/snippetReader

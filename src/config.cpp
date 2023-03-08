@@ -475,6 +475,40 @@ void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end 
 
 }
 
+void offsetted_inplace_insert(uint32_t offset , FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &insn_pool){    
+
+
+    uint32_t buffer_size = text_end - insert_location;
+    void * file_buffer = malloc(sizeof(char *) * (buffer_size));
+    printf("inserting instructions to address %x\n",insert_location);
+    fseek(fp,offset+insert_location,SEEK_SET);
+    fread(file_buffer, 1 , buffer_size , fp );
+    fseek(fp,offset+insert_location,SEEK_SET);
+    uint32_t size_acc = 0;
+    for(auto & insn : insns){
+        insn.write(fp);
+        size_acc+= insn.size;
+
+    }
+    fwrite(file_buffer,1,buffer_size,fp);
+    update_symtab_symbols(fp, text_start ,text_end, insert_location, size_acc);
+    update_branches(fp,branches,insert_location,size_acc);
+    update_endpgms(fp,endpgms,insert_location,size_acc);
+    
+    text_end += size_acc;
+    printf("updating kernel bounds\n");
+    for(auto & kb : kbs){
+        if(insert_location < kb.first){
+            kb.first += size_acc;
+            kb.last += size_acc;
+            fseek(fp,kb.kdAddr+16, SEEK_SET);
+            long long unsigned new_offset = kb.first-kb.kdAddr;
+            fwrite(&new_offset,1,8,fp );
+        }
+    }
+
+
+}
 
 
 uint32_t get_size(vector<MyInsn> &insns){

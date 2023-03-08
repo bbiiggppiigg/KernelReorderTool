@@ -38,7 +38,16 @@ int main(int argc, char * argv[]){
     if(argc !=2){
         printf("Usage: %s <binary path> \n",argv[0]);
     }
-
+    char *p;
+    uint32_t offset = 0;
+    if(argc == 3){
+        offset = strtol(argv[2],&p,10)-0x1000;
+        if(p){
+            puts("GGGGGGGGGGGGGGG");
+        }
+        printf("offset = %x\n",offset);
+        assert(offset >=0);
+    }
     FILE * fp = fopen("snippets.txt","r");
     uint32_t size, addr;
     char filename[1000];
@@ -85,12 +94,12 @@ int main(int argc, char * argv[]){
             void * ptr = snippets[sid]._ptr;
             if (addr < func_start || addr > func_end)
                 break;
-           inplace_insert(f_binary,func_start,func_end, addr , size , ptr ,branches, kernel_bounds,endpgms,insn_pool);
+           offsetted_inplace_insert(offset,f_binary,func_start,func_end, addr , size , ptr ,branches, kernel_bounds,endpgms,insn_pool);
            target_shift += size;
            per_kernel_size_sum += size;
         }
 
-        printf("target_shift =%u\n",target_shift);
+        /*printf("target_shift =%u\n",target_shift);
         uint32_t nop_size = 0;
         if(target_shift%256!=0){
             uint32_t remain = 256 - (target_shift%256);
@@ -100,10 +109,10 @@ int main(int argc, char * argv[]){
             for(uint32_t i=0; i <num_nops ;i++){
                 nops.push_back(InsnFactory::create_s_nop(insn_pool));
             }
-            inplace_insert(f_binary,func_start,func_end,nops,branches, func_end +target_shift,kernel_bounds,endpgms,insn_pool);
+            offsetted_inplace_insert(offset,f_binary,func_start,func_end,nops,branches, func_end +target_shift,kernel_bounds,endpgms,insn_pool);
             nop_size += get_size(nops);
             per_kernel_size_sum += get_size(nops);
-        }
+        }*/
         update_symtab_symbol_size(f_binary,kb.name.c_str(), func_end - func_start + per_kernel_size_sum );
     }
     extend_text(f_binary,target_shift);

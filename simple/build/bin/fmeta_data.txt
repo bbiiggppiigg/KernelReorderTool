@@ -1,0 +1,3 @@
+vectoradd_hip.exe
+1
+12288 9560

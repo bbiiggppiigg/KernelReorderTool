@@ -175,7 +175,7 @@ void extend_text(FILE * f, int inc_text_size){
     Phdr tmp_phdr;
     for (unsigned int i = 0; i < header.e_phnum ;i ++){
         read_phdr(&tmp_phdr,f,&header,i);
-        if(tmp_phdr.p_offset == text_hdr.sh_addr){
+        if(tmp_phdr.p_offset == text_hdr.sh_offset){
             tmp_phdr.p_filesz += inc_text_size;
             tmp_phdr.p_memsz += inc_text_size;
             fseek(f,header.e_phoff+sizeof(Phdr) * i , SEEK_SET);

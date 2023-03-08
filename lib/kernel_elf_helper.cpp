@@ -461,6 +461,9 @@ void update_symtab_symbol_size(FILE * f, const char kernel_name [] , uint32_t ne
 	for (int i =0 ; i < num_entries ;i ++){
 		Elf64_Sym * symbol = symtab_content+i;
 		char * symbol_name = strtab_content + symbol -> st_name;
+        printf("symbol_name at %x\n",symbol_name);
+        puts(kernel_name);
+        puts(symbol_name);
         if(strcmp(kernel_name,symbol_name)==0){
             puts(symbol_name);
             symbol->st_size = new_size;

@@ -1,0 +1,376 @@
+#include <elf.h>
+
+/*
+ * ELF dump of 'backup'
+ *     13272 (0x33D8) bytes
+ */
+
+Elf64_Dyn dumpedelf_dyn_0[];
+struct {
+	Elf64_Ehdr ehdr;
+	Elf64_Phdr phdrs[8];
+	Elf64_Shdr shdrs[14];
+	Elf64_Dyn *dyns;
+} dumpedelf_0 = {
+
+.ehdr = {
+	.e_ident = { /* (EI_NIDENT bytes) */
+		/* [0] EI_MAG:        */ 0x7F,'E','L','F',
+		/* [4] EI_CLASS:      */ 2 , /* (ELFCLASS64) */
+		/* [5] EI_DATA:       */ 1 , /* (ELFDATA2LSB) */
+		/* [6] EI_VERSION:    */ 1 , /* (EV_CURRENT) */
+		/* [7] EI_OSABI:      */ 64 , /* (ELFOSABI_ARM_AEABI) */
+		/* [8] EI_ABIVERSION: */ 2 ,
+		/* [9-15] EI_PAD:     */ 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+	},
+	.e_type      = 3          , /* (ET_DYN) */
+	.e_machine   = 224        , /* (UNKNOWN_TYPE) */
+	.e_version   = 1          , /* (EV_CURRENT) */
+	.e_entry     = 0x0        , /* (start address at runtime) */
+	.e_phoff     = 64         , /* (bytes into file) */
+	.e_shoff     = 12376      , /* (bytes into file) */
+	.e_flags     = 0x530      ,
+	.e_ehsize    = 64         , /* (bytes) */
+	.e_phentsize = 56         , /* (bytes) */
+	.e_phnum     = 8          , /* (program headers) */
+	.e_shentsize = 64         , /* (bytes) */
+	.e_shnum     = 14         , /* (section headers) */
+	.e_shstrndx  = 11        
+},
+
+.phdrs = {
+/* Program Header #0 0x40 */
+{
+	.p_type   = 6          , /* [PT_PHDR] */
+	.p_offset = 64         , /* (bytes into file) */
+	.p_vaddr  = 0x40       , /* (virtual addr at runtime) */
+	.p_paddr  = 0x40       , /* (physical addr at runtime) */
+	.p_filesz = 448        , /* (bytes in file) */
+	.p_memsz  = 448        , /* (bytes in mem at runtime) */
+	.p_flags  = 0x4        , /* PF_R */
+	.p_align  = 8          , /* (min mem alignment in bytes) */
+},
+/* Program Header #1 0x78 */
+{
+	.p_type   = 1          , /* [PT_LOAD] */
+	.p_offset = 0          , /* (bytes into file) */
+	.p_vaddr  = 0x0        , /* (virtual addr at runtime) */
+	.p_paddr  = 0x0        , /* (physical addr at runtime) */
+	.p_filesz = 1536       , /* (bytes in file) */
+	.p_memsz  = 1536       , /* (bytes in mem at runtime) */
+	.p_flags  = 0x4        , /* PF_R */
+	.p_align  = 4096       , /* (min mem alignment in bytes) */
+},
+/* Program Header #2 0xB0 */
+{
+	.p_type   = 1          , /* [PT_LOAD] */
+	.p_offset = 12288      , /* (bytes into file) */
+	.p_vaddr  = 0x1000     , /* (virtual addr at runtime) */
+	.p_paddr  = 0x1000     , /* (physical addr at runtime) */
+	.p_filesz = 84         , /* (bytes in file) */
+	.p_memsz  = 84         , /* (bytes in mem at runtime) */
+	.p_flags  = 0x5        , /* PF_R | PF_X */
+	.p_align  = 4096       , /* (min mem alignment in bytes) */
+},
+/* Program Header #3 0xE8 */
+{
+	.p_type   = 1          , /* [PT_LOAD] */
+	.p_offset = 8192       , /* (bytes into file) */
+	.p_vaddr  = 0x2000     , /* (virtual addr at runtime) */
+	.p_paddr  = 0x2000     , /* (physical addr at runtime) */
+	.p_filesz = 112        , /* (bytes in file) */
+	.p_memsz  = 112        , /* (bytes in mem at runtime) */
+	.p_flags  = 0x6        , /* PF_R | PF_W */
+	.p_align  = 4096       , /* (min mem alignment in bytes) */
+},
+/* Program Header #4 0x120 */
+{
+	.p_type   = 2          , /* [PT_DYNAMIC] */
+	.p_offset = 8192       , /* (bytes into file) */
+	.p_vaddr  = 0x2000     , /* (virtual addr at runtime) */
+	.p_paddr  = 0x2000     , /* (physical addr at runtime) */
+	.p_filesz = 112        , /* (bytes in file) */
+	.p_memsz  = 112        , /* (bytes in mem at runtime) */
+	.p_flags  = 0x6        , /* PF_R | PF_W */
+	.p_align  = 8          , /* (min mem alignment in bytes) */
+},
+/* Program Header #5 0x158 */
+{
+	.p_type   = 1685382482 , /* [PT_GNU_RELRO] */
+	.p_offset = 8192       , /* (bytes into file) */
+	.p_vaddr  = 0x2000     , /* (virtual addr at runtime) */
+	.p_paddr  = 0x2000     , /* (physical addr at runtime) */
+	.p_filesz = 112        , /* (bytes in file) */
+	.p_memsz  = 4096       , /* (bytes in mem at runtime) */
+	.p_flags  = 0x4        , /* PF_R */
+	.p_align  = 1          , /* (min mem alignment in bytes) */
+},
+/* Program Header #6 0x190 */
+{
+	.p_type   = 1685382481 , /* [PT_GNU_STACK] */
+	.p_offset = 0          , /* (bytes into file) */
+	.p_vaddr  = 0x0        , /* (virtual addr at runtime) */
+	.p_paddr  = 0x0        , /* (physical addr at runtime) */
+	.p_filesz = 0          , /* (bytes in file) */
+	.p_memsz  = 0          , /* (bytes in mem at runtime) */
+	.p_flags  = 0x6        , /* PF_R | PF_W */
+	.p_align  = 0          , /* (min mem alignment in bytes) */
+},
+/* Program Header #7 0x1C8 */
+{
+	.p_type   = 4          , /* [PT_NOTE] */
+	.p_offset = 512        , /* (bytes into file) */
+	.p_vaddr  = 0x200      , /* (virtual addr at runtime) */
+	.p_paddr  = 0x200      , /* (physical addr at runtime) */
+	.p_filesz = 700        , /* (bytes in file) */
+	.p_memsz  = 700        , /* (bytes in mem at runtime) */
+	.p_flags  = 0x4        , /* PF_R */
+	.p_align  = 4          , /* (min mem alignment in bytes) */
+
+	/* note section dump:
+	 * Elf64_Nhdr note0 = {
+	 * 	.n_namesz = 7, (bytes) [AMDGPU]
+	 * 	.n_descsz = 677, (bytes) [ 83 AE 61 6D 64 68 73 61 2E 6B 65 72 6E 65 6C 73 91 8F A5 2E 61 72 67 73 95 84 AE 2E 61 64 64 72 65 73 73 5F 73 70 61 63 65 A6 67 6C 6F 62 61 6C A7 2E 6F 66 66 73 65 74 00 A5 2E 73 69 7A 65 08 AB 2E 76 61 6C 75 65 5F 6B 69 6E 64 AD 67 6C 6F 62 61 6C 5F 62 75 66 66 65 72 84 AE 2E 61 64 64 72 65 73 73 5F 73 70 61 63 65 A6 67 6C 6F 62 61 6C A7 2E 6F 66 66 73 65 74 08 A5 2E 73 69 7A 65 08 AB 2E 76 61 6C 75 65 5F 6B 69 6E 64 AD 67 6C 6F 62 61 6C 5F 62 75 66 66 65 72 84 AE 2E 61 64 64 72 65 73 73 5F 73 70 61 63 65 A6 67 6C 6F 62 61 6C A7 2E 6F 66 66 73 65 74 10 A5 2E 73 69 7A 65 08 AB 2E 76 61 6C 75 65 5F 6B 69 6E 64 AD 67 6C 6F 62 61 6C 5F 62 75 66 66 65 72 83 A7 2E 6F 66 66 73 65 74 18 A5 2E 73 69 7A 65 04 AB 2E 76 61 6C 75 65 5F 6B 69 6E 64 A8 62 79 5F 76 61 6C 75 65 83 A7 2E 6F 66 66 73 65 74 1C A5 2E 73 69 7A 65 04 AB 2E 76 61 6C 75 65 5F 6B 69 6E 64 A8 62 79 5F 76 61 6C 75 65 B9 2E 67 72 6F 75 70 5F 73 65 67 6D 65 6E 74 5F 66 69 78 65 64 5F 73 69 7A 65 00 B6 2E 6B 65 72 6E 61 72 67 5F 73 65 67 6D 65 6E 74 5F 61 6C 69 67 6E 08 B5 2E 6B 65 72 6E 61 72 67 5F 73 65 67 6D 65 6E 74 5F 73 69 7A 65 20 A9 2E 6C 61 6E 67 75 61 67 65 A8 4F 70 65 6E 43 4C 20 43 B1 2E 6C 61 6E 67 75 61 67 65 5F 76 65 72 73 69 6F 6E 92 02 00 B8 2E 6D 61 78 5F 66 6C 61 74 5F 77 6F 72 6B 67 72 6F 75 70 5F 73 69 7A 65 CD 04 00 A5 2E 6E 61 6D 65 BA 5F 5A 31 32 76 65 63 74 6F 72 61 64 64 5F 6B 31 50 66 50 4B 66 53 31 5F 69 69 BB 2E 70 72 69 76 61 74 65 5F 73 65 67 6D 65 6E 74 5F 66 69 78 65 64 5F 73 69 7A 65 00 AB 2E 73 67 70 72 5F 63 6F 75 6E 74 0A B1 2E 73 67 70 72 5F 73 70 69 6C 6C 5F 63 6F 75 6E 74 00 A7 2E 73 79 6D 62 6F 6C BD 5F 5A 31 32 76 65 63 74 6F 72 61 64 64 5F 6B 31 50 66 50 4B 66 53 31 5F 69 69 2E 6B 64 AB 2E 76 67 70 72 5F 63 6F 75 6E 74 03 B1 2E 76 67 70 72 5F 73 70 69 6C 6C 5F 63 6F 75 6E 74 00 AF 2E 77 61 76 65 66 72 6F 6E 74 5F 73 69 7A 65 40 AD 61 6D 64 68 73 61 2E 74 61 72 67 65 74 B9 61 6D 64 67 63 6E 2D 61 6D 64 2D 61 6D 64 68 73 61 2D 2D 67 66 78 39 30 38 AE 61 6D 64 68 73 61 2E 76 65 72 73 69 6F 6E 92 01 01 ]
+	 * 	.n_type   = 20, [UNKNOWN_TYPE]
+	 * };
+	 */
+},
+},
+
+.shdrs = {
+/* Section Header #0 '' 0x3058 */
+{
+	.sh_name      = 0          ,
+	.sh_type      = 0          , /* [SHT_NULL] */
+	.sh_flags     = 0          ,
+	.sh_addr      = 0x0        ,
+	.sh_offset    = 0          , /* (bytes) */
+	.sh_size      = 0          , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 0          ,
+	.sh_entsize   = 0         
+},
+/* Section Header #1 '.note' 0x3098 */
+{
+	.sh_name      = 46         ,
+	.sh_type      = 7          , /* [SHT_NOTE] */
+	.sh_flags     = 2          ,
+	.sh_addr      = 0x200      ,
+	.sh_offset    = 512        , /* (bytes) */
+	.sh_size      = 700        , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 4          ,
+	.sh_entsize   = 0         
+},
+/* Section Header #2 '.dynsym' 0x30D8 */
+{
+	.sh_name      = 28         ,
+	.sh_type      = 11         , /* [SHT_DYNSYM] */
+	.sh_flags     = 2          ,
+	.sh_addr      = 0x4C0      ,
+	.sh_offset    = 1216       , /* (bytes) */
+	.sh_size      = 72         , /* (bytes) */
+	.sh_link      = 5          ,
+	.sh_info      = 1          ,
+	.sh_addralign = 8          ,
+	.sh_entsize   = 24        
+},
+/* Section Header #3 '.gnu.hash' 0x3118 */
+{
+	.sh_name      = 36         ,
+	.sh_type      = 1879048182 , /* [SHT_GNU_HASH] */
+	.sh_flags     = 2          ,
+	.sh_addr      = 0x508      ,
+	.sh_offset    = 1288       , /* (bytes) */
+	.sh_size      = 36         , /* (bytes) */
+	.sh_link      = 2          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 8          ,
+	.sh_entsize   = 0         
+},
+/* Section Header #4 '.hash' 0x3158 */
+{
+	.sh_name      = 40         ,
+	.sh_type      = 5          , /* [SHT_HASH] */
+	.sh_flags     = 2          ,
+	.sh_addr      = 0x52C      ,
+	.sh_offset    = 1324       , /* (bytes) */
+	.sh_size      = 32         , /* (bytes) */
+	.sh_link      = 2          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 4          ,
+	.sh_entsize   = 4         
+},
+/* Section Header #5 '.dynstr' 0x3198 */
+{
+	.sh_name      = 20         ,
+	.sh_type      = 3          , /* [SHT_STRTAB] */
+	.sh_flags     = 2          ,
+	.sh_addr      = 0x54C      ,
+	.sh_offset    = 1356       , /* (bytes) */
+	.sh_size      = 58         , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 1          ,
+	.sh_entsize   = 0         
+},
+/* Section Header #6 '.rodata' 0x31D8 */
+{
+	.sh_name      = 87         ,
+	.sh_type      = 1          , /* [SHT_PROGBITS] */
+	.sh_flags     = 2          ,
+	.sh_addr      = 0x5C0      ,
+	.sh_offset    = 1472       , /* (bytes) */
+	.sh_size      = 64         , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 64         ,
+	.sh_entsize   = 0         
+},
+/* Section Header #7 '.old.text' 0x3218 */
+{
+	.sh_name      = 1          ,
+	.sh_type      = 1          , /* [SHT_PROGBITS] */
+	.sh_flags     = 6          ,
+	.sh_addr      = 0x1000     ,
+	.sh_offset    = 4096       , /* (bytes) */
+	.sh_size      = 84         , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 256        ,
+	.sh_entsize   = 0         
+},
+/* Section Header #8 '.dynamic' 0x3258 */
+{
+	.sh_name      = 52         ,
+	.sh_type      = 6          , /* [SHT_DYNAMIC] */
+	.sh_flags     = 3          ,
+	.sh_addr      = 0x2000     ,
+	.sh_offset    = 8192       , /* (bytes) */
+	.sh_size      = 112        , /* (bytes) */
+	.sh_link      = 5          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 8          ,
+	.sh_entsize   = 16        
+},
+/* Section Header #9 '.comment' 0x3298 */
+{
+	.sh_name      = 11         ,
+	.sh_type      = 1          , /* [SHT_PROGBITS] */
+	.sh_flags     = 48         ,
+	.sh_addr      = 0x0        ,
+	.sh_offset    = 8304       , /* (bytes) */
+	.sh_size      = 158        , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 1          ,
+	.sh_entsize   = 1         
+},
+/* Section Header #10 '.symtab' 0x32D8 */
+{
+	.sh_name      = 79         ,
+	.sh_type      = 2          , /* [SHT_SYMTAB] */
+	.sh_flags     = 0          ,
+	.sh_addr      = 0x0        ,
+	.sh_offset    = 8464       , /* (bytes) */
+	.sh_size      = 96         , /* (bytes) */
+	.sh_link      = 12         ,
+	.sh_info      = 2          ,
+	.sh_addralign = 8          ,
+	.sh_entsize   = 24        
+},
+/* Section Header #11 '.shstrtab' 0x3318 */
+{
+	.sh_name      = 61         ,
+	.sh_type      = 3          , /* [SHT_STRTAB] */
+	.sh_flags     = 0          ,
+	.sh_addr      = 0x0        ,
+	.sh_offset    = 8560       , /* (bytes) */
+	.sh_size      = 95         , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 1          ,
+	.sh_entsize   = 0         
+},
+/* Section Header #12 '.strtab' 0x3358 */
+{
+	.sh_name      = 71         ,
+	.sh_type      = 3          , /* [SHT_STRTAB] */
+	.sh_flags     = 0          ,
+	.sh_addr      = 0x0        ,
+	.sh_offset    = 8655       , /* (bytes) */
+	.sh_size      = 67         , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 1          ,
+	.sh_entsize   = 0         
+},
+/* Section Header #13 '.text' 0x3398 */
+{
+	.sh_name      = 5          ,
+	.sh_type      = 1          , /* [SHT_PROGBITS] */
+	.sh_flags     = 6          ,
+	.sh_addr      = 0x1000     ,
+	.sh_offset    = 12288      , /* (bytes) */
+	.sh_size      = 84         , /* (bytes) */
+	.sh_link      = 0          ,
+	.sh_info      = 0          ,
+	.sh_addralign = 256        ,
+	.sh_entsize   = 0         
+},
+},
+
+.dyns = dumpedelf_dyn_0,
+};
+Elf64_Dyn dumpedelf_dyn_0[] = {
+/* Dynamic tag #0 'DT_SYMTAB' 0x2000 */
+{
+	.d_tag     = 0x6        ,
+	.d_un      = {
+		.d_val = 0x4C0      ,
+		.d_ptr = 0x4C0      ,
+	},
+},
+/* Dynamic tag #1 'DT_SYMENT' 0x2010 */
+{
+	.d_tag     = 0xB        ,
+	.d_un      = {
+		.d_val = 0x18       ,
+		.d_ptr = 0x18       ,
+	},
+},
+/* Dynamic tag #2 'DT_STRTAB' 0x2020 */
+{
+	.d_tag     = 0x5        ,
+	.d_un      = {
+		.d_val = 0x54C      ,
+		.d_ptr = 0x54C      ,
+	},
+},
+/* Dynamic tag #3 'DT_STRSZ' 0x2030 */
+{
+	.d_tag     = 0xA        ,
+	.d_un      = {
+		.d_val = 0x3A       ,
+		.d_ptr = 0x3A       ,
+	},
+},
+/* Dynamic tag #4 'DT_GNU_HASH' 0x2040 */
+{
+	.d_tag     = 0x6FFFFEF5 ,
+	.d_un      = {
+		.d_val = 0x508      ,
+		.d_ptr = 0x508      ,
+	},
+},
+/* Dynamic tag #5 'DT_HASH' 0x2050 */
+{
+	.d_tag     = 0x4        ,
+	.d_un      = {
+		.d_val = 0x52C      ,
+		.d_ptr = 0x52C      ,
+	},
+},
+};

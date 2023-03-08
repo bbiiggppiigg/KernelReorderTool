@@ -143,6 +143,7 @@ void update_branches(FILE* fp , vector<MyBranchInsn> &branches, uint32_t insert_
 void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs ,vector<uint32_t> &endpgms,vector<char *> &insn_pool);
    
 void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , uint32_t insert_location, uint32_t size, void * ptr , vector<MyBranchInsn> & branches, vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &insn_pool);
+void offsetted_inplace_insert(uint32_t offset, FILE * fp , const uint32_t text_start , uint32_t & text_end , uint32_t insert_location, uint32_t size, void * ptr , vector<MyBranchInsn> & branches, vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &insn_pool);
 
 uint32_t get_size(vector<MyInsn> &insns);
 
