@@ -1,4 +1,4 @@
-# Install script for directory: /home/wuxx1279/KR/simple/snippetReader
+# Install script for directory: /home/ronak/dyninst-experiments/KernelReorderTool/simple/snippetReader
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -9,6 +9,7 @@ using namespace std;
 void extend_text(FILE * f, int new_text_size);
 void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count );
 
+void update_function_symbol(FILE * f, const char kernel_name [], uint32_t new_addr, uint32_t new_size);
 void update_symtab_symbol_size(FILE * f, const char kernel_name [],uint32_t new_size);
 void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , uint32_t insert_loc , uint32_t insert_size);
 void update_lds_usage(FILE * f, uint32_t new_lds_usage);

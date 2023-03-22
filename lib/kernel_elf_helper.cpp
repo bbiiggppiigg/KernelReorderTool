@@ -399,6 +399,98 @@ void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , u
 	}
 
 }
+void update_function_symbol(FILE * f, const char kernel_name [], uint32_t new_addr, uint32_t new_size){
+	ElfW header;
+    fseek(f,0,SEEK_SET);
+	fread(&header,sizeof(header),1,f);
+
+	Shdr shstrtable_header;
+	read_shdr(&shstrtable_header,f,&header,header.e_shstrndx);
+	char * shstrtable = read_section(f,&shstrtable_header);
+
+	Shdr tmp_hdr;
+
+	Shdr text_hdr;
+	Shdr symtab_hdr;
+	Shdr strtab_hdr;
+	Shdr dynsym_hdr;
+	Shdr dynstr_hdr;
+
+	//int text_index = -1;
+	//int symtab_index = -1;
+	for (unsigned int i = 1; i < header.e_shnum ; i ++){
+		read_shdr(&tmp_hdr,f,&header,i);
+		char * sh_name = shstrtable+tmp_hdr.sh_name;
+        printf("sh_name = %s\n",sh_name);
+		if(0==strcmp(sh_name,".text")){
+	//		text_index = i ;
+			text_hdr = tmp_hdr;
+		}
+		if(0==strcmp(sh_name,".symtab")){
+			symtab_hdr = tmp_hdr;
+            printf("found .symtab, sh_offset = %u, size = %u\n",symtab_hdr.sh_offset, symtab_hdr.sh_size);
+	//		symtab_index = i;
+		}
+		if(0==strcmp(sh_name,".strtab")){
+			strtab_hdr = tmp_hdr;
+		}
+		if(0==strcmp(sh_name,".dynstr")){
+			dynstr_hdr = tmp_hdr;
+		}
+
+		if(0==strcmp(sh_name,".dynsym")){
+			dynsym_hdr = tmp_hdr;
+            printf("found .dynsym, sh_offset = %u, size = %u\n",symtab_hdr.sh_offset, symtab_hdr.sh_size);
+		}
+
+
+	}
+
+	char * strtab_content = read_section(f,&strtab_hdr);
+	char * dynstr_content = read_section(f,&dynstr_hdr);
+
+
+	Elf64_Sym * symtab_content = (Elf64_Sym *) read_section(f,&symtab_hdr);
+	Elf64_Sym * dynsym_content = (Elf64_Sym *) read_section(f,&dynsym_hdr);
+
+	int num_entries = symtab_hdr.sh_size / symtab_hdr.sh_entsize;
+
+    printf("num entries in symtab = %u\n",num_entries);
+	//int target_index = -1;
+	for (int i =0 ; i < num_entries ;i ++){
+		Elf64_Sym * symbol = symtab_content+i;
+		char * symbol_name = strtab_content + symbol -> st_name;
+        printf("symbol_name at %x\n",symbol_name);
+        puts(kernel_name);
+        puts(symbol_name);
+        if(strcmp(kernel_name,symbol_name)==0){
+            puts(symbol_name);
+            symbol->st_size = new_size;
+            symbol->st_value = new_addr;
+		    fseek(f,symtab_hdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+			fwrite(symbol,sizeof(Elf64_Sym),1,f);
+
+        }
+	}
+	num_entries = dynsym_hdr.sh_size / symtab_hdr.sh_entsize;
+
+    printf("num entries in dynsym = %u\n",num_entries);
+	//int target_index = -1;
+	for (int i =0 ; i < num_entries ;i ++){
+		Elf64_Sym * symbol = dynsym_content+i;
+		char * symbol_name = dynstr_content + symbol -> st_name;
+        if(strcmp(kernel_name,symbol_name)==0){
+            puts(symbol_name);
+            symbol->st_size = new_size;
+            symbol->st_value = new_addr;
+		    fseek(f,dynsym_hdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+			fwrite(symbol,sizeof(Elf64_Sym),1,f);
+
+        }
+	}
+
+
+}
 
 
 /* Update the symbol of labels that is after the insertion point such that llvm-objdump works correctly

@@ -45,19 +45,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/opt/cmake-3.20.6/bin/cmake
+CMAKE_COMMAND = /usr/bin/cmake
 
 # The command to remove a file.
-RM = /home/opt/cmake-3.20.6/bin/cmake -E rm -f
+RM = /usr/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/wuxx1279/KR/simple
+CMAKE_SOURCE_DIR = /home/ronak/dyninst-experiments/KernelReorderTool/simple
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/wuxx1279/KR/simple/build
+CMAKE_BINARY_DIR = /home/ronak/dyninst-experiments/KernelReorderTool/simple/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -132,14 +132,14 @@ snippetReader/clean: snippetReader/CMakeFiles/snippetReader.dir/clean
 snippetInserter/CMakeFiles/snippetInserter.dir/all:
 	$(MAKE) $(MAKESILENT) -f snippetInserter/CMakeFiles/snippetInserter.dir/build.make snippetInserter/CMakeFiles/snippetInserter.dir/depend
 	$(MAKE) $(MAKESILENT) -f snippetInserter/CMakeFiles/snippetInserter.dir/build.make snippetInserter/CMakeFiles/snippetInserter.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/wuxx1279/KR/simple/build/CMakeFiles --progress-num=6,7,8,9,10 "Built target snippetInserter"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles --progress-num=6,7,8,9,10 "Built target snippetInserter"
 .PHONY : snippetInserter/CMakeFiles/snippetInserter.dir/all
 
 # Build rule for subdir invocation for target.
 snippetInserter/CMakeFiles/snippetInserter.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wuxx1279/KR/simple/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 snippetInserter/CMakeFiles/snippetInserter.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wuxx1279/KR/simple/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles 0
 .PHONY : snippetInserter/CMakeFiles/snippetInserter.dir/rule
 
 # Convenience name for target.
@@ -158,14 +158,14 @@ snippetInserter/CMakeFiles/snippetInserter.dir/clean:
 snippetGenerator/CMakeFiles/snippetGenerator.dir/all:
 	$(MAKE) $(MAKESILENT) -f snippetGenerator/CMakeFiles/snippetGenerator.dir/build.make snippetGenerator/CMakeFiles/snippetGenerator.dir/depend
 	$(MAKE) $(MAKESILENT) -f snippetGenerator/CMakeFiles/snippetGenerator.dir/build.make snippetGenerator/CMakeFiles/snippetGenerator.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/wuxx1279/KR/simple/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target snippetGenerator"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target snippetGenerator"
 .PHONY : snippetGenerator/CMakeFiles/snippetGenerator.dir/all
 
 # Build rule for subdir invocation for target.
 snippetGenerator/CMakeFiles/snippetGenerator.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wuxx1279/KR/simple/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 snippetGenerator/CMakeFiles/snippetGenerator.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wuxx1279/KR/simple/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles 0
 .PHONY : snippetGenerator/CMakeFiles/snippetGenerator.dir/rule
 
 # Convenience name for target.
@@ -184,14 +184,14 @@ snippetGenerator/CMakeFiles/snippetGenerator.dir/clean:
 snippetReader/CMakeFiles/snippetReader.dir/all:
 	$(MAKE) $(MAKESILENT) -f snippetReader/CMakeFiles/snippetReader.dir/build.make snippetReader/CMakeFiles/snippetReader.dir/depend
 	$(MAKE) $(MAKESILENT) -f snippetReader/CMakeFiles/snippetReader.dir/build.make snippetReader/CMakeFiles/snippetReader.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/wuxx1279/KR/simple/build/CMakeFiles --progress-num=11,12,13,14,15 "Built target snippetReader"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles --progress-num=11,12,13,14,15 "Built target snippetReader"
 .PHONY : snippetReader/CMakeFiles/snippetReader.dir/all
 
 # Build rule for subdir invocation for target.
 snippetReader/CMakeFiles/snippetReader.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wuxx1279/KR/simple/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles 5
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 snippetReader/CMakeFiles/snippetReader.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/wuxx1279/KR/simple/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ronak/dyninst-experiments/KernelReorderTool/simple/build/CMakeFiles 0
 .PHONY : snippetReader/CMakeFiles/snippetReader.dir/rule
 
 # Convenience name for target.

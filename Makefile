@@ -29,15 +29,15 @@ bin/preload_base: src/preload_global.cpp src/config.cpp lib/InsnFactory.h lib/ke
 
 bin/preload_global_v2: src/global_with_spilling.cpp src/config.cpp lib/InsnFactory.h lib/kernel_elf_helper.o
 	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/config.cpp src/global_with_spilling.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/preload_global_v2
-
-bin/preload_global_v3: src/global_with_spilling.cpp src/config.cpp lib/InsnFactory.h lib/kernel_elf_helper.o
-	g++ -g -Wall -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/config.cpp src/preload_global_v3.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/preload_global_v3
+ 
+bin/preload_global_v3: src/preload_global_v3.cpp src/config.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
+	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/config.cpp src/preload_global_v3.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/preload_global_v3
 
 bin/split_kernel_v2: src/split_kernel_v2.cpp
 	g++ -o $@ $<
 
 bin/split_kernel_v3: src/split_kernel_v3.cpp
-	g++ -o $@ $<
+	g++ -g -o $@ $<
 
 
 bin/merge_kernel_v2: src/merge_kernel_v2.cpp

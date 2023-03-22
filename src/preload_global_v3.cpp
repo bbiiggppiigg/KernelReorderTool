@@ -9,7 +9,7 @@
 #include "INIReader.h"
 #include "../lib/AMDHSAKernelDescriptor.h"
 
-#include "config.h"
+#include "helper.h"
 using namespace std;
 using namespace Dyninst;
 using namespace ParseAPI;
@@ -100,7 +100,8 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     
     ret.push_back(InsnFactory::create_s_memtime(c.TIMER_1,insn_pool));
     //ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
-    printf("first uninitialized sgpr = %u\n",c.first_uninitalized_sgpr);
+    printf("first uninitialized sgpr = %u, kernarg_segmnet_ptr = %u \n",c.first_uninitalized_sgpr,c.kernarg_segment_ptr);
+    assert(c.kernarg_segment_ptr != -1);
     if((c.first_uninitalized_sgpr % 4) == 0){
         ret.push_back(InsnFactory::create_s_load_dwordx4(c.first_uninitalized_sgpr,c.kernarg_segment_ptr, c.old_kernarg_size+12 ,insn_pool));
     }else{
@@ -109,6 +110,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     }
 
     ret.push_back(InsnFactory::create_s_load_dwordx2(BACKUP_WRITEBACK_ADDR,c.kernarg_segment_ptr, c.old_kernarg_size ,insn_pool));
+    printf("old kernarg size = %u\n",c.old_kernarg_size);
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
     if(c.work_group_id_z_enabled){
@@ -130,7 +132,6 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     }
     // AFTER THIS STEP, a global WG_ID is stored in WORK_GROUP_ID 
 
-
     // THREAD_ID = (THREAD_ID_Z * WG_DIM_Y +  TID_Y ) * WG_DIM_X + TID_x
     if(c.work_item_id_enabled > 1){ // TID_Z
         ret.push_back(InsnFactory::create_v_readfirstlane_b32(TMP_SGPR0,258,insn_pool));  // 258 is VGPR2 in this encoding
@@ -142,6 +143,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
         ret.push_back(InsnFactory::create_v_readlane_b32(TMP_SGPR1,128,257,insn_pool));
         ret.push_back(InsnFactory::create_s_add_u32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,false,insn_pool));
     }
+
     ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.first_uninitalized_sgpr+2,true,insn_pool));  
     ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,TMP_SGPR1,TMP_SGPR0,insn_pool));
 
@@ -161,7 +163,6 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ret.push_back(InsnFactory::create_s_mul_i32(TMP_SGPR0,WORK_GROUP_ID,c.first_uninitalized_sgpr,insn_pool));
     ret.push_back(InsnFactory::create_s_add_u32(GLOBAL_WAVEFRONT_ID,TMP_SGPR0,LOCAL_WAVEFRONT_ID,false,insn_pool));
-
 
 
 
@@ -242,12 +243,21 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vect
 
 
 
+/*
+ * What do we need ?
+ * An Offset to Text section of the kernel
+ * A list of addresses that describes the bound of kernels
+ * A list of branches within each kernel
+ * A list of symbols within each kernel
+ */
+
 
 int main(int argc, char **argv){
 
     vector < char *> insn_pool;
 
-
+    vector<myKernelDescriptor> mkds;
+    uint32_t text_offset = 0x1000;
 
     if(argc !=3){
         printf("Usage: %s <binary path> <config_file>\n",argv[0]);
@@ -256,51 +266,40 @@ int main(int argc, char **argv){
     char *binaryPath = argv[1];
     char *configPath = argv[2];
 
+
+    analyze_binary(binaryPath, mkds, text_offset);
     //vector<pair<uint64_t, string>> kds;
     //get_kds(fp,kds);
     //
     FILE* fp = fopen(binaryPath,"rb+");
 
-
-    vector<kernel_bound> kernel_bounds ; 
-    uint32_t text_end; // address after last instr
-    getKernelBounds(binaryPath,kernel_bounds,text_end);
-
     vector<config> configs;
-    read_config(fp,configPath,configs,kernel_bounds);
-    fclose(fp);
+    read_config(fp,configPath,configs,mkds);
     printf("after reading config\n");
+    myKernelDescriptor cur_kd;
+    uint32_t mkd_id = -1;
+    int kid = 0;
     for(auto &c : configs){
-
-        fp = fopen(binaryPath,"rb+");
-
+        printf("KERNEL ID :  %d\n",++kid);
         uint32_t target_shift = 0;
-        uint32_t func_start = 0;
-        uint32_t func_end = 0;
-        for( auto & kb : kernel_bounds){
-            if(kb.name == c.name){
-                func_start = kb.first;
-                func_end = kb.last;
+        bool found = false;
+        uint32_t ii = 0;
+        for(auto & mkd : mkds ){
+            if(mkd.name == c.name){
+                mkd_id = ii;
+                found = true; cur_kd = mkd; break;
+
             }
+            ii++;
         }
-        if(func_start ==0){
-            assert(0 && " kernel name not found ");
+        if(!found){
+            std::cerr << " Error : try instrumenting non-existent kernel" << std::endl;
+            exit(-1);
         }
-
-
-        vector<CFG_EDGE> edges;
-        vector<pair<uint32_t, uint32_t >> save_mask_insns;
-        vector<uint32_t> endpgms;
-        analyze_binary(binaryPath, edges,  save_mask_insns, func_start , func_end, endpgms); 
-
-
+        //vector<CFG_EDGE> &edges = cur_kd.branch_insns;
+        vector<pair<uint32_t, uint32_t >> &save_mask_insns = mkds[mkd_id].save_mask_insns;
+        vector<uint32_t> & endpgms = mkds[mkd_id].endpgms;
         vector<MyBranchInsn> branches;
-        printf("before converting branches\n");
-        for (auto & edge : edges ) {
-            branches.push_back(
-                    InsnFactory::convert_to_branch_insn(edge.branch_address, edge.target_address, edge.cmd, edge.length, insn_pool)
-                    );
-        }
 
         uint32_t num_branches = save_mask_insns.size();
         c.num_branches = num_branches;
@@ -310,21 +309,23 @@ int main(int argc, char **argv){
             vector<MyInsn> init_insns;
             setup_initailization(init_insns,c,insn_pool);
 
-            inplace_insert(fp,func_start,text_end,init_insns,branches, func_start+ target_shift,kernel_bounds,endpgms,insn_pool);
-            printf("patching start at address offset %u\n", func_start);
-            target_shift += get_size(init_insns);
+            inplace_insert( mkds, mkd_id, init_insns, mkds[mkd_id].start_addr);
+            //inplace_insert( cur_kd, init_insns, cur_kd.start_addr, mkds);
+            target_shift += getSize(init_insns);
         }
-
+        puts("GGGGGGGGGGGGG");
+        dumpBuffers(mkds);
 #ifndef MEASURE_BASE 
         uint32_t branch_id =0 ;
         for( const auto & pair_addr_sgpr : save_mask_insns){
             auto addr = pair_addr_sgpr.first;
             auto exec_cond_sgpr = pair_addr_sgpr.second;
-            printf("branch id = %d, exec_cond_sgpr = %d\n",branch_id,exec_cond_sgpr);
+            printf("0x%p: branch id = %d, exec_cond_sgpr = %d\n",addr,branch_id,exec_cond_sgpr);
             vector<MyInsn> update_branch_statistic;
             per_branch_instrumentation(update_branch_statistic, branch_id  , exec_cond_sgpr , c ,insn_pool);
-            inplace_insert(fp,func_start,text_end,update_branch_statistic,branches, addr + target_shift,kernel_bounds,endpgms,insn_pool);
-            target_shift+= get_size(update_branch_statistic);
+            
+            inplace_insert( mkds,mkd_id, update_branch_statistic, addr);
+            target_shift+= getSize(update_branch_statistic);
             branch_id++;
         }
 #endif
@@ -333,48 +334,20 @@ int main(int argc, char **argv){
         setup_writeback(writeback_insns, c ,insn_pool);
         memtime_epilogue(writeback_insns, c, my_offset , insn_pool);
         printf("before inserting writeback\n");
-
         for (const auto & endpgm : endpgms){
-            //printf("before ending, endpgms position = %p\n",endpgm);
-            inplace_insert(fp,func_start,text_end,writeback_insns,branches, endpgm ,kernel_bounds,endpgms,insn_pool);
-            target_shift+= get_size(writeback_insns);
-
-
+            inplace_insert( mkds,mkd_id, writeback_insns, endpgm);
+            target_shift+= getSize(writeback_insns);
         }
-        /*{
-            vector<MyInsn> writeback_insns;
-            uint32_t my_offset = num_branches * 8;
-            setup_writeback(writeback_insns, c ,insn_pool);
-            memtime_epilogue(writeback_insns, c, my_offset , insn_pool);
-            printf("before inserting writeback\n");
-            inplace_insert(fp,func_start,text_end,writeback_insns,branches, func_end - 4 + target_shift,kernel_bounds,endpgms,insn_pool);
-            target_shift+= get_size(writeback_insns);
-
-        }*/
-        
-        printf("target_shift =%u\n",target_shift);
-        uint32_t nop_size = 0;
-        if(target_shift%256!=0){
-            uint32_t remain = 256 - (target_shift%256);
-            uint32_t num_nops = remain / 4;
-            vector<MyInsn> nops;
-            printf("number of remain = %u, num_nops = %u\n", remain,num_nops);
-            for(uint32_t i=0; i <num_nops ;i++){
-                nops.push_back(InsnFactory::create_s_nop(insn_pool));
-            }
-            inplace_insert(fp,func_start,text_end,nops,branches, func_end +target_shift,kernel_bounds,endpgms,insn_pool);
-            nop_size += get_size(nops);
-        }
-        // 0x10b0
-
-
-        extend_text(fp,target_shift+target_shift);
         set_sgpr_vgpr_usage(fp,c.kd_addr,c.sgpr_max,c.vgpr_max);
-        printf("updating sgpr max to %u, vgpr_max to %u\n",c.sgpr_max,c.vgpr_max);
-        update_symtab_symbol_size(fp,c.name.c_str(), func_end - func_start + target_shift );
-        printf(" increase symbol for kernel %s of size = %u, with size %u instrumentation \n", c.name.c_str(), func_end - func_start, target_shift);
-        fclose(fp);
+        propogate_mkd_update(mkds,mkd_id); 
+        dumpBuffers(mkds);
+
+        for(int ii =0 ; ii < mkds.size(); ii++){
+            update_function_symbol(fp,mkds[ii].name.c_str(),mkds[ii].start_addr, mkds[ii].end_addr - mkds[ii].start_addr);
+        }
     }
+    fclose(fp);
+    finalize(binaryPath,mkds,text_offset);
 
     for (auto &p : insn_pool){
         free(p);    

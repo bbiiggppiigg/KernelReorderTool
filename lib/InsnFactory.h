@@ -25,7 +25,12 @@ class MyBranchInsn : public MyInsn{
         uint32_t _branch_addr;
         uint32_t _target_addr;
         MyBranchInsn(uint32_t branch_addr, uint32_t target_addr, void * cmd_ptr,uint32_t size, string pretty) : MyInsn ( cmd_ptr, size , pretty), _branch_addr(branch_addr) , _target_addr(target_addr) {
-        
+            printf("Creating Branch Insns of size %u\n",size); 
+        }
+
+        void update_for_move(uint32_t offset){
+            _branch_addr+= offset;
+            _target_addr+= offset;
         }
         /*
          * There are two cases, 

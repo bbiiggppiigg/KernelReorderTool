@@ -138,19 +138,16 @@ int main(int argc, char ** argv){
         fseek(f,meta.offset,SEEK_SET);
         fread(buffer,meta.size,1,f);
         snprintf(path,1000,"code-objects/%s\0",meta.name);
+
         FILE * tmpfile = fopen(path,"wb");
         fwrite(buffer,meta.size,1,tmpfile);
         fclose(tmpfile);
+
         free(buffer);
         printf("freeing buffer\n");
     }
     fclose(fmeta);
-    /*
-       initscr();
-       printw("Hello Wrold !!");
-       refresh();
-       getch();
-       endwin();*/
+    fclose(f);
     return 0;
 
 }

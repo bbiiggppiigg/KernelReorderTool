@@ -8,10 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/wuxx1279/KR/simple/snippetGenerator/amdgpu-tooling/KernelDescriptor.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/amdgpu-tooling/KernelDescriptor.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/amdgpu-tooling/KernelDescriptor.cpp.o.d"
-  "/home/wuxx1279/KR/simple/snippetGenerator/config.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/config.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/config.cpp.o.d"
-  "/home/wuxx1279/KR/simple/snippetGenerator/kernel_elf_helper.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/kernel_elf_helper.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/kernel_elf_helper.cpp.o.d"
-  "/home/wuxx1279/KR/simple/snippetGenerator/snippetGenerator.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/snippetGenerator.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/snippetGenerator.cpp.o.d"
+  "/home/ronak/dyninst-experiments/KernelReorderTool/simple/snippetGenerator/amdgpu-tooling/KernelDescriptor.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/amdgpu-tooling/KernelDescriptor.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/amdgpu-tooling/KernelDescriptor.cpp.o.d"
+  "/home/ronak/dyninst-experiments/KernelReorderTool/simple/snippetGenerator/config.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/config.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/config.cpp.o.d"
+  "/home/ronak/dyninst-experiments/KernelReorderTool/simple/snippetGenerator/kernel_elf_helper.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/kernel_elf_helper.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/kernel_elf_helper.cpp.o.d"
+  "/home/ronak/dyninst-experiments/KernelReorderTool/simple/snippetGenerator/snippetGenerator.cpp" "snippetGenerator/CMakeFiles/snippetGenerator.dir/snippetGenerator.cpp.o" "gcc" "snippetGenerator/CMakeFiles/snippetGenerator.dir/snippetGenerator.cpp.o.d"
   )
 
 # Targets to which this target links.
