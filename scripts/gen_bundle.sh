@@ -15,7 +15,7 @@ $BIN/../scripts/gen_config.sh $CO > config.ini
 
 llvm-objdump -d $CO > orig.s
 llvm-objdump -d $CO | sed 's/\/\/.*//g'> orig_clean.s
-LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 $BIN/preload_global $CO config.ini
+LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst-amdgpu-codegen/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 $BIN/preload_global $CO config.ini
 
 llvm-objcopy --dump-section=.note=$CO.note $CO # dump the .note section of tmp_00
 llvm-objcopy --remove-section=.note $CO # remove the original note section

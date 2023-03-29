@@ -114,6 +114,23 @@ typedef struct myKernelDescriptor{
 
 void dumpBuffers(vector<myKernelDescriptor> & mkds);
 
+void update_mkd_move( myKernelDescriptor & mkd, uint32_t new_start_addr ){
+
+    uint32_t offset = new_start_addr - mkd.start_addr;
+    for (auto & pr : mkd.save_mask_insns){
+        pr.first += offset;
+    }
+    for ( auto & branch : mkd.branch_insns){
+        uint32_t buffer_offset = branch._branch_addr - mkd.start_addr;
+        branch.update_for_move(offset);
+        memcpy(mkd.buffer+buffer_offset , branch.ptr, branch.size);
+    }
+    for ( auto & endpgm : mkd.endpgms){
+        endpgm+= offset;
+    } 
+
+}
+
 void update_save_mask_insns( myKernelDescriptor & mkd, uint32_t insert_location, uint32_t size){
     for (auto & pr : mkd.save_mask_insns){
         printf("address = %x, mask reg = %u\n",pr.first, pr.second);
@@ -123,15 +140,17 @@ void update_save_mask_insns( myKernelDescriptor & mkd, uint32_t insert_location,
     }
 }
 void update_mkd_branches( myKernelDescriptor & mkd, uint32_t insert_location, uint32_t size){
+    int j = 0; 
     for ( auto & branch : mkd.branch_insns){
-
+        printf("bid = %d\n",j++);
         printf("patching branch at address = %x, size = %u bytes\n", branch._branch_addr , branch.size);
         branch.update_for_insertion(insert_location,size);
         printf("new branch at address = %x\n",branch._branch_addr);
     }
     for ( auto & branch : mkd.branch_insns ){
         uint32_t buffer_offset = branch._branch_addr - mkd.start_addr;
-        printf("buffer_offset = %x , new address =  %x, %u bytes\n", buffer_offset, branch._branch_addr, branch.size);
+
+        printf("buffer_offset = %x  =  new address =  %x, %u bytes\n", buffer_offset, branch._branch_addr, branch.size);
         memcpy(mkd.buffer+buffer_offset , branch.ptr, branch.size);
     }
 
@@ -156,7 +175,7 @@ void update_mkds_kds(vector<myKernelDescriptor> &mkds){
     }
 }
 
-void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds, uint32_t text_offset){
+void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
     SymtabAPI::Symtab * symTab;
     string binaryPathStr(binaryPath);
     SymtabAPI::Symtab::openFile(symTab, binaryPathStr);
@@ -188,8 +207,8 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds, uint32_
             mkd.buffer = (char *) malloc(mkd.end_addr - mkd.start_addr); 
 
             FILE * fp = fopen(binaryPath,"r");
-            printf("Reading kernel from address %x, size = %d\n",text_offset - 0x1000 + mkd.start_addr, mkd.end_addr - mkd.start_addr);
-            fseek(fp,text_offset - 0x1000 + mkd.start_addr,SEEK_SET);
+            printf("Reading kernel from address %x, size = %d\n",mkd.start_addr, mkd.end_addr - mkd.start_addr);
+            fseek(fp, mkd.start_addr,SEEK_SET);
             fread(mkd.buffer,1,mkd.end_addr -mkd.start_addr, fp);
             fclose(fp);
             std::cerr << " Adding kernel to mkds " << std::endl;
@@ -315,7 +334,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds, uint32_
 
 /**
  * Inplace Insertion of a sequence of code to a fixed address
- * Each code object is described as buffer, with starting address 0x1000
+ * Each code object is described as buffer, with starting address text_offset
  * Insert offset within the buffer = Insert Location - MKD.start  
  * We need to copy back the
  *
@@ -333,10 +352,14 @@ void inplace_insert(vector<myKernelDescriptor> &mkds, uint32_t mkd_id, vector<My
     uint32_t insert_offset = insert_location - mkd.start_addr;
     uint32_t new_buffer_size = mkd.end_addr - mkd.start_addr + size_acc;
     uint32_t copy_size = mkd.end_addr - insert_location;
+    printf("start_addr = %x, insert_location = %x, end_addr = %x\n",mkd.start_addr, insert_location, mkd.end_addr);
+    printf("insert_offset = %u, new_buffer_size = %u , copy_size = %u\n",insert_offset, new_buffer_size, copy_size);
     printf("Inserting to address %p, size = %u\n", insert_location, size_acc);
     //printf("increasing buffer size to %u\n", new_buffer_size);
     tmp_buffer = (char * ) malloc(new_buffer_size);
-
+    printf("tmp buffer start at address %08llx, ends at %08llx\n", tmp_buffer, tmp_buffer+ new_buffer_size);
+    printf("insert offset = %u\n",insert_offset);
+    printf("copying to address %08llx, ends at %08llx\n",tmp_buffer+insert_offset+size_acc,tmp_buffer+insert_offset+size_acc+copy_size);
     memmove(tmp_buffer+insert_offset+size_acc, mkd.buffer+insert_offset, copy_size);
     memmove(tmp_buffer,mkd.buffer,insert_offset);
     free(mkd.buffer);
@@ -576,6 +599,20 @@ void dumpBuffers(vector<myKernelDescriptor> & mkds){
         printf("writing buffer  output , first 16 bytes = %08llx %08llx\n",mbuffer[0],mbuffer[1]);
     }
     printf("out %s \n",__func__);
+
+
+    printf("in %s \n",__func__);
+    int i = 0;
+    for(const auto & mkd : mkds){
+        printf("Kernel id = %d\n",i);
+        int j =0 ;
+        for ( auto & branch : mkd.branch_insns){
+            printf("\tbid = %d : ptr = %llx, branch_addr = %llx\n",j++,branch.ptr, branch._branch_addr);
+        }
+        i++;
+    }
+    printf("out %s \n",__func__);
+
 }
 
 
@@ -587,12 +624,13 @@ void propogate_mkd_update(vector<myKernelDescriptor> & mkds, uint32_t mkd_id){
         if(prev_end > mkds[nid].start_addr){
             uint32_t aligned_up_addr = ((prev_end + 0xff) / 0x100) * 0x100;
             uint32_t offset = aligned_up_addr - mkds[nid].start_addr;
-
-            update_mkd_branches(mkds[nid],0,offset);
-            update_mkd_endpgms(mkds[nid],mkds[nid].start_addr,offset);
-
+            
+            // Here the start_addr is still pointing to the old offset
+            update_mkd_move(mkds[nid],aligned_up_addr);
             mkds[nid].start_addr += offset;
             mkds[nid].end_addr += offset;
+
+
             printf("aligned_up_addr = %x, offset = %u\n",aligned_up_addr,offset);
             printf("new start address for nid = %u [%x,%x)\n",nid,mkds[nid].start_addr,mkds[nid].end_addr);
             
@@ -631,8 +669,8 @@ void finalize(char * filename, vector<myKernelDescriptor> &mkds, uint32_t text_o
 
     FILE * f_text = fopen(new_filename,"w");
     for(const auto & mkd : mkds){
-        printf("fseeking to file offset = %x\n",mkd.start_addr - 0x1000);
-        fseek(f_text,mkd.start_addr-0x1000,SEEK_SET);
+        printf("fseeking to file offset = %x\n",mkd.start_addr - text_offset);
+        fseek(f_text,mkd.start_addr-text_offset,SEEK_SET);
         
         long long int * mbuffer = ( long long int * ) mkd.buffer;
         printf("writing buffer  output , first 16 bytes = %08llx %08llx\n",mbuffer[0],mbuffer[1]);

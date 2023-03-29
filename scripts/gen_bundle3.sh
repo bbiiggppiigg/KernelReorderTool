@@ -4,6 +4,7 @@ CO=$2
 BIN=/home/wuxx1279/KR/bin/
 mkdir code-objects
 
+set -e
 $BIN/split_kernel_v3 $TARGET
 cd code-objects
 
@@ -16,6 +17,7 @@ fi
 echo "TARGET = $TARGET"
 echo "CODE OBJECT = $CO"
 
+cc=0
 for ff in *; do
     if [[ "$ff" == *"$CO" ]]; then
     echo "Processing " $ff
@@ -23,9 +25,9 @@ for ff in *; do
     $BIN/../scripts/gen_config.sh $ff > $ff.config.ini
     llvm-objdump -d $ff > orig.s
     llvm-objdump -d $ff | sed 's/\/\/.*//g'> orig_clean.s
-    cat $ff.config.ini > tmp.config.ini
+    cat $ff.config.ini >> tmp.config.ini
 
-    LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 $BIN/preload_global_v3 $ff $ff.config.ini
+    LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst-amdgpu-codegen/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 $BIN/preload_global_v3 $ff $ff.config.ini  
 
     llvm-objcopy --rename-section=.text=.old.text $ff # remove the original note section
     llvm-objcopy --add-section=.text=$ff.text.new $ff # add a new section 

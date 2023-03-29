@@ -257,7 +257,6 @@ int main(int argc, char **argv){
     vector < char *> insn_pool;
 
     vector<myKernelDescriptor> mkds;
-    uint32_t text_offset = 0x1000;
 
     if(argc !=3){
         printf("Usage: %s <binary path> <config_file>\n",argv[0]);
@@ -267,12 +266,13 @@ int main(int argc, char **argv){
     char *configPath = argv[2];
 
 
-    analyze_binary(binaryPath, mkds, text_offset);
+    analyze_binary(binaryPath, mkds);
     //vector<pair<uint64_t, string>> kds;
     //get_kds(fp,kds);
     //
     FILE* fp = fopen(binaryPath,"rb+");
 
+    uint32_t text_offset = get_text_offset(fp);
     vector<config> configs;
     read_config(fp,configPath,configs,mkds);
     printf("after reading config\n");

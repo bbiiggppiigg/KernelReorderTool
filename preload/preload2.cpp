@@ -106,6 +106,8 @@ std::map<std::string, config *> metaLookup;
 std::map<int ,int > testMap;
 registerFunc_t realRegisterFunction;
 int g_kid = 0;
+
+FILE * fdebug;
 extern "C" void __hipRegisterFunction(
         void** modules,
         const void*  hostFunction,
@@ -117,13 +119,13 @@ extern "C" void __hipRegisterFunction(
         dim3*        blockDim,
         dim3*        gridDim,
         int*         wSize){
-    printf("modules = %p, hostFunciton = %p, devceFunciton = %s, deviceName = %s\n",modules,hostFunction, deviceFunction, deviceName);
+    fprintf(fdebug,"modules = %p, hostFunciton = %p, devceFunciton = %s, deviceName = %s\n",modules,hostFunction, deviceFunction, deviceName);
+    
     if(realRegisterFunction == 0){
         realRegisterFunction = (registerFunc_t) dlsym(RTLD_NEXT,"__hipRegisterFunction");   
         INIReader reader("config.ini");
         if(reader.ParseError() !=0){
-            std::cout << "Can't load " << std::string("config.ini")  << std::endl;
-
+            std::cerr << "Can't load " << std::string("config.ini")  << std::endl;
             exit(-1);
 
         }
@@ -136,7 +138,7 @@ extern "C" void __hipRegisterFunction(
             c->branch_count = reader.GetInteger(section,"branch_count",-1);
             c->kid = g_kid;
             g_kid ++;
-            std::cout << "kname : " << kname << std::endl;
+            fprintf(fdebug,"kernal name = %s\n",kname.c_str());
             metaLookup[kname] = c;
         }
 
@@ -165,7 +167,7 @@ launch_t realLaunch;
 
 void print_result(uint32_t * records, uint32_t kid ,uint32_t num_records, uint32_t num_branches){
     fprintf(fdata,"num_records = %u\n",num_records);
-    printf("num_records = %u\n",num_records);
+    fprintf(fdebug,"num_records = %u\n",num_records);
     uint32_t m_stride = (num_branches+2) * 2;
     for (uint32_t i =0; i < num_records ;i += m_stride){
         uint32_t j =0;
@@ -180,18 +182,6 @@ void print_result(uint32_t * records, uint32_t kid ,uint32_t num_records, uint32
     fprintf(fdata,"done\n");
 }
 
-void callback (hipStream_t stream, hipError_t status, void *userData){
-    kernel_launch_tracker * klt = (kernel_launch_tracker *) userData;
-    klt_result_t * klt_result = (klt_result_t*) &(klt->result);
-
-    printf("kernel completed\n");
-    printf("copying back from device to host, data_size = %u\n",klt->data_size);
-
-    hipDeviceSynchronize();
-    hipMemcpy(klt->data_h,klt->data,klt->data_size,hipMemcpyDeviceToHost);
-    //print_result (klt_result->records, klt_result->kid , klt_result -> num_records, klt_result->num_branches);
-    printf("kernel completed\n");
-}
 
 //uint32_t * data, * data_h , data_size;
 //uint32_t no_records;
@@ -207,24 +197,20 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         realLaunch = (launch_t)  dlsym(RTLD_NEXT, "hipLaunchKernel");
     }
 
-    printf("hip Launch Kernel Called, hostFunction = %p\n",hostFunction);
-    printf("x y z = %u %u %u\n",gridDim.x , gridDim.y , gridDim.z);
-    printf("x y z = %u %u %u\n",blockDim.x , blockDim.y , blockDim.z);
+    fprintf(fdebug,"hip Launch Kernel Called, hostFunction = %p\n",hostFunction);
+    fprintf(fdebug,"x y z = %u %u %u\n",gridDim.x , gridDim.y , gridDim.z);
+    fprintf(fdebug,"x y z = %u %u %u\n",blockDim.x , blockDim.y , blockDim.z);
 
-    printf("before lookup\n");
     config * c = FuncLookup[hostFunction];
     if(c){
-        printf("after lookup, config c = %p \n",c);
         uint32_t warps_per_block =  ( blockDim.x * blockDim.y * blockDim.z + 63 ) / 64;
         uint32_t no_warps = gridDim.x * gridDim.y * gridDim.z * warps_per_block;
-        printf("before accessing branch count\n");
+
         uint32_t num_branches = c->branch_count; // TODO:
 
-        printf("after accessing branch count\n");
         uint32_t size_per_warp = (num_branches * 2 * sizeof(uint32_t) + 2 * sizeof(uint64_t)); // 2 for counters for each branch , 2 for timestamp
         uint32_t data_size = no_warps * size_per_warp;
         uint32_t no_records = data_size / sizeof(uint32_t);
-        printf("before memory pool\n");
 
         kernel_launch_tracker * klt_ptr;
         bool found = false;
@@ -249,11 +235,9 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         klt_ptr->result.num_records = no_records ;
         klt_ptr->result.num_branches =num_branches ;
 
-        printf("memsetting\n");
         memset(klt_ptr->data_h,0, data_size);
         hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice);
 
-        printf("allocating memory for kernarg\n");
         int new_kernarg_vec_size = (c->kernarg_num + 6) * 8 ;
         void ** newArgs = (void **) malloc(new_kernarg_vec_size);
         memcpy(newArgs, args , c->kernarg_num *8);
@@ -265,19 +249,17 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         *(newArgs+c->kernarg_num+3) = &(gridDim.y);
         *(newArgs+c->kernarg_num+4) = &(blockDim.x);
         *(newArgs+c->kernarg_num+5) = &(blockDim.y);
-        printf("launching kernel with newargs\n");
         realLaunch(hostFunction,gridDim,blockDim, newArgs, sharedMemBytes, stream);
 
         kernel_launch_tracker * klt = (kernel_launch_tracker *) klt_ptr;
         klt_result_t * klt_result = (klt_result_t*) &(klt->result);
         hipMemcpy(klt_ptr->data_h,klt_ptr->data,klt_ptr->data_size,hipMemcpyDeviceToHost);
-        printf("before printing result\n");
         print_result (klt_result->records, klt_result->kid , klt_result -> num_records, klt_result->num_branches);
         klt_ptr->status=2;
 
         return hipSuccess;
     }else{
-        printf("config not found, using old args\n");
+        fprintf(fdebug,"config not found, using old args\n");
         realLaunch(hostFunction,gridDim,blockDim, args, sharedMemBytes, stream);
 
         return hipSuccess;
@@ -334,6 +316,7 @@ __attribute__((constructor)) static void setup(void){
     if(gct ==0 ){
         printf("calling setup, gct = %d\n",gct++);
         fdata = fopen("measure_result.txt","w");
+        fdebug = fopen("preload_debug.txt","w");
     }
     g_mtx.unlock();
 }
@@ -352,5 +335,6 @@ __attribute__((destructor)) static void fini(void){
         it = mempool.erase(it);
     }
     fclose(fdata);
+    fclose(fdebug);
 }
 

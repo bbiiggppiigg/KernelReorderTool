@@ -140,6 +140,35 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
 
 }
 
+uint32_t get_text_offset(FILE * f){
+
+    fseek(f,0,SEEK_SET);
+    ElfW header;
+    fread(&header,sizeof(header),1,f);
+    
+    Shdr shstrtable_header; 
+    read_shdr(&shstrtable_header,f,&header,header.e_shstrndx);
+    char * shstrtable = read_section(f,&shstrtable_header);
+
+    Shdr tmp_hdr;
+    Shdr text_hdr;
+    
+    int text_index = -1;
+    for (unsigned int i = 1; i < header.e_shnum ; i ++){
+        read_shdr(&tmp_hdr,f,&header,i);
+        char * sh_name = shstrtable+tmp_hdr.sh_name;
+        if(0==strcmp(sh_name,".text")){
+            text_index = i ;
+            text_hdr = tmp_hdr;
+        }
+    }
+    if(text_index == -1){
+        assert(0 && " can't find .text section" );
+    }
+    return text_hdr.sh_offset;
+}
+
+
 
 
 void extend_text(FILE * f, int inc_text_size){

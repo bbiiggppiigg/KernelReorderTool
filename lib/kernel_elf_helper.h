@@ -7,6 +7,7 @@
 #include <cassert>
 using namespace std;
 void extend_text(FILE * f, int new_text_size);
+uint32_t get_text_offset(FILE * f);
 void set_sgpr_usage( FILE* fp , vector<pair <uint64_t,string>> & kds ,string name, uint32_t new_sgpr_count );
 
 void update_function_symbol(FILE * f, const char kernel_name [], uint32_t new_addr, uint32_t new_size);

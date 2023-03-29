@@ -8,7 +8,7 @@ LIBS=$(addprefix lib/,$(libs))
 
 all : $(BINS) $(LIBS)
 
-DYNINST_ROOT=/home/wuxx1279/bin/dyninst
+DYNINST_ROOT=/home/wuxx1279/bin/dyninst-amdgpu-codegen
 ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
 endif

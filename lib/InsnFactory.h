@@ -26,6 +26,8 @@ class MyBranchInsn : public MyInsn{
         uint32_t _target_addr;
         MyBranchInsn(uint32_t branch_addr, uint32_t target_addr, void * cmd_ptr,uint32_t size, string pretty) : MyInsn ( cmd_ptr, size , pretty), _branch_addr(branch_addr) , _target_addr(target_addr) {
             printf("Creating Branch Insns of size %u\n",size); 
+            assert(ptr !=0 );
+            assert(_branch_addr !=0);
         }
 
         void update_for_move(uint32_t offset){
@@ -163,8 +165,11 @@ class InsnFactory {
                                    
                 }else{
                     std::cout << std::hex << cmd_value << " "<<(and_result) <<std::endl;
+
+                    assert(0 && "branch instruction of unsupported instruction prefix");
                 }
             }else{
+                assert(0 && "branch instruction of unsupported length");
                 ////printf("length = %u\n",length);
             }
             printf("exiting because of unsupport branch\n");
