@@ -28,6 +28,7 @@ for ff in *; do
     cat $ff.config.ini >> tmp.config.ini
 
     LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst-amdgpu-codegen/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 $BIN/preload_global_v3 $ff $ff.config.ini  
+    #LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst-amdgpu-codegen/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 gdb $BIN/preload_global_v3 $ff $ff.config.ini  
 
     llvm-objcopy --rename-section=.text=.old.text $ff # remove the original note section
     llvm-objcopy --add-section=.text=$ff.text.new $ff # add a new section 

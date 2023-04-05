@@ -1,4 +1,0 @@
-/home/wuxx1279/krt/lib/amdgpu-tooling/build/CMakeFiles/rebuild_cache.dir
-/home/wuxx1279/krt/lib/amdgpu-tooling/build/CMakeFiles/edit_cache.dir
-/home/wuxx1279/krt/lib/amdgpu-tooling/build/CMakeFiles/kd-tool.dir
-/home/wuxx1279/krt/lib/amdgpu-tooling/build/CMakeFiles/amdgpu-tooling.dir

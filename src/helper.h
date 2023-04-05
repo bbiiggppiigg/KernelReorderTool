@@ -15,11 +15,38 @@
 #include <algorithm>
 #include "unaligned_memory_access.h"
 #include "Function.h"
+#include <stdint.h>
+#include <stdarg.h>
 
 using namespace std;
 using namespace Dyninst;
 using namespace ParseAPI;
 using namespace InstructionAPI;
+
+FILE * log_file = 0;
+int kr_printf_initialized = 0;
+int kr_debug_printf = 0;
+void kr_printf(const char * format , ... ){
+    if(!kr_printf_initialized){
+        kr_printf_initialized = 1;
+        if(getenv("KR_DEBUG")){
+            kr_debug_printf = 1; 
+            if( log_file == NULL){
+                log_file = fopen("reorder_tool_debug.txt","w");
+            }
+        }
+    }
+    if(!kr_debug_printf)
+        return;
+
+    va_list va;
+    va_start(va,format);
+    int ret = vfprintf(log_file, format, va);
+    assert(ret >= 0);
+    fflush(log_file);
+    va_end(va);
+
+}
 
 typedef struct {
     uint32_t sgpr_max; // id of highest used scalar register in the binary
@@ -51,17 +78,8 @@ typedef struct {
 
     uint32_t num_branches;
 
-
-    uint32_t TMP_SGPR0;
-    uint32_t TMP_SGPR1;
-
-    uint32_t GLOBAL_WAVEFRONT_ID;
-    uint32_t LOCAL_WAVEFRONT_ID;
-    uint32_t WORK_GROUP_ID;
-    uint32_t BACKUP_WRITEBACK_ADDR;
-
-    uint32_t DEBUG_SGPR0;
-    uint32_t DEBUG_SGPR1;
+    uint32_t PER_WAVEFRONT_OFFSET;
+    uint32_t SDATA;
 
 
     // VGPRS
@@ -80,7 +98,7 @@ typedef struct {
     uint32_t code_entry_offset;
     uint32_t func_start;
     uint32_t func_end;
-    
+
     uint32_t first_uninitalized_sgpr;
     // 
     //
@@ -133,7 +151,7 @@ void update_mkd_move( myKernelDescriptor & mkd, uint32_t new_start_addr ){
 
 void update_save_mask_insns( myKernelDescriptor & mkd, uint32_t insert_location, uint32_t size){
     for (auto & pr : mkd.save_mask_insns){
-        printf("address = %x, mask reg = %u\n",pr.first, pr.second);
+        kr_printf("address = %x, mask reg = %u\n",pr.first, pr.second);
         if(insert_location <= pr.first){
             pr.first += size;
         }
@@ -142,15 +160,15 @@ void update_save_mask_insns( myKernelDescriptor & mkd, uint32_t insert_location,
 void update_mkd_branches( myKernelDescriptor & mkd, uint32_t insert_location, uint32_t size){
     int j = 0; 
     for ( auto & branch : mkd.branch_insns){
-        printf("bid = %d\n",j++);
-        printf("patching branch at address = %x, size = %u bytes\n", branch._branch_addr , branch.size);
+        kr_printf("bid = %d\n",j++);
+        kr_printf("patching branch at address = %x, size = %u bytes\n", branch._branch_addr , branch.size);
         branch.update_for_insertion(insert_location,size);
-        printf("new branch at address = %x\n",branch._branch_addr);
+        kr_printf("new branch at address = %x\n",branch._branch_addr);
     }
     for ( auto & branch : mkd.branch_insns ){
         uint32_t buffer_offset = branch._branch_addr - mkd.start_addr;
 
-        printf("buffer_offset = %x  =  new address =  %x, %u bytes\n", buffer_offset, branch._branch_addr, branch.size);
+        kr_printf("buffer_offset = %x  =  new address =  %x, %u bytes\n", buffer_offset, branch._branch_addr, branch.size);
         memcpy(mkd.buffer+buffer_offset , branch.ptr, branch.size);
     }
 
@@ -207,11 +225,11 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
             mkd.buffer = (char *) malloc(mkd.end_addr - mkd.start_addr); 
 
             FILE * fp = fopen(binaryPath,"r");
-            printf("Reading kernel from address %x, size = %d\n",mkd.start_addr, mkd.end_addr - mkd.start_addr);
+            kr_printf("Reading kernel from address %x, size = %d\n",mkd.start_addr, mkd.end_addr - mkd.start_addr);
             fseek(fp, mkd.start_addr,SEEK_SET);
             fread(mkd.buffer,1,mkd.end_addr -mkd.start_addr, fp);
             fclose(fp);
-            std::cerr << " Adding kernel to mkds " << std::endl;
+            kr_printf(" Adding kernel to mkds\n");
             mkds.push_back(mkd);
         }else{
             std::cerr << symbol->getType() << " symbol name " << symbol->getMangledName()  << std::endl;
@@ -234,20 +252,20 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
     vector<Function *> funcs;
     SymtabCodeSource * sts;
     CodeObject * co;
-    printf("in %s \n",__func__);
+    kr_printf("in %s \n",__func__);
     sts = new SymtabCodeSource(binaryPath);
-    printf("after sts\n");
+    kr_printf("after sts\n");
     co = new CodeObject( sts);
-    printf("after co\n");
+    kr_printf("after co\n");
     co -> parse();
-    printf("after parse\n");
+    kr_printf("after parse\n");
     auto arch = sts->getArch();
 
     const CodeObject::funclist & all = co->funcs();
     auto fit = all.begin();
     for (int i =0 ; fit != all.end(); fit++ , i++){
         Function * f = * fit;
-        printf("Creating a decoder, parsing region addr = %lx, len = %u\n",f->addr(), InstructionDecoder::maxInstructionLength);
+        kr_printf("Creating a decoder, parsing region addr = %lx, len = %u\n",f->addr(), InstructionDecoder::maxInstructionLength);
         InstructionDecoder decoder("",InstructionDecoder::maxInstructionLength,f->region()->getArch());
         auto bit = f->blocks().begin();
         for (; bit != f->blocks().end(); ++ bit){
@@ -257,10 +275,8 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
             for (auto & edges : b->targets()){
                 Address branch_addr = edges->src()->lastInsnAddr();
                 void * insn_ptr = f->isrc()->getPtrToInstruction(branch_addr);
-                cout << "Address = " << std::hex <<branch_addr << endl;
                 Instruction instr = decoder.decode((unsigned char *) insn_ptr);
-
-                cout << instr.format() << endl;
+                kr_printf("Address = %x : %s \n", branch_addr, instr.format().c_str());
                 if(edges->type() == COND_TAKEN || edges->type() == DIRECT || edges->type() == CALL ){
                     cout << instr.format() << endl;
                     CFG_EDGE edge;
@@ -284,7 +300,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
     std::sort(mkds.begin(),mkds.end());
 
     for (auto & mkd : mkds){
-        printf("HAHA\n");
+        kr_printf("HAHA\n");
         InstructionDecoder decoder(mkd.buffer,mkd.end_addr - mkd.start_addr,arch);
         Address buffer_offset = 0;
         Address addr = mkd.start_addr;
@@ -297,7 +313,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
                 mkd.endpgms.push_back(addr);
             }
             if(instr.format().find("S_AND_SAVEEXEC") != string::npos){
-                //printf("FOUND SAVEEXEC AT ADDRESS = %x\n",addr);
+                //kr_printf("FOUND SAVEEXEC AT ADDRESS = %x\n",addr);
                 std::vector < InstructionAPI::Operand> operands;
                 instr.getOperands(operands);
                 for (auto & opr : operands){
@@ -328,7 +344,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
     }
     delete co;
     delete sts;
-    printf("return from %s\n" , __func__);
+    kr_printf("return from %s\n" , __func__);
 }
 
 
@@ -352,19 +368,18 @@ void inplace_insert(vector<myKernelDescriptor> &mkds, uint32_t mkd_id, vector<My
     uint32_t insert_offset = insert_location - mkd.start_addr;
     uint32_t new_buffer_size = mkd.end_addr - mkd.start_addr + size_acc;
     uint32_t copy_size = mkd.end_addr - insert_location;
-    printf("start_addr = %x, insert_location = %x, end_addr = %x\n",mkd.start_addr, insert_location, mkd.end_addr);
-    printf("insert_offset = %u, new_buffer_size = %u , copy_size = %u\n",insert_offset, new_buffer_size, copy_size);
-    printf("Inserting to address %p, size = %u\n", insert_location, size_acc);
-    //printf("increasing buffer size to %u\n", new_buffer_size);
+    kr_printf("start_addr = %x, insert_location = %x, end_addr = %x\n",mkd.start_addr, insert_location, mkd.end_addr);
+    kr_printf("insert_offset = %u, new_buffer_size = %u , copy_size = %u\n",insert_offset, new_buffer_size, copy_size);
+    kr_printf("Inserting to address %p, size = %u\n", insert_location, size_acc);
+    //kr_printf("increasing buffer size to %u\n", new_buffer_size);
     tmp_buffer = (char * ) malloc(new_buffer_size);
-    printf("tmp buffer start at address %08llx, ends at %08llx\n", tmp_buffer, tmp_buffer+ new_buffer_size);
-    printf("insert offset = %u\n",insert_offset);
-    printf("copying to address %08llx, ends at %08llx\n",tmp_buffer+insert_offset+size_acc,tmp_buffer+insert_offset+size_acc+copy_size);
+    kr_printf("tmp buffer start at address %08llx, ends at %08llx\n", tmp_buffer, tmp_buffer+ new_buffer_size);
+    kr_printf("insert offset = %u\n",insert_offset);
+    kr_printf("copying to address %08llx, ends at %08llx\n",tmp_buffer+insert_offset+size_acc,tmp_buffer+insert_offset+size_acc+copy_size);
     memmove(tmp_buffer+insert_offset+size_acc, mkd.buffer+insert_offset, copy_size);
     memmove(tmp_buffer,mkd.buffer,insert_offset);
     free(mkd.buffer);
     mkd.buffer = tmp_buffer;
-    long long int * mbuffer = ( long long int * ) mkd.buffer;
     mkd.end_addr = mkd.end_addr + size_acc;
 
     uint32_t copy_offset = 0;
@@ -378,7 +393,7 @@ void inplace_insert(vector<myKernelDescriptor> &mkds, uint32_t mkd_id, vector<My
     update_mkd_endpgms(mkd,insert_location,size_acc);
     update_save_mask_insns(mkd,insert_location,size_acc);
     dumpBuffers(mkds);
-    printf("out func %s \n",__func__);
+    kr_printf("out func %s \n",__func__);
 }
 
 
@@ -412,7 +427,7 @@ uint32_t getVgpr(config &conf, bool pair){
 
 
 void read_config(FILE * fp, char * configPath , vector<config> &configs , vector<myKernelDescriptor> & mkds){
-    puts("reading config");
+    kr_printf("reading config\n");
     INIReader reader(configPath);
     if(reader.ParseError() !=0){
         std::cout << "Can't load " << std::string(configPath)  << std::endl;     
@@ -428,7 +443,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         bool found = false;
         uint32_t kd_offset = -1;
         //KernelDescriptor * kd;
-        
+
         for(auto & mkd : mkds){
             if(mkd.name == kernel_name){
                 c.func_start = mkd.start_addr;
@@ -477,23 +492,23 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
         if (AMDHSA_BITS_GET(fkd.kernel_code_properties,llvm::amdhsa::KERNEL_CODE_PROPERTY_ENABLE_SGPR_DISPATCH_PTR)){
             c.dispatch_ptr = sgpr_count;
             sgpr_count += 2;
-            printf("dispatch ptr = %u\n",c.dispatch_ptr);
+            kr_printf("dispatch ptr = %u\n",c.dispatch_ptr);
         }
 
         if(AMDHSA_BITS_GET(fkd.kernel_code_properties,llvm::amdhsa::KERNEL_CODE_PROPERTY_ENABLE_SGPR_QUEUE_PTR)){
             c.queue_ptr = sgpr_count;
             sgpr_count +=2 ;
 
-            printf("queue ptr = %u\n",c.queue_ptr);
+            kr_printf("queue ptr = %u\n",c.queue_ptr);
         }
 
         if(AMDHSA_BITS_GET(fkd.kernel_code_properties,llvm::amdhsa::KERNEL_CODE_PROPERTY_ENABLE_SGPR_KERNARG_SEGMENT_PTR )){
             c.kernarg_segment_ptr = sgpr_count;
             sgpr_count += 2;
 
-            printf("kerarg seg ptr = %u\n",c.kernarg_segment_ptr);
+            kr_printf("kerarg seg ptr = %u\n",c.kernarg_segment_ptr);
         }else{
-            printf("no kernarg seg ptr \n");    
+            kr_printf("no kernarg seg ptr \n");    
         }
 
 
@@ -502,7 +517,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
             c.dispatch_id = sgpr_count;
             sgpr_count += 2;
 
-            printf("dispatch id = %u\n",c.dispatch_id);
+            kr_printf("dispatch id = %u\n",c.dispatch_id);
         }
 
 
@@ -516,51 +531,39 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
             c.private_segment_size = sgpr_count;
             sgpr_count += 1;
 
-            printf("private segment size   = %u\n",c.private_segment_size);
+            kr_printf("private segment size   = %u\n",c.private_segment_size);
         }
 
         if(c.work_group_id_x_enabled){
             c.work_group_id_x = sgpr_count;
             sgpr_count +=1;
-            printf("workgroup_id_x = %u, sgpr_count = %u\n",c.work_group_id_x,sgpr_count);
+            kr_printf("workgroup_id_x = %u, sgpr_count = %u\n",c.work_group_id_x,sgpr_count);
         }
 
         if(c.work_group_id_y_enabled){
             c.work_group_id_y = sgpr_count;
             sgpr_count +=1;
 
-            printf("workgroup_id_y = %u\n",c.work_group_id_y);
+            kr_printf("workgroup_id_y = %u\n",c.work_group_id_y);
         }
 
         if(c.work_group_id_z_enabled){
             c.work_group_id_z = sgpr_count;
             sgpr_count +=1;
 
-            printf("workgroup_id_z = %u\n",c.work_group_id_z);
+            kr_printf("workgroup_id_z = %u\n",c.work_group_id_z);
         }
 
         c.first_uninitalized_sgpr = sgpr_count;
         if(sgpr_count %2)
             c.first_uninitalized_sgpr+=1;
 
-        if(c.first_uninitalized_sgpr+4 > c.sgpr_max){
-            c.sgpr_max = c.first_uninitalized_sgpr+4;
+        if(c.first_uninitalized_sgpr+10 > c.sgpr_max){
+            c.sgpr_max = c.first_uninitalized_sgpr+10;
         }
 
-
-        c.BACKUP_WRITEBACK_ADDR = getSgpr(c,true); // even
-        c.TIMER_1 = getSgpr(c,true); // even
-        c.TIMER_2 = getSgpr(c,true); // even
-        c.BACKUP_EXEC = getSgpr(c,true); // even
-        c.WORK_GROUP_ID = getSgpr(c); // odd
-
-        c.TMP_SGPR0 = getSgpr(c,true); // even
-        c.TMP_SGPR1 = getSgpr(c); // odd
-        c.GLOBAL_WAVEFRONT_ID = getSgpr(c); // even
-        c.LOCAL_WAVEFRONT_ID = getSgpr(c); // odd
-        c.DEBUG_SGPR0 = getSgpr(c);
-        c.DEBUG_SGPR1 = getSgpr(c);
-
+        c.PER_WAVEFRONT_OFFSET = getSgpr(c,true);
+        c.SDATA = getSgpr(c,true);
 
         /* 
            c.BACKUP_WRITEBACK_ADDR = sgpr_max+1; // even
@@ -574,11 +577,6 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
            c.GLOBAL_WAVEFRONT_ID = c.TMP_SGPR1+1; // even
            c.LOCAL_WAVEFRONT_ID = c.GLOBAL_WAVEFRONT_ID+1; // odd
            */
-        c.DS_ADDR = getVgpr(c);
-        c.DS_DATA_0 = getVgpr(c);
-        c.DS_DATA_1 = getVgpr(c);
-        c.V_MINUS_1 = getVgpr(c);
-        c.v_global_addr = getVgpr(c,true);
         configs.push_back(c);
     }
 }
@@ -592,48 +590,48 @@ uint32_t getSize(vector<MyInsn> &insns){
     return ret;
 }
 void dumpBuffers(vector<myKernelDescriptor> & mkds){
-    printf("in %s \n",__func__);
+    kr_printf("in %s \n",__func__);
     for(const auto & mkd : mkds){
         long long int * mbuffer = ( long long int * ) mkd.buffer;
-        printf("start address = %x , end address = %x, buffer = %08llx, kd_offset = %x\n",mkd.start_addr , mkd.end_addr,mbuffer,mkd.kd_offset);
-        printf("writing buffer  output , first 16 bytes = %08llx %08llx\n",mbuffer[0],mbuffer[1]);
+        kr_printf("start address = %x , end address = %x, buffer = %08llx, kd_offset = %x\n",mkd.start_addr , mkd.end_addr,mbuffer,mkd.kd_offset);
+        kr_printf("writing buffer  output , first 16 bytes = %08llx %08llx\n",mbuffer[0],mbuffer[1]);
     }
-    printf("out %s \n",__func__);
+    kr_printf("out %s \n",__func__);
 
 
-    printf("in %s \n",__func__);
+    kr_printf("in %s \n",__func__);
     int i = 0;
     for(const auto & mkd : mkds){
-        printf("Kernel id = %d\n",i);
+        kr_printf("Kernel id = %d\n",i);
         int j =0 ;
         for ( auto & branch : mkd.branch_insns){
-            printf("\tbid = %d : ptr = %llx, branch_addr = %llx\n",j++,branch.ptr, branch._branch_addr);
+            kr_printf("\tbid = %d : ptr = %llx, branch_addr = %llx\n",j++,branch.ptr, branch._branch_addr);
         }
         i++;
     }
-    printf("out %s \n",__func__);
+    kr_printf("out %s \n",__func__);
 
 }
 
 
 void propogate_mkd_update(vector<myKernelDescriptor> & mkds, uint32_t mkd_id){
-    printf("in %s\n",__func__);
+    kr_printf("in %s\n",__func__);
     for( uint32_t nid = mkd_id +1 ; nid < mkds.size(); nid ++){
         uint32_t prev_end = mkds[nid-1].end_addr;
-        printf("nid = %u , prev_end = %x , next_start = %x\n",nid,prev_end,mkds[nid].start_addr);
+        kr_printf("nid = %u , prev_end = %x , next_start = %x\n",nid,prev_end,mkds[nid].start_addr);
         if(prev_end > mkds[nid].start_addr){
             uint32_t aligned_up_addr = ((prev_end + 0xff) / 0x100) * 0x100;
             uint32_t offset = aligned_up_addr - mkds[nid].start_addr;
-            
+
             // Here the start_addr is still pointing to the old offset
             update_mkd_move(mkds[nid],aligned_up_addr);
             mkds[nid].start_addr += offset;
             mkds[nid].end_addr += offset;
 
 
-            printf("aligned_up_addr = %x, offset = %u\n",aligned_up_addr,offset);
-            printf("new start address for nid = %u [%x,%x)\n",nid,mkds[nid].start_addr,mkds[nid].end_addr);
-            
+            kr_printf("aligned_up_addr = %x, offset = %u\n",aligned_up_addr,offset);
+            kr_printf("new start address for nid = %u [%x,%x)\n",nid,mkds[nid].start_addr,mkds[nid].end_addr);
+
         }
     }
 
@@ -641,12 +639,12 @@ void propogate_mkd_update(vector<myKernelDescriptor> & mkds, uint32_t mkd_id){
 }
 
 
-    
+
 
 
 void finalize(char * filename, vector<myKernelDescriptor> &mkds, uint32_t text_offset){
-    
-    printf("in func %s \n",__func__);
+
+    kr_printf("in func %s \n",__func__);
     dumpBuffers(mkds);
 
     char new_filename[1000];
@@ -663,17 +661,17 @@ void finalize(char * filename, vector<myKernelDescriptor> &mkds, uint32_t text_o
         fseek(f_co,mkd.kd_offset+16,SEEK_SET);
         long long unsigned new_offset = mkd.start_addr - mkd.kd_offset;
         fwrite(&new_offset,1,8,f_co);
-        printf("updating offset in kernel descriptor, address = %p\n",mkd.kd_offset+16); 
+        kr_printf("updating offset in kernel descriptor, address = %p\n",mkd.kd_offset+16); 
     }
     fclose(f_co);
 
     FILE * f_text = fopen(new_filename,"w");
     for(const auto & mkd : mkds){
-        printf("fseeking to file offset = %x\n",mkd.start_addr - text_offset);
+        kr_printf("fseeking to file offset = %x\n",mkd.start_addr - text_offset);
         fseek(f_text,mkd.start_addr-text_offset,SEEK_SET);
-        
+
         long long int * mbuffer = ( long long int * ) mkd.buffer;
-        printf("writing buffer  output , first 16 bytes = %08llx %08llx\n",mbuffer[0],mbuffer[1]);
+        kr_printf("writing buffer  output , first 16 bytes = %08llx %08llx\n",mbuffer[0],mbuffer[1]);
         fwrite(mkd.buffer,mkd.end_addr-mkd.start_addr,1,f_text);
     }
     fclose(f_text);

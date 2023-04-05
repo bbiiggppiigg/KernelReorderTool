@@ -1,3 +1,0 @@
-/home/ronak/dyninst-experiments/KernelReorderTool/simple/build/bin/snippetInserter
-/home/ronak/dyninst-experiments/KernelReorderTool/simple/build/bin/snippetGenerator
-/home/ronak/dyninst-experiments/KernelReorderTool/simple/build/bin/snippetReader

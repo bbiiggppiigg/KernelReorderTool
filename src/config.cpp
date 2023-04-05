@@ -412,7 +412,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
 void update_symtab_symbols(FILE * f, uint32_t text_start , uint32_t text_end , uint32_t insert_loc , uint32_t insert_size);
 
 
-void update_endpgms(FILE* fp , vector<uint32_t> & endpgms, uint32_t insert_loc , uint32_t insert_size){
+void update_endpgms(FILE* , vector<uint32_t> & endpgms, uint32_t insert_loc , uint32_t insert_size){
    for ( auto & endpgm : endpgms){
         if(insert_loc < endpgm){
             endpgm+= insert_size;
@@ -440,7 +440,7 @@ void update_branches(FILE* fp , vector<MyBranchInsn> &branches, uint32_t insert_
 //
 //
 //
-void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &insn_pool){    
+void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &){    
 
 
     uint32_t buffer_size = text_end - insert_location;
@@ -475,7 +475,7 @@ void inplace_insert(FILE * fp , const uint32_t text_start , uint32_t & text_end 
 
 }
 
-void offsetted_inplace_insert(uint32_t offset , FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &insn_pool){    
+void offsetted_inplace_insert(uint32_t offset , FILE * fp , const uint32_t text_start , uint32_t & text_end , vector<MyInsn> & insns, vector<MyBranchInsn> & branches, uint32_t insert_location,  vector<kernel_bound> &kbs , vector<uint32_t> & endpgms ,vector<char *> &){    
 
 
     uint32_t buffer_size = text_end - insert_location;
