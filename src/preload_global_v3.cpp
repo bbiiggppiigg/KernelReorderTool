@@ -97,8 +97,14 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     uint32_t S_LWFID = S_GRIDDIM_Y;
     uint32_t S_WARP_PER_BLOCK = S_BLOCKDIM_Y;
     uint32_t S_GWFID = S_BLOCKDIM_X;
+    
 
-    uint32_t S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
+    uint32_t S_PERWF_OFFSET;
+    if (c.vgpr_spill ){
+        S_PERWF_OFFSET = FIRST_FREE_SGPR + 10;
+    }else{
+        S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
+    }
 
     ret.push_back(InsnFactory::create_s_memtime(S_TIMER,insn_pool));
     //ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
@@ -114,6 +120,10 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_load_dwordx2(S_WBADDR,S_KERNARG , c.old_kernarg_size ,insn_pool));
     printf("old kernarg size = %u\n",c.old_kernarg_size);
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
+
+
+
+
 
     if(c.work_group_id_z_enabled){
         //ret.push_back(InsnFactory::create_s_mov_b32(S_TMP,c.work_group_id_z,false,insn_pool));  
@@ -139,6 +149,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
 
 
     // THREAD_ID = (THREAD_ID_Z * WG_DIM_Y +  TID_Y ) * WG_DIM_X + TID_x
+    //
     if(c.work_item_id_enabled > 1){ // TID_Z
         ret.push_back(InsnFactory::create_v_readfirstlane_b32(S_TMP,258,insn_pool));  // 258 is VGPR2 in this encoding
         ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_BLOCKDIM_Y,S_TMP,insn_pool));
@@ -149,14 +160,16 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_load_dword(S_WARP_PER_BLOCK,S_KERNARG, c.old_kernarg_size+8 ,insn_pool)); // WARPS_PER_BLOCK ?? WHY READ HERE?
 
     if(c.work_item_id_enabled > 0){ // TID_Y
-        ret.push_back(InsnFactory::create_v_readlane_b32(S_TMP1,128,257,insn_pool));
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_TMP1,128,1+256,insn_pool));
         ret.push_back(InsnFactory::create_s_add_u32(S_TMP,S_TMP1,S_TMP,false,insn_pool));
     }
 
     //ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.first_uninitalized_sgpr+2,true,insn_pool));  
     ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_BLOCKDIM_X,S_TMP,insn_pool));
-    ret.push_back(InsnFactory::create_v_readlane_b32(S_TMP1,128,256,insn_pool)); // TID_X
+    ret.push_back(InsnFactory::create_v_readlane_b32(S_TMP1,128,0+256,insn_pool)); // S_TMP1 = V1[0]
     ret.push_back(InsnFactory::create_s_add_u32(S_TMP,S_TMP1,S_TMP,false,insn_pool));
+
+
 
     // AFTER THIS STEP, we have a thread ID, now we want warp id , divide by 64
     ret.push_back(InsnFactory::create_s_lshr_b32(S_LWFID,S_6,S_TMP ,insn_pool)); 
@@ -167,13 +180,18 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     //
 
 
+
     ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_WGID,S_WARP_PER_BLOCK,insn_pool));
+
+
     ret.push_back(InsnFactory::create_s_add_u32(S_GWFID,S_TMP,S_LWFID,false,insn_pool));
 
 
     // At this point our interest is in calculating per wavefront offset
     // PER_WAVEFRONT_OFFSET should points to WRITEBACK_ADDR +  OFFSET + GLOBAL_WAVEFRONT_ID * NUM_BRANCHES * 8 
+    //
     uint32_t local_offset =  (c.num_branches + 2 ) * 8;
+
 
     ret.push_back(InsnFactory::create_s_mov_b32(S_PERWF_OFFSET,local_offset ,true,insn_pool));
     ret.push_back(InsnFactory::create_s_mul_i32(S_PERWF_OFFSET,S_GWFID,S_PERWF_OFFSET,insn_pool)); 
@@ -183,6 +201,12 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_add_u32(  S_PERWF_OFFSET   , S_PERWF_OFFSET , S_WBADDR   , false ,insn_pool));
     ret.push_back(InsnFactory::create_s_addc_u32( S_PERWF_OFFSET+1 ,             S_0, S_WBADDR+1 , false ,insn_pool));  
     ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET, c.num_branches * 8, insn_pool)); 
+
+
+    if( c.vgpr_spill ){
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,128,S_PERWF_OFFSET,insn_pool)); // VSPILL
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,129,S_PERWF_OFFSET+1,insn_pool)); // VSPILL
+    }
 
 }
 
@@ -195,12 +219,32 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
 
     uint32_t EXECCOND = execcond; // 2
     uint32_t local_offset = (branch_id)  * 8;
+    uint32_t S_PERWF_OFFSET;
+    uint32_t SDATA;
+    if ( c.vgpr_spill ){
+        S_PERWF_OFFSET = 100;
+        SDATA = 99;
+    }else{ 
+        SDATA = c.SDATA;
+        S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
+    }
 
-    uint32_t S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
     uint32_t S_ADDR = S_PERWF_OFFSET;
-    uint32_t SDATA = c.SDATA;
+    if( c.vgpr_spill ){
+
+
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,130,S_PERWF_OFFSET,insn_pool)); // VSPILL
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,131,S_PERWF_OFFSET+1,insn_pool)); // VSPILL
+
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,132,SDATA,insn_pool)); // VSPILL
+
+
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET,128,c.V_SPILL+256,insn_pool));
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET+1,129,c.V_SPILL+256,insn_pool));
+    }
+
+
     // S_ADDR_PAIR = PER_WAVEFRONT_BASE + ( BRANCH_ID * 8 ( each branch takes 8 bytes ) )
-    
     ret.push_back(InsnFactory::create_s_cmp_eq_u64(EXEC,EXECCOND,insn_pool)); // CHECK IF backuped_exec == exec && cond
     ret.push_back(InsnFactory::create_s_mov_b32(SDATA, SCC, false ,insn_pool));
     ret.push_back(InsnFactory::create_s_atomic_add(SDATA, S_ADDR , local_offset , insn_pool));
@@ -209,6 +253,18 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
     ret.push_back(InsnFactory::create_s_atomic_add(SDATA, S_ADDR , local_offset , insn_pool));
     ret.push_back(InsnFactory::create_s_mov_b32(SDATA, 193, false ,insn_pool));
     ret.push_back(InsnFactory::create_s_atomic_inc(SDATA, S_ADDR , local_offset+4 , insn_pool));
+
+
+
+
+
+    if( c.vgpr_spill ){
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET,130,c.V_SPILL+256,insn_pool));
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET+1,131,c.V_SPILL+256,insn_pool));
+        ret.push_back(InsnFactory::create_v_readlane_b32(SDATA,132,c.V_SPILL+256,insn_pool));
+    }
+
+
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 }
 
@@ -240,8 +296,19 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
 void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vector<char *> & insn_pool){
 
 
-    uint32_t S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
+    uint32_t S_PERWF_OFFSET;
+    if ( c.vgpr_spill ){
+        S_PERWF_OFFSET = 2;
+    }else{ 
+        S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
+    }
+
     uint32_t S_TIMER = S_PERWF_OFFSET - 2;
+    if( c.vgpr_spill ){
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET,128,256+c.V_SPILL,insn_pool));
+        ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET+1,129,256+c.V_SPILL,insn_pool));
+ 
+    }
 
 
 
@@ -250,8 +317,8 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vect
     //ret.push_back(InsnFactory::create_s_store_dword_x2(c.TIMER_1 ,c.TMP_SGPR0, my_offset, insn_pool)); 
 
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER , S_PERWF_OFFSET, my_offset+8, insn_pool)); 
+    ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET,my_offset +  8, insn_pool)); 
+    //ret.push_back(InsnFactory::create_s_dcache_wb(insn_pool));
 }
 
 
@@ -318,6 +385,7 @@ int main(int argc, char **argv){
         uint32_t num_branches = save_mask_insns.size();
         c.num_branches = num_branches;
 
+
         printf("before initialization \n");
         {
             vector<MyInsn> init_insns;
@@ -359,6 +427,7 @@ int main(int argc, char **argv){
         for(unsigned long ii =0 ; ii < mkds.size(); ii++){
             update_function_symbol(fp,mkds[ii].name.c_str(),mkds[ii].start_addr, mkds[ii].end_addr - mkds[ii].start_addr);
         }
+
     }
     fclose(fp);
     finalize(binaryPath,mkds,text_offset);

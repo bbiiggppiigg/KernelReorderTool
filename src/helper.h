@@ -81,13 +81,9 @@ typedef struct {
     uint32_t PER_WAVEFRONT_OFFSET;
     uint32_t SDATA;
 
-
+    uint32_t V_SPILL;;
     // VGPRS
-    uint32_t DS_ADDR;
-    uint32_t DS_DATA_0;
-    uint32_t DS_DATA_1;
-    uint32_t V_MINUS_1;
-
+    
     uint32_t TIMER_1;
     uint32_t TIMER_2;
     uint32_t BACKUP_EXEC;
@@ -100,8 +96,7 @@ typedef struct {
     uint32_t func_end;
 
     uint32_t first_uninitalized_sgpr;
-    // 
-    //
+    bool vgpr_spill;
 } config;
 
 
@@ -162,8 +157,9 @@ void update_mkd_branches( myKernelDescriptor & mkd, uint32_t insert_location, ui
     for ( auto & branch : mkd.branch_insns){
         kr_printf("bid = %d\n",j++);
         kr_printf("patching branch at address = %x, size = %u bytes\n", branch._branch_addr , branch.size);
+        kr_printf("old branch code = %x\n",*(uint32_t *) branch.ptr);
         branch.update_for_insertion(insert_location,size);
-        kr_printf("new branch at address = %x\n",branch._branch_addr);
+        kr_printf("new branch code = %x ad address = %x\n",*(uint32_t *) branch.ptr, branch._branch_addr);
     }
     for ( auto & branch : mkd.branch_insns ){
         uint32_t buffer_offset = branch._branch_addr - mkd.start_addr;
@@ -176,7 +172,7 @@ void update_mkd_branches( myKernelDescriptor & mkd, uint32_t insert_location, ui
 
 void update_mkd_endpgms(myKernelDescriptor & mkd, uint32_t insert_location ,uint32_t size){
     for ( auto & endpgm : mkd.endpgms){
-        if(insert_location < endpgm){
+        if(insert_location <= endpgm){
             endpgm+= size;
         }
     } 
@@ -232,7 +228,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
             kr_printf(" Adding kernel to mkds\n");
             mkds.push_back(mkd);
         }else{
-            std::cerr << symbol->getType() << " symbol name " << symbol->getMangledName()  << std::endl;
+            //std::cerr << symbol->getType() << " symbol name " << symbol->getMangledName()  << std::endl;
         }
     }
     for(const auto & symbol : symbols){
@@ -278,7 +274,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
                 Instruction instr = decoder.decode((unsigned char *) insn_ptr);
                 kr_printf("Address = %x : %s \n", branch_addr, instr.format().c_str());
                 if(edges->type() == COND_TAKEN || edges->type() == DIRECT || edges->type() == CALL ){
-                    cout << instr.format() << endl;
+                    //cout << instr.format() << endl;
                     CFG_EDGE edge;
                     edge.branch_address = branch_addr;
                     edge.target_address = edges->trg()->start();
@@ -307,8 +303,8 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
         while( addr < mkd.end_addr ){
             Address addr = mkd.start_addr+buffer_offset;
             Instruction instr = decoder.decode();
-            std::cout << "asddress = " << std::hex << addr<< " end addr = " << mkd.end_addr << "bool" << (addr < mkd.end_addr)<< std::endl;
-            std::cout << instr.format() << std::endl;;
+            //std::cout << "asddress = " << std::hex << addr<< " end addr = " << mkd.end_addr << "bool" << (addr < mkd.end_addr)<< std::endl;
+            //std::cout << instr.format() << std::endl;;
             if(instr.format().find("S_ENDPGM") != string::npos){
                 mkd.endpgms.push_back(addr);
             }
@@ -321,14 +317,16 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
                         auto name = opr.format(Arch_amdgpu_cdna2);
                         uint32_t start,end;
                         if(sscanf(name.c_str(),"S%d",&start)==1){
-                            std::cout << "OPRNAMEZ" << name<<"Z" << std::endl;
+                            //std::cout << "OPRNAMEZ" << name<<"Z" << std::endl;
                             uint32_t sgpr = start;
                             mkd.save_mask_insns.push_back(make_pair(addr + instr.size() , sgpr));
+                            break;
                         }else if (sscanf(name.c_str(),"S[%d:%d]",&start,&end)==2){
                             uint32_t sgpr = start;
                             mkd.save_mask_insns.push_back(make_pair(addr + instr.size() , sgpr));
+                            break;
                         }
-                        std::cout << "OPERAND WRITTEN, NAME = " << opr.format(Arch_amdgpu_cdna2) << std::endl;    
+                        //std::cout << "OPERAND WRITTEN, NAME = " << opr.format(Arch_amdgpu_cdna2) << std::endl;    
                     }else{
                         //std::cout << "OPERAND NOT WRITTEN, NAME = " << opr.format(Arch_amdgpu_cdna2) << std::endl;    
                     }
@@ -453,7 +451,7 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
                 c.name = kernel_name;
                 found = true;
             }else{
-                std::cerr << " kernel name = " << kernel_name << " mkd name = " << mkd.name << std::endl;
+                //std::cerr << " kernel name = " << kernel_name << " mkd name = " << mkd.name << std::endl;
             }
         }
 
@@ -553,7 +551,16 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
 
             kr_printf("workgroup_id_z = %u\n",c.work_group_id_z);
         }
-
+        c.vgpr_spill = false;
+        if( c.sgpr_max >= 101 ) {
+            kr_printf("scalar register >= 101, try to use vgpr \n");
+            if( c.vgpr_max >= 255){
+                kr_printf("vector registers also maxed out, need to do stack\n");
+                assert(0 && " maxed usage of both scalar and vector register");
+            }
+            c.vgpr_spill = true;
+            c.V_SPILL = getVgpr(c);
+        }
         c.first_uninitalized_sgpr = sgpr_count;
         if(sgpr_count %2)
             c.first_uninitalized_sgpr+=1;
@@ -564,19 +571,6 @@ void read_config(FILE * fp, char * configPath , vector<config> &configs , vector
 
         c.PER_WAVEFRONT_OFFSET = getSgpr(c,true);
         c.SDATA = getSgpr(c,true);
-
-        /* 
-           c.BACKUP_WRITEBACK_ADDR = sgpr_max+1; // even
-           c.TIMER_1 = c.BACKUP_WRITEBACK_ADDR+2; // even
-           c.TIMER_2 = c.TIMER_1+2; // even
-           c.BACKUP_EXEC = c.TIMER_2 + 2; // even
-           c.WORK_GROUP_ID = c.BACKUP_EXEC +1; // odd
-
-           c.TMP_SGPR0 = c.WORK_GROUP_ID +1; // even
-           c.TMP_SGPR1 = c.TMP_SGPR0 +1; // odd
-           c.GLOBAL_WAVEFRONT_ID = c.TMP_SGPR1+1; // even
-           c.LOCAL_WAVEFRONT_ID = c.GLOBAL_WAVEFRONT_ID+1; // odd
-           */
         configs.push_back(c);
     }
 }

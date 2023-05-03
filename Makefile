@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=split_kernel_v2 merge_kernel_v2 preload_global expand_args update_note_phdr report_args_loc disassemble preload_base split_kernel_v3 merge_kernel_v3 preload_global_v3 update_text_phdr update_dynamic
+srcs=expand_args update_note_phdr report_args_loc disassemble preload_base split_kernel_v3 merge_kernel_v3 preload_global_v3 update_text_phdr update_dynamic empty debug update_kd
 libs=kernel_elf_helper.o
 
 BINS=$(addprefix bin/,$(srcs))
@@ -26,6 +26,16 @@ bin/preload_base: src/preload_global_v3.cpp lib/InsnFactory.h lib/kernel_elf_hel
 
 bin/preload_global_v3: src/preload_global_v3.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
 	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/preload_global_v3.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/preload_global_v3
+
+bin/debug: src/debug.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
+	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/debug.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/debug
+
+bin/empty: src/empty.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
+	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/empty.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/empty
+
+bin/update_kd: src/update_kd.cpp
+	g++ -g -o $@ $<
+
 
 bin/split_kernel_v3: src/split_kernel_v3.cpp
 	g++ -g -o $@ $<

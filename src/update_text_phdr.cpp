@@ -52,6 +52,8 @@ void update_text_phdr(FILE * f){
     Shdr dynamic_shdr;
     Shdr old_text_shdr;
     Shdr old_dynamic_shdr;
+    Shdr symtab_shdr;
+    Shdr dynsym_shdr;
     uint32_t new_offset;
     uint32_t new_size;
     int text_index = -1, dynamic_index = -1;
@@ -81,6 +83,12 @@ void update_text_phdr(FILE * f){
         if(0==strcmp(sh_name,".old.dynamic")){
             old_dynamic_shdr = tmp_shdr;
         }
+        if(0==strcmp(sh_name,".symtab")){
+            symtab_shdr = tmp_shdr;
+        }
+        if(0==strcmp(sh_name,".dynsym")){
+            dynsym_shdr = tmp_shdr;
+        }
 
 
     }
@@ -96,12 +104,44 @@ void update_text_phdr(FILE * f){
 
 
     //text_shdr.sh_addr = new_offset;
-
+    uint32_t old_offset = old_text_shdr.sh_offset;
     old_text_shdr.sh_offset = new_offset;
     old_text_shdr.sh_name = text_shdr.sh_name;
     old_text_shdr.sh_size = new_size;
     fseek(f,header.e_shoff + sizeof(Shdr) * text_index ,SEEK_SET);
     fwrite(&old_text_shdr,sizeof(Shdr),1,f);
+
+    char * symtab_section = read_section(f,&symtab_shdr);
+    int num_entries = symtab_shdr.sh_size / symtab_shdr.sh_entsize;
+    for( int i =0; i < num_entries ; i++){
+        Elf64_Sym * symbol = ((Elf64_Sym *) symtab_section + i );
+        unsigned char bind = ELF64_ST_BIND(symbol->st_info);
+        unsigned char type = ELF64_ST_TYPE(symbol->st_info);
+        if(type == STT_FUNC){
+            printf(" Found STT_FUNC , VALUE = 0x%x, size = %u\n",symbol->st_value, symbol->st_size);
+            symbol->st_value = symbol->st_value - old_offset + new_offset;
+            fseek(f,symtab_shdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+            fwrite(symbol,sizeof(Elf64_Sym),1,f);
+        }
+    }
+    
+    char * dynsym_section = read_section(f,&dynsym_shdr);
+    num_entries = dynsym_shdr.sh_size / dynsym_shdr.sh_entsize;
+    for( int i =0; i < num_entries ; i++){
+        Elf64_Sym * symbol = ((Elf64_Sym *) dynsym_section + i );
+        unsigned char bind = ELF64_ST_BIND(symbol->st_info);
+        unsigned char type = ELF64_ST_TYPE(symbol->st_info);
+        if(type == STT_FUNC){
+            printf(" Found STT_FUNC , VALUE = 0x%x, size = %u\n",symbol->st_value, symbol->st_size);
+            symbol->st_value = symbol->st_value - old_offset + new_offset;
+            fseek(f,dynsym_shdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
+            fwrite(symbol,sizeof(Elf64_Sym),1,f);
+        }
+    }
+
+
+
+
 
     //dynamic_shdr.sh_addr = new_dynamic_offset;
     /*

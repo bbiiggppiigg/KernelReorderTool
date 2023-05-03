@@ -35,13 +35,6 @@ int old_kernarg_size;
 int old_kernarg_num;
 
 FILE * fdata;
-typedef struct klt_result_t{
-    uint32_t * records;
-    uint32_t kid;
-    uint32_t num_records;
-    uint32_t num_branches;
-}klt_result_t;
-
 
 typedef struct kernel_launch_tracker{
     uint32_t * data;
@@ -49,7 +42,10 @@ typedef struct kernel_launch_tracker{
     uint32_t avail_size;
     uint32_t data_size;
     uint32_t status;
-    klt_result_t result;
+
+    uint32_t kid;
+    uint32_t num_records;
+    uint32_t num_branches;
 }kernel_launch_tracker;
 
 std::vector<kernel_launch_tracker*> mempool;
@@ -100,6 +96,7 @@ typedef struct config {
     uint32_t kernarg_num ;
     uint32_t branch_count ;
     uint32_t kid;
+    std::string name;
 }config;
 std::map<const void * , config* > FuncLookup;
 std::map<std::string, config *> metaLookup; 
@@ -136,6 +133,7 @@ extern "C" void __hipRegisterFunction(
             c->kernarg_size = reader.GetInteger(section,"kernarg_size",-1);
             c->kernarg_num  = reader.GetInteger(section,"kernarg_num",-1);
             c->branch_count = reader.GetInteger(section,"branch_count",-1);
+            c->name = kname;
             c->kid = g_kid;
             g_kid ++;
             fprintf(fdebug,"kernal name = %s\n",kname.c_str());
@@ -173,11 +171,11 @@ void print_result(uint32_t * records, uint32_t kid ,uint32_t num_records, uint32
         uint32_t j =0;
         for(; j < num_branches ; j++){
 #ifdef PRINT_DETAIL
-            fprintf(fdata,"\tK%d:%u %u\n",kid,records[i+j*2],records[i+j*2+1]);
+            fprintf(fdata,"\tK%d:%x %x\n",kid,records[i+j*2],records[i+j*2+1]);
 #endif
         }
         uint64_t * mem_time = (uint64_t * ) & records [i+j*2];
-        fprintf(fdata,"%u: %lu %lu\n",kid,mem_time[0],mem_time[1]);
+        fprintf(fdata,"%u: %llx %llx\n",kid,mem_time[0],mem_time[1]);
     }
     fprintf(fdata,"done\n");
 }
@@ -185,6 +183,7 @@ void print_result(uint32_t * records, uint32_t kid ,uint32_t num_records, uint32
 
 //uint32_t * data, * data_h , data_size;
 //uint32_t no_records;
+uint32_t launch_id = 0;
 extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         dim3 gridDim,
         dim3 blockDim,
@@ -197,12 +196,10 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         realLaunch = (launch_t)  dlsym(RTLD_NEXT, "hipLaunchKernel");
     }
 
-    fprintf(fdebug,"hip Launch Kernel Called, hostFunction = %p\n",hostFunction);
-    fprintf(fdebug,"x y z = %u %u %u\n",gridDim.x , gridDim.y , gridDim.z);
-    fprintf(fdebug,"x y z = %u %u %u\n",blockDim.x , blockDim.y , blockDim.z);
-
     config * c = FuncLookup[hostFunction];
     if(c){
+       
+
         uint32_t warps_per_block =  ( blockDim.x * blockDim.y * blockDim.z + 63 ) / 64;
         uint32_t no_warps = gridDim.x * gridDim.y * gridDim.z * warps_per_block;
 
@@ -214,36 +211,48 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
 
         kernel_launch_tracker * klt_ptr;
         bool found = false;
-        for ( int i =0; i < mempool.size() ; i ++){
+        /*for ( int i =0; i < mempool.size() ; i ++){
+            klt_ptr = mempool[i]; 
+            fprintf(fdebug,"Iterating  memory pool at 0x%llx, size = %u\n",klt_ptr->data_h, data_size);
             if(mempool[i]->status == 2 && mempool[i]->data_size >= klt_ptr->avail_size){
                 klt_ptr = mempool[i]; 
                 found = true;
+                fprintf(fdebug,"Reusing memory at 0x%llx, size = %u\n",klt_ptr->data_h, data_size);
                 break;
             }
-        }
+        }*/
+        hipError_t hip_ret;
         if(found == false){
+            fprintf(fdebug,"Can't reuse memory , allocating new memory of size %u\n",data_size);
             klt_ptr = (kernel_launch_tracker *)  malloc(sizeof(kernel_launch_tracker));
             mempool.push_back(klt_ptr);
             klt_ptr->data_h = (uint32_t * ) malloc(data_size);
-            hipMalloc((void **) & klt_ptr->data , data_size  );
-            klt_ptr->result.records = klt_ptr->data_h;
+            hip_ret = hipMalloc((void **) & klt_ptr->data , data_size  );
+            assert(hip_ret == hipSuccess);
             klt_ptr->avail_size = data_size;
         }
         klt_ptr->data_size = data_size;
         klt_ptr->status = 1;
-        klt_ptr->result.kid = c->kid ;
-        klt_ptr->result.num_records = no_records ;
-        klt_ptr->result.num_branches =num_branches ;
+        klt_ptr->kid = c->kid ;
+        klt_ptr->num_records = no_records ;
+        klt_ptr->num_branches =num_branches ;
 
-        memset(klt_ptr->data_h,0, data_size);
-        hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice);
-
+        //if(launch_id == 0){
+            memset(klt_ptr->data_h,0x0, data_size);
+            hip_ret = hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice);
+            assert(hip_ret == hipSuccess);
+        //}
         int new_kernarg_vec_size = (c->kernarg_num + 6) * 8 ;
         void ** newArgs = (void **) malloc(new_kernarg_vec_size);
         memcpy(newArgs, args , c->kernarg_num *8);
 
+        fprintf(fdebug,"hip Launch Kernel Called, hostFunction = %p, kernel name = %s\n",hostFunction,c->name.c_str());
+        fprintf(fdebug,"Grid(x,y,z)=(%u,%u,%u) Block(x,y,z)=(%u,%u,%u)\n", gridDim.x , gridDim.y , gridDim.z ,blockDim.x , blockDim.y , blockDim.z);
+        fprintf(fdebug,"WARPS_PER_BLOCK = %u, NO_WARPS = %u, NUM_BRANCHES = %u\n", warps_per_block, no_warps, num_branches);
+        fprintf(fdebug,"data_h = 0x%llx , data = 0x%llx\n", klt_ptr->data_h, klt_ptr->data);
 
         *(newArgs+c->kernarg_num) = &(klt_ptr->data);
+
         *(newArgs+c->kernarg_num+1) = &warps_per_block;
         *(newArgs+c->kernarg_num+2) = &(gridDim.x);
         *(newArgs+c->kernarg_num+3) = &(gridDim.y);
@@ -251,12 +260,14 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         *(newArgs+c->kernarg_num+5) = &(blockDim.y);
         realLaunch(hostFunction,gridDim,blockDim, newArgs, sharedMemBytes, stream);
 
-        kernel_launch_tracker * klt = (kernel_launch_tracker *) klt_ptr;
-        klt_result_t * klt_result = (klt_result_t*) &(klt->result);
+    
+        fprintf(fdebug,"copying to 0x%llx from 0x%llx\n", klt_ptr->data_h,klt_ptr->data);
         hipMemcpy(klt_ptr->data_h,klt_ptr->data,klt_ptr->data_size,hipMemcpyDeviceToHost);
-        print_result (klt_result->records, klt_result->kid , klt_result -> num_records, klt_result->num_branches);
+        fprintf(fdata,"%s\n",c->name.c_str());
+        print_result (klt_ptr->data_h, klt_ptr->kid , klt_ptr -> num_records, klt_ptr->num_branches);
         klt_ptr->status=2;
-
+        fprintf(fdebug,"hip Launch Kernel Ended\n\n");
+        launch_id ++;
         return hipSuccess;
     }else{
         fprintf(fdebug,"config not found, using old args\n");

@@ -72,6 +72,13 @@ with open(filename) as f:
         print("kernarg_size = ",kernel_info[kname][0],";")
         print("kernarg_num = ",kernel_info[kname][1],";")
         print("branch_count = ",branch_count,";")
+    else:
+        print("sgpr_max = ",8,";")
+        print("vgpr_max = ",8,";")
+        print("kernarg_size = ",kernel_info[kname][0],";")
+        print("kernarg_num = ",kernel_info[kname][1],";")
+        print("branch_count = ",branch_count,";")
+
 
     #print(find_max_sgpr(text))
     #print(find_max_vgpr(text))
