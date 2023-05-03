@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=expand_args update_note_phdr report_args_loc disassemble bd_base split_kernel merge_kernel bd_inplace update_text_phdr update_dynamic empty debug update_kd
+srcs=expand_args update_note_phdr report_args_loc disassemble bd_base split_kernel merge_kernel bd_inplace update_text_phdr update_dynamic debug update_kd
 libs=kernel_elf_helper.o
 
 BINS=$(addprefix bin/,$(srcs))

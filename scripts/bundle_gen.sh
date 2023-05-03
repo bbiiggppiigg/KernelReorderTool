@@ -5,7 +5,7 @@ BIN=/home/wuxx1279/KR/bin/
 mkdir code-objects
 
 set -e
-$BIN/split_kernel_v3 $TARGET &> split.log
+$BIN/split_kernel $TARGET &> split.log
 cd code-objects
 
 if [[ $CO == "" ]]; then
@@ -47,8 +47,8 @@ for ff in *; do
 done
 cd ..
 $BIN/../scripts/modify_config.py code-objects/tmp.config.ini > config.ini
-$BIN/merge_kernel_v3 &> merge.log
-~/exec-rw/exec-rw ./$TARGET ./test_bundle.txt ./new3 &> exec-rw.log
+$BIN/merge_kernel &> merge.log
+~/exec-rw/exec-rw ./$TARGET ./test_bundle.txt ./new &> exec-rw.log
 chmod +x ./new
 exit
 
