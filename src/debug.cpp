@@ -68,41 +68,6 @@ using namespace InstructionAPI;
 typedef uint16_t reg;
 typedef uint16_t sreg;
 typedef uint16_t vreg;
-void gen_empty(vector<MyInsn> & ret , config c , vector<char *> & insn_pool){
-
-    /**
-     * To calculate the local warp id, we need to calculate threadId_Y * Threads_PER_block_X + threadID_X / 64
-     * Here we reuse warp_sgpr_pair to do so
-     */
-    // First step load from dispatch ptr size of block 
-    //
-    // GLOBAL WORK GROUP ID : (WG_ID_Z * #WG_PER_Y + WG_ID_Y) * #WG_PWE_X + WG_ID_X
-    //ret.push_back(InsnFactory::create_s_add_u32(c.kernarg_segment_ptr   , S_16  , c.kernarg_segment_ptr, false ,insn_pool));
-    //ret.push_back(InsnFactory::create_s_addc_u32(c.kernarg_segment_ptr+1   , S_0  , c.kernarg_segment_ptr+1, false ,insn_pool));
-
-    uint32_t FIRST_FREE_SGPR = c.first_uninitalized_sgpr; 
-    uint32_t S_KERNARG = c.kernarg_segment_ptr;
-
-    uint32_t S_WBADDR = FIRST_FREE_SGPR;
-    uint32_t S_TIMER = FIRST_FREE_SGPR+2;
-
-    ret.push_back(InsnFactory::create_s_memtime(S_TIMER,insn_pool));
-    //ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
-    printf("first uninitialized sgpr = %u, kernarg_segment_ptr = %u \n",FIRST_FREE_SGPR,c.kernarg_segment_ptr);
-    assert(c.kernarg_segment_ptr != (unsigned) -1);
-
-    c.old_kernarg_size = 0;
-    ret.push_back(InsnFactory::create_s_load_dwordx2(S_WBADDR,S_KERNARG , c.old_kernarg_size ,insn_pool));
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_WBADDR, 0, insn_pool)); 
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_WBADDR, S_WBADDR, 8 , insn_pool)); 
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ret.push_back(InsnFactory::create_s_memtime(S_TIMER,insn_pool));
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_WBADDR, 8, insn_pool)); 
-    ret.push_back(InsnFactory::create_s_endpgm(insn_pool));
-}
-
 
 void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & insn_pool){
 
@@ -132,21 +97,19 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     uint32_t S_LWFID = S_GRIDDIM_Y;
     uint32_t S_WARP_PER_BLOCK = S_BLOCKDIM_Y;
     uint32_t S_GWFID = S_BLOCKDIM_X;
-    uint32_t S_DEBUG = FIRST_FREE_SGPR + 12; 
-    uint32_t S_DEBUG_2 = FIRST_FREE_SGPR + 13; 
+    
+
     uint32_t S_PERWF_OFFSET;
     if (c.vgpr_spill ){
         S_PERWF_OFFSET = FIRST_FREE_SGPR + 10;
     }else{
         S_PERWF_OFFSET = c.PER_WAVEFRONT_OFFSET;
     }
-    
+
     ret.push_back(InsnFactory::create_s_memtime(S_TIMER,insn_pool));
     //ret.push_back(InsnFactory::create_s_mov_b32(M0,S_MINUS_1,false,insn_pool)); // Initialize M0 to -1 to access shared memory
     printf("first uninitialized sgpr = %u, kernarg_segment_ptr = %u \n",FIRST_FREE_SGPR,c.kernarg_segment_ptr);
     assert(c.kernarg_segment_ptr != (unsigned) -1);
-
-    c.old_kernarg_size = 0;
     if((FIRST_FREE_SGPR % 4) == 0){
         ret.push_back(InsnFactory::create_s_load_dwordx4(FIRST_FREE_SGPR,S_KERNARG, c.old_kernarg_size+12 ,insn_pool));
     }else{
@@ -155,41 +118,38 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     }
 
     ret.push_back(InsnFactory::create_s_load_dwordx2(S_WBADDR,S_KERNARG , c.old_kernarg_size ,insn_pool));
-
+    printf("old kernarg size = %u\n",c.old_kernarg_size);
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
 
 
-    // Calculating GLOBAL BLOCK ID 
-    // GLOBAL BLOCK ID = BLOCK_ID_Z * GRID_DIM_Y * GRID_DIM_X + BLOCK_ID_Y * GRID_DIM_X + BLOCK_ID+X
-    //                 = (BLOCK_ID_Z * GRID_DIM_Y + BLOCK_ID_Y) * GRID_DIM_X + BLOCK_ID_X
-    if(c.work_group_id_z_enabled){
-        
 
+
+
+    if(c.work_group_id_z_enabled){
+        //ret.push_back(InsnFactory::create_s_mov_b32(S_TMP,c.work_group_id_z,false,insn_pool));  
+        //ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_GRIDDIM_Y,S_TMP,insn_pool));
         ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_GRIDDIM_Y,c.work_group_id_z,insn_pool)); 
     }else{
         ret.push_back(InsnFactory::create_s_mov_b32(S_TMP,128,false,insn_pool));  
-        printf("work group id z not enabled\n");
     }
 
     if(c.work_group_id_y_enabled){
         ret.push_back(InsnFactory::create_s_add_u32(S_TMP,S_TMP,c.work_group_id_y,false,insn_pool));
-    }else{
-        printf("work group id y not enabled\n");
     }
     ret.push_back(InsnFactory::create_s_mul_i32(S_WGID,S_GRIDDIM_X,S_TMP,insn_pool));
 
 
-
+    // AFTER THIS STEP, a global WG_ID is stored in WORK_GROUP_ID 
     if(c.work_group_id_x_enabled){
         ret.push_back(InsnFactory::create_s_add_u32(S_WGID,S_WGID,c.work_group_id_x,false,insn_pool));
     }
-   
-    ret.push_back(InsnFactory::create_s_mov_b32(S_DEBUG,c.work_group_id_x,false,insn_pool));  
-    // AFTER THIS STEP, a global BLOCK ID is stored in S_WGID
-    //
+
+
+
+
 
     // THREAD_ID = (THREAD_ID_Z * WG_DIM_Y +  TID_Y ) * WG_DIM_X + TID_x
-    // T_ID      = (T_ID_Z * BLOCK_DIM_Y + TID_Y ) * BLOCK_DIM_X + TID_X
+    //
     if(c.work_item_id_enabled > 1){ // TID_Z
         ret.push_back(InsnFactory::create_v_readfirstlane_b32(S_TMP,258,insn_pool));  // 258 is VGPR2 in this encoding
         ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_BLOCKDIM_Y,S_TMP,insn_pool));
@@ -204,7 +164,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
         ret.push_back(InsnFactory::create_s_add_u32(S_TMP,S_TMP1,S_TMP,false,insn_pool));
     }
 
-
+    //ret.push_back(InsnFactory::create_s_mov_b32(TMP_SGPR1,c.first_uninitalized_sgpr+2,true,insn_pool));  
     ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_BLOCKDIM_X,S_TMP,insn_pool));
     ret.push_back(InsnFactory::create_v_readlane_b32(S_TMP1,128,0+256,insn_pool)); // S_TMP1 = V1[0]
     ret.push_back(InsnFactory::create_s_add_u32(S_TMP,S_TMP1,S_TMP,false,insn_pool));
@@ -220,19 +180,19 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     //
 
 
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool)); // waiting for the write back address to be loaded
+
     ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_WGID,S_WARP_PER_BLOCK,insn_pool));
 
-    ret.push_back(InsnFactory::create_s_mov_b32(S_DEBUG_2,S_WARP_PER_BLOCK,false,insn_pool));  
+
     ret.push_back(InsnFactory::create_s_add_u32(S_GWFID,S_TMP,S_LWFID,false,insn_pool));
 
 
     // At this point our interest is in calculating per wavefront offset
     // PER_WAVEFRONT_OFFSET should points to WRITEBACK_ADDR +  OFFSET + GLOBAL_WAVEFRONT_ID * NUM_BRANCHES * 8 
-    // PER WAVEFRONT OFFSET = GLOBAL_WAVE_FRONT_ID * ( NUM_BRANHCES + 2 ) * 8 + WRITE_BACK_ADDR
+    //
     uint32_t local_offset =  (c.num_branches + 2 ) * 8;
-    printf("c.num_branches = %u, local_offset = %u\n",c.num_branches, local_offset);
-    //S_PERWF_OFFSET = S_TIMER;
+
+
     ret.push_back(InsnFactory::create_s_mov_b32(S_PERWF_OFFSET,local_offset ,true,insn_pool));
     ret.push_back(InsnFactory::create_s_mul_i32(S_PERWF_OFFSET,S_GWFID,S_PERWF_OFFSET,insn_pool)); 
 
@@ -240,13 +200,15 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool)); // waiting for the write back address to be loaded
     ret.push_back(InsnFactory::create_s_add_u32(  S_PERWF_OFFSET   , S_PERWF_OFFSET , S_WBADDR   , false ,insn_pool));
     ret.push_back(InsnFactory::create_s_addc_u32( S_PERWF_OFFSET+1 ,             S_0, S_WBADDR+1 , false ,insn_pool));  
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET, c.num_branches * 8, insn_pool)); 
+    //ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET, c.num_branches * 8, insn_pool)); 
+    //
+    ret.push_back(InsnFactory::create_s_add_u32(  S_PERWF_OFFSET   , S_PERWF_OFFSET , c.num_branches*8   , true ,insn_pool));
+    ret.push_back(InsnFactory::create_s_addc_u32( S_PERWF_OFFSET+1 ,             S_0, S_PERWF_OFFSET+1 , false ,insn_pool));  
 
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_PERWF_OFFSET ,S_PERWF_OFFSET, c.num_branches * 8 + 8 , insn_pool)); 
 
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    //ret.push_back(InsnFactory::create_s_store_dword( S_DEBUG ,S_PERWF_OFFSET, c.num_branches * 8, insn_pool)); 
-    //ret.push_back(InsnFactory::create_s_store_dword( S_DEBUG_2 ,S_PERWF_OFFSET, c.num_branches * 8+4, insn_pool)); 
+    ret.push_back(InsnFactory::create_s_store_dword_x2(S_PERWF_OFFSET ,S_PERWF_OFFSET,0, insn_pool)); 
+
+
     if( c.vgpr_spill ){
         ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,128,S_PERWF_OFFSET,insn_pool)); // VSPILL
         ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,129,S_PERWF_OFFSET+1,insn_pool)); // VSPILL
@@ -260,7 +222,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
 
 void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint32_t execcond , config c, vector<char *> & insn_pool){
     return;
-    //
+
     uint32_t EXECCOND = execcond; // 2
     uint32_t local_offset = (branch_id)  * 8;
     uint32_t S_PERWF_OFFSET;
@@ -276,19 +238,19 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
     uint32_t S_ADDR = S_PERWF_OFFSET;
     if( c.vgpr_spill ){
 
-        // VSPILL[2:3] = BACKING_UP_SPERWF_OFFSET
-        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,130,S_PERWF_OFFSET,insn_pool));
-        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,131,S_PERWF_OFFSET+1,insn_pool));
-        // VSPILL[4] = BACKING_UP_SDATA
+
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,130,S_PERWF_OFFSET,insn_pool)); // VSPILL
+        ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,131,S_PERWF_OFFSET+1,insn_pool)); // VSPILL
+
         ret.push_back(InsnFactory::create_v_writelane_b32(c.V_SPILL,132,SDATA,insn_pool)); // VSPILL
 
-        // S_PERWF_OFFSET = VGPR[0:1]
+
         ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET,128,c.V_SPILL+256,insn_pool));
         ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET+1,129,c.V_SPILL+256,insn_pool));
     }
 
 
-    //S_ADDR_PAIR = PER_WAVEFRONT_BASE + ( BRANCH_ID * 8 ( each branch takes 8 bytes ) )
+    // S_ADDR_PAIR = PER_WAVEFRONT_BASE + ( BRANCH_ID * 8 ( each branch takes 8 bytes ) )
     ret.push_back(InsnFactory::create_s_cmp_eq_u64(EXEC,EXECCOND,insn_pool)); // CHECK IF backuped_exec == exec && cond
     ret.push_back(InsnFactory::create_s_mov_b32(SDATA, SCC, false ,insn_pool));
     ret.push_back(InsnFactory::create_s_atomic_add(SDATA, S_ADDR , local_offset , insn_pool));
@@ -297,14 +259,10 @@ void per_branch_instrumentation(vector<MyInsn> & ret , uint32_t branch_id , uint
     ret.push_back(InsnFactory::create_s_atomic_add(SDATA, S_ADDR , local_offset , insn_pool));
     ret.push_back(InsnFactory::create_s_mov_b32(SDATA, 193, false ,insn_pool));
     ret.push_back(InsnFactory::create_s_atomic_inc(SDATA, S_ADDR , local_offset+4 , insn_pool));
-    
-    //ret.push_back(InsnFactory::create_s_mov_b32(SDATA, branch_id,true,insn_pool));  
-    //ret.push_back(InsnFactory::create_s_store_dword( SDATA ,S_PERWF_OFFSET, local_offset, insn_pool)); 
-    //ret.push_back(InsnFactory::create_s_store_dword( SDATA ,S_PERWF_OFFSET, local_offset+4, insn_pool)); 
-    
-    //uint32_t new_offset = c.num_branches * 8 + 8;
-    //if(branch_id %2)
-    //    ret.push_back(InsnFactory::create_s_atomic_inc(SDATA, S_ADDR , new_offset , insn_pool));
+
+
+
+
 
     if( c.vgpr_spill ){
         ret.push_back(InsnFactory::create_v_readlane_b32(S_PERWF_OFFSET,130,c.V_SPILL+256,insn_pool));
@@ -343,6 +301,7 @@ void setup_writeback(vector<MyInsn> & ret , config c, vector<char *> & insn_pool
 // SAVED :  64 bit SGPR TIMESTAMP_1, 64 bit SGPR S_ADDR , 64 bit sgpr PER_WAVEFRONT_OFFSET
 void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vector<char *> & insn_pool){
 
+
     uint32_t S_PERWF_OFFSET;
     if ( c.vgpr_spill ){
         S_PERWF_OFFSET = 2;
@@ -361,20 +320,16 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vect
 
     ret.push_back(InsnFactory::create_s_memtime(S_TIMER,insn_pool));
 
-
-
-    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET,my_offset +  8, insn_pool)); 
+    //ret.push_back(InsnFactory::create_s_store_dword_x2(c.TIMER_1 ,c.TMP_SGPR0, my_offset, insn_pool)); 
 
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
-    return;
-    uint32_t TMP_1 = S_TIMER - 2;
-    uint32_t TMP_2 = S_TIMER - 1;
+    //ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET,my_offset +  8, insn_pool)); 
+    //
+    ret.push_back(InsnFactory::create_s_add_u32(  S_PERWF_OFFSET   , S_PERWF_OFFSET , 8   , true ,insn_pool));
+    ret.push_back(InsnFactory::create_s_addc_u32( S_PERWF_OFFSET+1 ,             S_0, S_PERWF_OFFSET+1 , false ,insn_pool));  
 
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_1,0xA,true,insn_pool));  
-    ret.push_back(InsnFactory::create_s_mov_b32(TMP_2,0xB,true,insn_pool));  
-    ret.push_back(InsnFactory::create_s_store_dword( TMP_1 , S_PERWF_OFFSET, my_offset+8, insn_pool)); 
-    ret.push_back(InsnFactory::create_s_store_dword( TMP_2 , S_PERWF_OFFSET, my_offset+12, insn_pool)); 
+    ret.push_back(InsnFactory::create_s_store_dword_x2(S_PERWF_OFFSET ,S_PERWF_OFFSET, 0, insn_pool)); 
+    //ret.push_back(InsnFactory::create_s_dcache_wb(insn_pool));
 }
 
 
@@ -440,19 +395,9 @@ int main(int argc, char **argv){
 
         uint32_t num_branches = save_mask_insns.size();
         c.num_branches = num_branches;
-        printf("in main, c.num_branches = %u\n",c.num_branches);
-        
-        {
-        
-            vector<MyInsn> empties;
-            gen_empty(empties,c,insn_pool);
-            FILE * f_co_empty = fopen("memtime.text","wb+");
-            for( auto & insn : empties){
-                fwrite(insn.ptr,1,insn.size,f_co_empty);
-            }
-            fclose(f_co_empty);
-        }
 
+
+        printf("before initialization \n");
         {
             vector<MyInsn> init_insns;
             setup_initailization(init_insns,c,insn_pool);
@@ -461,14 +406,14 @@ int main(int argc, char **argv){
             //inplace_insert( cur_kd, init_insns, cur_kd.start_addr, mkds);
             target_shift += getSize(init_insns);
         }
-
+        puts("GGGGGGGGGGGGG");
         dumpBuffers(mkds);
 #ifndef MEASURE_BASE 
         uint32_t branch_id =0 ;
         for( const auto & pair_addr_sgpr : save_mask_insns){
             auto addr = pair_addr_sgpr.first;
             auto exec_cond_sgpr = pair_addr_sgpr.second;
-            //printf("0x%x: branch id = %d, exec_cond_sgpr = %d\n",addr,branch_id,exec_cond_sgpr);
+            printf("0x%x: branch id = %d, exec_cond_sgpr = %d\n",addr,branch_id,exec_cond_sgpr);
             vector<MyInsn> update_branch_statistic;
             per_branch_instrumentation(update_branch_statistic, branch_id  , exec_cond_sgpr , c ,insn_pool);
             
@@ -481,11 +426,8 @@ int main(int argc, char **argv){
         uint32_t my_offset = num_branches * 8;
         //setup_writeback(writeback_insns, c ,insn_pool);
         memtime_epilogue(writeback_insns, c, my_offset , insn_pool);
-        vector<uint32_t> new_endpgms;
-        new_endpgms.push_back(0x10ac);
+        printf("before inserting writeback\n");
         for (const auto & endpgm : endpgms){
-            printf("now endpgm at address = %x\n",endpgm);
-        //for (const auto & endpgm : new_endpgms){
             inplace_insert( mkds,mkd_id, writeback_insns, endpgm);
             target_shift+= getSize(writeback_insns);
         }
@@ -494,10 +436,9 @@ int main(int argc, char **argv){
         dumpBuffers(mkds);
 
         for(unsigned long ii =0 ; ii < mkds.size(); ii++){
-            printf("updateing kernel with name %s with new address = %x, new size = %u\n",mkds[ii].name.c_str(),mkds[ii].start_addr,mkds[ii].end_addr - mkds[ii].start_addr);
             update_function_symbol(fp,mkds[ii].name.c_str(),mkds[ii].start_addr, mkds[ii].end_addr - mkds[ii].start_addr);
         }
-        //break;
+
     }
     fclose(fp);
     finalize(binaryPath,mkds,text_offset);

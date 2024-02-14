@@ -1,6 +1,6 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=expand_args update_note_phdr report_args_loc disassemble bd_base split_kernel merge_kernel bd_inplace update_text_phdr update_dynamic debug update_kd
+srcs=expand_args update_note_phdr report_args_loc disassemble bd_base split_kernel merge_kernel bd_inplace bd_inplace_global update_text_phdr update_dynamic debug update_kd pure_bd
 libs=kernel_elf_helper.o
 
 BINS=$(addprefix bin/,$(srcs))
@@ -26,6 +26,13 @@ bin/bd_base: src/bd_inplace.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/he
 
 bin/bd_inplace: src/bd_inplace.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
 	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/bd_inplace.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/bd_inplace
+
+bin/pure_bd: src/pure_bd.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
+	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/pure_bd.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/pure_bd
+
+
+bin/bd_inplace_global: src/bd_inplace_global.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
+	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/bd_inplace.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/bd_inplace_global
 
 bin/debug: src/debug.cpp lib/InsnFactory.h lib/kernel_elf_helper.o src/helper.h
 	g++ -g -Wall -Wextra -Wno-class-memaccess -I$(DYNINST_ROOT)/include -I$(TBB) -Ilib/ -Ilib/inih/ -Ilib/amdgpu-tooling src/debug.cpp lib/amdgpu-tooling/KernelDescriptor.cpp -L$(DYNINST_ROOT)/lib -Iinclude -Iinih/ -I/opt/intel-tbb/include lib/kernel_elf_helper.o  $(lDyninst) -o bin/debug

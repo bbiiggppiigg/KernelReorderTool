@@ -42,10 +42,17 @@ with open(filename) as f:
     max_vgpr = 0
     branch_count = 0
     kname = ""
+    in_parse = False
     for i in range(len(lines)):
         if("<" in lines[i] and ("+" not in lines[i]) and "BB" not in lines[i]):
             trash,line = lines[i].split("<")
             line,trash = line.split(">")
+            if( ".text" in line):
+                while not ("<" in lines[i] and ("+" not in lines[i]) and "BB" not in lines[i]):
+                    i=i+1
+                i = i -1
+                continue
+
             if(fid != 1):
                 print("sgpr_max = ",max_sgpr,";")
                 print("vgpr_max = ",max_vgpr,";")

@@ -116,7 +116,7 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
     if(vgpr_usage < 0)
         vgpr_usage =0 ;
     uint32_t sgpr_bits = sgpr_usage / 16;
-    if(sgpr_bits%16)
+    if(sgpr_usage%16)
         sgpr_bits +=1;
     sgpr_bits -=1;
     if(sgpr_bits <0)
@@ -128,7 +128,11 @@ void set_sgpr_vgpr_usage(FILE * fp , uint32_t kd_offset , uint32_t sgpr_usage ,u
     uint32_t old_sgpr_bits, old_vgpr_bits;
     old_sgpr_bits = (old_bits & 0x3c0) >> 6;
     old_vgpr_bits = old_bits & 0x3f;
-    assert(old_sgpr_bits <= sgpr_bits);
+    if( old_sgpr_bits > sgpr_bits){
+        printf("WARNING ! sgpr old bits = %x, sgpr_new_bits = % x\n",old_sgpr_bits, sgpr_bits);
+        //assert(old_sgpr_bits <= sgpr_bits);
+        sgpr_bits = old_sgpr_bits;
+    }
     assert(old_vgpr_bits <= vgpr_bits);
     
     uint32_t new_mask =  ( 0xaf <<16 ) | ( sgpr_bits << 6 ) | vgpr_bits;

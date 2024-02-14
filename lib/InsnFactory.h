@@ -638,7 +638,7 @@ class InsnFactory {
 			uint32_t op = 33;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
 			uint32_t imm = 1;
-			cmd_low = ( cmd_low | (op << 18) | (imm << 17) );
+			cmd_low = ( cmd_low | (op << 18)  );
 
 			cmd_high = ( cmd_high );
 			memcpy( cmd_ptr ,&cmd_low,  4 );
@@ -726,7 +726,8 @@ class InsnFactory {
 			uint32_t op = 17;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
 			uint32_t imm = 1;
-			cmd_low = ( cmd_low | (op << 18) | (imm << 17) |  (1 << 16 ) |  s_data_pair << 6 | (s_base_pair >> 1) );
+            uint32_t glc = 0;
+			cmd_low = ( cmd_low | (op << 18) | (imm << 17) | (glc << 16)  |  s_data_pair << 6 | (s_base_pair >> 1) );
 
 			cmd_high = ( cmd_high | offset );
 			memcpy( cmd_ptr ,&cmd_low,  4 );

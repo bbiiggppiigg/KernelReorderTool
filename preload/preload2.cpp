@@ -14,6 +14,24 @@
 #include <iostream>
 #include <stdio.h>
 #include <mutex>
+using namespace std;
+#include <chrono>
+
+
+/*typedef float SECS_t;
+inline long long get_time()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000000) + tv.tv_usec;
+}
+
+// Returns the number of seconds elapsed between the two specified times
+inline SECS_t elapsed_time(long long start_time, long long end_time)
+{
+    return ((SECS_t) (end_time - start_time)) / ((SECS_t)(1000 * 1000));
+}*/
+
 /*
    typedef struct dim3 {
    uint32_t x;  ///< x
@@ -59,25 +77,27 @@ typedef void** (*registerFatBinary_t ) (
         const void * data);
 
 
-/*
-   registerFatBinary_t realRegisterFatBinary =0 ;
-   struct __CudaFatBinaryWrapper {
-   unsigned int magic;
-   unsigned int version;
-   void*        binary;
-   void*        dummy1;
-   };
 
-   extern "C" void** __hipRegisterFatBinary(void* data)
-   {
-   __CudaFatBinaryWrapper* fbwrapper = reinterpret_cast<__CudaFatBinaryWrapper*>(data);
-   __CudaFatBinaryWrapper newwrapper;
-   memcpy(&newwrapper,fbwrapper,sizeof(__CudaFatBinaryWrapper));
-   printf("data %lx : %s %lx\n", (uint64_t) data, (char * ) data, (uint64_t) fbwrapper->binary); 
-   newwrapper.binary = fatbin_data;
-   return realRegisterFatBinary( &newwrapper );
+registerFatBinary_t realRegisterFatBinary =0 ;
+struct __CudaFatBinaryWrapper {
+    unsigned int magic;
+    unsigned int version;
+    void*        binary;
+    void*        dummy1;
+};
 
-   }*/
+FILE * fdebug;
+extern "C" void** __hipRegisterFatBinary(void* data)
+{
+    if(realRegisterFatBinary == 0){
+        realRegisterFatBinary = (registerFatBinary_t) dlsym(RTLD_NEXT,"__hipRegisterFatBinary");   
+    }
+
+    __CudaFatBinaryWrapper* fbwrapper = reinterpret_cast<__CudaFatBinaryWrapper*>(data);
+    fprintf(fdebug,"data %lx : %s %lx\n", (uint64_t) data, (char * ) data, (uint64_t) fbwrapper->binary); 
+    return realRegisterFatBinary( data );
+
+}
 
 typedef void (*registerFunc_t ) (
         void** modules,
@@ -104,7 +124,6 @@ std::map<int ,int > testMap;
 registerFunc_t realRegisterFunction;
 int g_kid = 0;
 
-FILE * fdebug;
 extern "C" void __hipRegisterFunction(
         void** modules,
         const void*  hostFunction,
@@ -117,7 +136,7 @@ extern "C" void __hipRegisterFunction(
         dim3*        gridDim,
         int*         wSize){
     fprintf(fdebug,"modules = %p, hostFunciton = %p, devceFunciton = %s, deviceName = %s\n",modules,hostFunction, deviceFunction, deviceName);
-    
+
     if(realRegisterFunction == 0){
         realRegisterFunction = (registerFunc_t) dlsym(RTLD_NEXT,"__hipRegisterFunction");   
         INIReader reader("config.ini");
@@ -163,19 +182,25 @@ typedef uint32_t (*launch_t)(const void *hostFunction,
 
 launch_t realLaunch;
 
-void print_result(uint32_t * records, uint32_t kid ,uint32_t num_records, uint32_t num_branches){
-    fprintf(fdata,"num_records = %u\n",num_records);
-    fprintf(fdebug,"num_records = %u\n",num_records);
-    uint32_t m_stride = (num_branches+2) * 2;
-    for (uint32_t i =0; i < num_records ;i += m_stride){
-        uint32_t j =0;
-        for(; j < num_branches ; j++){
+
+void print_result_v2(uint32_t * records, const char * kname ,uint32_t num_warps, uint32_t num_branches){
+    fprintf(fdebug,"num_records = %u,%s\n",num_warps * (num_branches+2),kname);
+    uint32_t stride = (num_branches+2)*2;
+
 #ifdef PRINT_DETAIL
-            fprintf(fdata,"\tK%d:%x %x\n",kid,records[i+j*2],records[i+j*2+1]);
+    fprintf(fdata,"num_records = %u,%s\n",num_warps * (num_branches+2),kname);
+#else
+    fprintf(fdata,"num_records = %u,%s\n",num_warps,kname);
 #endif
+    for ( uint32_t warp_index = 0  ; warp_index < num_warps; warp_index++){
+#ifdef PRINT_DETAIL
+        for ( uint32_t branch_index = 0 ; branch_index < num_branches ; branch_index++){
+            uint32_t index = (warp_index * (num_branches+2)  + branch_index) ;
+            fprintf(fdata,"\tK%d:%x %x\n",index,records[index*2],records[index*2+1]);
         }
-        uint64_t * mem_time = (uint64_t * ) & records [i+j*2];
-        fprintf(fdata,"%u: %llx %llx\n",kid,mem_time[0],mem_time[1]);
+#endif
+        uint64_t * mem_time = (uint64_t * ) & records [ (warp_index+1) * stride-4 ];
+        fprintf(fdata,"%u: %llx %llx\n",warp_index ,mem_time[0],mem_time[1]);
     }
     fprintf(fdata,"done\n");
 }
@@ -198,7 +223,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
 
     config * c = FuncLookup[hostFunction];
     if(c){
-       
+
 
         uint32_t warps_per_block =  ( blockDim.x * blockDim.y * blockDim.z + 63 ) / 64;
         uint32_t no_warps = gridDim.x * gridDim.y * gridDim.z * warps_per_block;
@@ -212,15 +237,15 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         kernel_launch_tracker * klt_ptr;
         bool found = false;
         /*for ( int i =0; i < mempool.size() ; i ++){
-            klt_ptr = mempool[i]; 
-            fprintf(fdebug,"Iterating  memory pool at 0x%llx, size = %u\n",klt_ptr->data_h, data_size);
-            if(mempool[i]->status == 2 && mempool[i]->data_size >= klt_ptr->avail_size){
-                klt_ptr = mempool[i]; 
-                found = true;
-                fprintf(fdebug,"Reusing memory at 0x%llx, size = %u\n",klt_ptr->data_h, data_size);
-                break;
-            }
-        }*/
+          klt_ptr = mempool[i]; 
+          fprintf(fdebug,"Iterating  memory pool at 0x%llx, size = %u\n",klt_ptr->data_h, data_size);
+          if(mempool[i]->status == 2 && mempool[i]->data_size >= klt_ptr->avail_size){
+          klt_ptr = mempool[i]; 
+          found = true;
+          fprintf(fdebug,"Reusing memory at 0x%llx, size = %u\n",klt_ptr->data_h, data_size);
+          break;
+          }
+          }*/
         hipError_t hip_ret;
         if(found == false){
             fprintf(fdebug,"Can't reuse memory , allocating new memory of size %u\n",data_size);
@@ -238,9 +263,9 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         klt_ptr->num_branches =num_branches ;
 
         //if(launch_id == 0){
-            memset(klt_ptr->data_h,0x0, data_size);
-            hip_ret = hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice);
-            assert(hip_ret == hipSuccess);
+        memset(klt_ptr->data_h,0x0, data_size);
+        hip_ret = hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice);
+        assert(hip_ret == hipSuccess);
         //}
         int new_kernarg_vec_size = (c->kernarg_num + 6) * 8 ;
         void ** newArgs = (void **) malloc(new_kernarg_vec_size);
@@ -258,13 +283,23 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         *(newArgs+c->kernarg_num+3) = &(gridDim.y);
         *(newArgs+c->kernarg_num+4) = &(blockDim.x);
         *(newArgs+c->kernarg_num+5) = &(blockDim.y);
-        realLaunch(hostFunction,gridDim,blockDim, newArgs, sharedMemBytes, stream);
 
-    
+        //typedef std::chrono::high_resolution_clock Clock;
+        typedef std::chrono::steady_clock Clock;
+        auto t1 = Clock::now();
+        realLaunch(hostFunction,gridDim,blockDim, newArgs, sharedMemBytes, stream);
+        hipStreamSynchronize(stream);
+        auto t2 = Clock::now();
+        //std::chrono::duration<double> elapsed_seconds = t2 - t1;
+        int clock_rate = 0;
+        hipDeviceGetAttribute (&clock_rate, hipDeviceAttributeClockRate, 0 );
+        cout << "Elapsed duration = " << std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count() << " clockRate = " <<  clock_rate << "\n";
         fprintf(fdebug,"copying to 0x%llx from 0x%llx\n", klt_ptr->data_h,klt_ptr->data);
+
         hipMemcpy(klt_ptr->data_h,klt_ptr->data,klt_ptr->data_size,hipMemcpyDeviceToHost);
-        fprintf(fdata,"%s\n",c->name.c_str());
-        print_result (klt_ptr->data_h, klt_ptr->kid , klt_ptr -> num_records, klt_ptr->num_branches);
+        //fprintf(fdata,"%s\n",c->name.c_str());
+        //print_result (klt_ptr->data_h, klt_ptr->kid , klt_ptr -> num_records, klt_ptr->num_branches);
+        print_result_v2 (klt_ptr->data_h, c->name.c_str() , no_warps, klt_ptr->num_branches);
         klt_ptr->status=2;
         fprintf(fdebug,"hip Launch Kernel Ended\n\n");
         launch_id ++;
@@ -293,13 +328,13 @@ hipError_t hipMalloc(void** ptr, size_t sizeBytes){
 typedef hipError_t (* memcpy_t) (void* dst, const void* src, size_t sizeBytes, hipMemcpyKind kind);
 memcpy_t realMemcpy;
 /*
-hipError_t hipMemcpy(void* dst, const void* src, size_t sizeBytes, hipMemcpyKind kind){
-    if(realMemcpy ==0){
-        realMemcpy = (memcpy_t) dlsym(RTLD_NEXT,"hipMemcpy");
-    }
-    printf("hipMemcpy dst = %p , src = %p\n", dst,src);
-    return realMemcpy(dst,src,sizeBytes,kind);
-}*/
+   hipError_t hipMemcpy(void* dst, const void* src, size_t sizeBytes, hipMemcpyKind kind){
+   if(realMemcpy ==0){
+   realMemcpy = (memcpy_t) dlsym(RTLD_NEXT,"hipMemcpy");
+   }
+   printf("hipMemcpy dst = %p , src = %p\n", dst,src);
+   return realMemcpy(dst,src,sizeBytes,kind);
+   }*/
 
 
 

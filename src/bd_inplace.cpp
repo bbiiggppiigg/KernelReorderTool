@@ -181,6 +181,7 @@ void setup_initailization(vector<MyInsn> & ret , config c , vector<char *> & ins
 
 
 
+    ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_WGID,S_WARP_PER_BLOCK,insn_pool));
 
 
@@ -318,7 +319,7 @@ void memtime_epilogue(vector<MyInsn> & ret,  config c , uint32_t my_offset ,vect
 
     ret.push_back(InsnFactory::create_s_wait_cnt(insn_pool));
     ret.push_back(InsnFactory::create_s_store_dword_x2(S_TIMER ,S_PERWF_OFFSET,my_offset +  8, insn_pool)); 
-    //ret.push_back(InsnFactory::create_s_dcache_wb(insn_pool));
+    ret.push_back(InsnFactory::create_s_dcache_wb(insn_pool));
 }
 
 
