@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cstring>
+#include <cassert>
 using namespace std;
 
 class MyInsn {
@@ -308,6 +309,16 @@ class InsnFactory {
 		}
 
 		// VOP2
+        static MyInsn create_v_lshl_b32(  uint32_t vdst, uint32_t vsrc1, uint32_t src0, vector<char *> & insn_pool ){
+			uint32_t cmd = 0x0;
+			uint32_t op = 18;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 4 );
+			cmd = ( cmd | (op << 25) | ( vdst << 17) | (vsrc1 << 9)  | src0 );
+			memcpy( cmd_ptr ,&cmd,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,4,std::string("v_add_u32 "));
+		}
+
 		static MyInsn create_v_add_u32(  uint32_t vdst, uint32_t vsrc1, uint32_t src0, vector<char *> & insn_pool ){
 			uint32_t cmd = 0x0;
 			uint32_t op = 52;
@@ -637,7 +648,6 @@ class InsnFactory {
 			uint32_t cmd_high = 0x0;
 			uint32_t op = 33;
 			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
-			uint32_t imm = 1;
 			cmd_low = ( cmd_low | (op << 18)  );
 
 			cmd_high = ( cmd_high );
@@ -748,6 +758,20 @@ class InsnFactory {
 			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
 			insn_pool.push_back(cmd_ptr);
 			return MyInsn(cmd_ptr,8,std::string("s_store_dword_x2 "));
+		}
+		static MyInsn create_global_store_dword( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xdc030000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 28;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 18 )  | (2 << 14) | offset );
+
+			cmd_high = ( cmd_high | (0x7f << 16) |s_data_pair << 8 | s_base_pair );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x2 "));
+
 		}
 
 		static MyInsn create_global_store_dword_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){

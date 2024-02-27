@@ -16,7 +16,7 @@ void expand_args(const char * filename)
     }*/
     size_t len = strlen(filename);
     char newfile_name[len+20];
-    sprintf(newfile_name,"%s.expanded.new\0",filename);
+    sprintf(newfile_name,"%s.expanded.new",filename);
     /*
      * Step 1, read .note file into buffer
      */
@@ -65,10 +65,10 @@ void expand_args(const char * filename)
     for ( uint32_t k_list_i = 0 ; k_list_i < kernarg_list.size(); k_list_i++){
         kernarg_list[k_list_i].convert(kernarg_list_map);
         uint32_t old_kernarg_size = 0;
-        size_t i =0 ;
+        //size_t i =0 ;
         old_kernarg_size = kernarg_list_map[".kernarg_segment_size"].convert(old_kernarg_size);
         kernarg_list_map[".args"].convert(arg_list_map);
-        int old_kernarg_num  = arg_list_map.size();
+        //int old_kernarg_num  = arg_list_map.size();
         std::cout<< old_kernarg_size << " " << arg_list_map.size() << std::endl;
         uint32_t new_kernarg_size = old_kernarg_size;
         if(old_kernarg_size % 8)

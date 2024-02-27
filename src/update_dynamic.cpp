@@ -6,35 +6,11 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "kernel_elf_helper.h"
 #define ElfW Elf64_Ehdr
 #define Shdr Elf64_Shdr
 #define Phdr Elf64_Phdr
 using namespace std;
-
-void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
-    fread(shdr,sizeof(Shdr),1,f);
-}
-
-void read_phdr(Phdr * phdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_phoff + sizeof(Phdr) * offset ,SEEK_SET);
-    fread(phdr,sizeof(Phdr),1,f);
-}
-
-char * read_section(FILE * f, Shdr * shdr) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    char * ret = (char * ) malloc(size) ;
-    fread(ret,size,1,f);
-    return ret;
-}
-void write_section(FILE * f, Shdr * shdr, char * data) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    fwrite(data,size,1,f);
-}
 
 
 void update_text_phdr(FILE * f){
@@ -56,7 +32,7 @@ void update_text_phdr(FILE * f){
     uint32_t new_size;
     int text_index = -1, dynamic_index = -1;
     uint32_t new_dynamic_offset = -1;
-    uint32_t old_text_addr = -1, old_dynamic_addr = -1;
+    //uint32_t old_text_addr = -1, old_dynamic_addr = -1;
     for (unsigned int i = 1; i < header.e_shnum ; i ++){
         read_shdr(&tmp_shdr,f,&header,i);
         char * sh_name = shstrtable+tmp_shdr.sh_name;

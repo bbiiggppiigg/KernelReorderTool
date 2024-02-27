@@ -4,24 +4,12 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <vector>
+#include "kernel_elf_helper.h"
 using namespace std;
 
 #define ElfW Elf64_Ehdr 
 #define Shdr Elf64_Shdr
 
-void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
-    fread(shdr,sizeof(Shdr),1,f);
-}
-
-char * read_section(FILE * f, Shdr * shdr) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    char * ret = (char * ) malloc(size + 1 ) ;
-    fread(ret,size,1,f);
-    return ret;
-}
 
 typedef struct meta{
     long long int offset;

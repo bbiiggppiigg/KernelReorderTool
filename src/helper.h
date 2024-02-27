@@ -314,7 +314,7 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
                 instr.getOperands(operands);
                 for (auto & opr : operands){
                     if(opr.isWritten()){
-                        auto name = opr.format(Arch_amdgpu_cdna2);
+                        auto name = opr.format(Arch_amdgpu_gfx940);
                         uint32_t start,end;
                         if(sscanf(name.c_str(),"S%d",&start)==1){
                             //std::cout << "OPRNAMEZ" << name<<"Z" << std::endl;
@@ -326,9 +326,9 @@ void analyze_binary(char * binaryPath, vector<myKernelDescriptor> &mkds){
                             mkd.save_mask_insns.push_back(make_pair(addr + instr.size() , sgpr));
                             break;
                         }
-                        //std::cout << "OPERAND WRITTEN, NAME = " << opr.format(Arch_amdgpu_cdna2) << std::endl;    
+                        //std::cout << "OPERAND WRITTEN, NAME = " << opr.format(Arch_amdgpu_gfx940) << std::endl;    
                     }else{
-                        //std::cout << "OPERAND NOT WRITTEN, NAME = " << opr.format(Arch_amdgpu_cdna2) << std::endl;    
+                        //std::cout << "OPERAND NOT WRITTEN, NAME = " << opr.format(Arch_amdgpu_gfx940) << std::endl;    
                     }
                 }
             }else{
@@ -669,6 +669,7 @@ void finalize(char * filename, vector<myKernelDescriptor> &mkds, uint32_t text_o
         fwrite(mkd.buffer,mkd.end_addr-mkd.start_addr,1,f_text);
     }
     fclose(f_text);
+    puts("Code Object closed successfully");
 }
 
 

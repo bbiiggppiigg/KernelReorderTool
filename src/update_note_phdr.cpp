@@ -5,36 +5,11 @@
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
-
+#include "kernel_elf_helper.h"
 #define ElfW Elf64_Ehdr
 #define Shdr Elf64_Shdr
 #define Phdr Elf64_Phdr
 using namespace std;
-
-void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
-    fread(shdr,sizeof(Shdr),1,f);
-}
-
-void read_phdr(Phdr * phdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_phoff + sizeof(Phdr) * offset ,SEEK_SET);
-    fread(phdr,sizeof(Phdr),1,f);
-}
-
-char * read_section(FILE * f, Shdr * shdr) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    char * ret = (char * ) malloc(size) ;
-    fread(ret,size,1,f);
-    return ret;
-}
-void write_section(FILE * f, Shdr * shdr, char * data) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    fwrite(data,size,1,f);
-}
 
 
 void update_note_phdr(FILE * f){
@@ -77,7 +52,7 @@ void update_note_phdr(FILE * f){
         read_phdr(&tmp_phdr,f,&header,i);
         if(tmp_phdr.p_type == PT_NOTE){
             printf("found program header of type PT_NOTE, index = %u\n", i);
-            printf("p offset = %u , paddr = %u , p vaddr = %u\n", tmp_phdr.p_offset , tmp_phdr.p_paddr, tmp_phdr.p_vaddr);
+            printf("p offset = %lu , paddr = %lu , p vaddr = %lu\n", tmp_phdr.p_offset , tmp_phdr.p_paddr, tmp_phdr.p_vaddr);
             tmp_phdr.p_filesz = new_size;
             tmp_phdr.p_memsz = new_size;
             tmp_phdr.p_offset = new_offset;
@@ -90,7 +65,7 @@ void update_note_phdr(FILE * f){
             printf("patching offset in program header at 0x%lx to %d, ret value = %d\n",header.e_phoff+sizeof(Phdr)*i,new_offset,ret);
             break;
         }else{
-            printf("p offset = %u , paddr = %u , p vaddr = %u\n", tmp_phdr.p_offset , tmp_phdr.p_paddr, tmp_phdr.p_vaddr);
+            printf("p offset = %lu , paddr = %lu , p vaddr = %lu\n", tmp_phdr.p_offset , tmp_phdr.p_paddr, tmp_phdr.p_vaddr);
         }
     }
 
@@ -99,6 +74,7 @@ void update_note_phdr(FILE * f){
 
 
 int main(int argc, char * argv[]){
+    assert(argc > 1);
     FILE * fp = fopen(argv[1],"rw+");
     update_note_phdr(fp);
     fclose(fp);

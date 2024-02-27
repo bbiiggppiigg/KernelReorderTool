@@ -6,7 +6,6 @@
 #include "hip/hip_runtime.h"
 
 #include "hip/hip_runtime_api.h"
-//#include "amd_comgr.h"
 #include <link.h>
 #include <vector>
 #include <map>
@@ -18,6 +17,7 @@ using namespace std;
 #include <chrono>
 
 
+#define HIP_ASSERT(x) (assert((x)==hipSuccess))
 /*typedef float SECS_t;
 inline long long get_time()
 {
@@ -187,20 +187,9 @@ void print_result_v2(uint32_t * records, const char * kname ,uint32_t num_warps,
     fprintf(fdebug,"num_records = %u,%s\n",num_warps * (num_branches+2),kname);
     uint32_t stride = (num_branches+2)*2;
 
-#ifdef PRINT_DETAIL
-    fprintf(fdata,"num_records = %u,%s\n",num_warps * (num_branches+2),kname);
-#else
     fprintf(fdata,"num_records = %u,%s\n",num_warps,kname);
-#endif
-    for ( uint32_t warp_index = 0  ; warp_index < num_warps; warp_index++){
-#ifdef PRINT_DETAIL
-        for ( uint32_t branch_index = 0 ; branch_index < num_branches ; branch_index++){
-            uint32_t index = (warp_index * (num_branches+2)  + branch_index) ;
-            fprintf(fdata,"\tK%d:%x %x\n",index,records[index*2],records[index*2+1]);
-        }
-#endif
-        uint64_t * mem_time = (uint64_t * ) & records [ (warp_index+1) * stride-4 ];
-        fprintf(fdata,"%u: %llx %llx\n",warp_index ,mem_time[0],mem_time[1]);
+    for ( uint32_t index =0 ; index < 256 ; index ++){
+      fprintf(fdata,"%u: %x\n",index,records[index]);
     }
     fprintf(fdata,"done\n");
 }
@@ -231,7 +220,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         uint32_t num_branches = c->branch_count; // TODO:
 
         uint32_t size_per_warp = (num_branches * 2 * sizeof(uint32_t) + 2 * sizeof(uint64_t)); // 2 for counters for each branch , 2 for timestamp
-        uint32_t data_size = no_warps * size_per_warp;
+        uint32_t data_size = no_warps * size_per_warp * 64;
         uint32_t no_records = data_size / sizeof(uint32_t);
 
         kernel_launch_tracker * klt_ptr;
@@ -252,8 +241,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
             klt_ptr = (kernel_launch_tracker *)  malloc(sizeof(kernel_launch_tracker));
             mempool.push_back(klt_ptr);
             klt_ptr->data_h = (uint32_t * ) malloc(data_size);
-            hip_ret = hipMalloc((void **) & klt_ptr->data , data_size  );
-            assert(hip_ret == hipSuccess);
+            HIP_ASSERT(hipMalloc((void **) & klt_ptr->data , data_size  ));
             klt_ptr->avail_size = data_size;
         }
         klt_ptr->data_size = data_size;
@@ -264,8 +252,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
 
         //if(launch_id == 0){
         memset(klt_ptr->data_h,0x0, data_size);
-        hip_ret = hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice);
-        assert(hip_ret == hipSuccess);
+        HIP_ASSERT(hipMemcpy(klt_ptr->data,klt_ptr->data_h,data_size,hipMemcpyHostToDevice));
         //}
         int new_kernarg_vec_size = (c->kernarg_num + 6) * 8 ;
         void ** newArgs = (void **) malloc(new_kernarg_vec_size);
@@ -274,7 +261,7 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         fprintf(fdebug,"hip Launch Kernel Called, hostFunction = %p, kernel name = %s\n",hostFunction,c->name.c_str());
         fprintf(fdebug,"Grid(x,y,z)=(%u,%u,%u) Block(x,y,z)=(%u,%u,%u)\n", gridDim.x , gridDim.y , gridDim.z ,blockDim.x , blockDim.y , blockDim.z);
         fprintf(fdebug,"WARPS_PER_BLOCK = %u, NO_WARPS = %u, NUM_BRANCHES = %u\n", warps_per_block, no_warps, num_branches);
-        fprintf(fdebug,"data_h = 0x%llx , data = 0x%llx\n", klt_ptr->data_h, klt_ptr->data);
+        fprintf(fdebug,"data_h = 0x%p , data = 0x%p\n", klt_ptr->data_h, klt_ptr->data);
 
         *(newArgs+c->kernarg_num) = &(klt_ptr->data);
 
@@ -288,15 +275,15 @@ extern "C" hipError_t hipLaunchKernel(const void *hostFunction,
         typedef std::chrono::steady_clock Clock;
         auto t1 = Clock::now();
         realLaunch(hostFunction,gridDim,blockDim, newArgs, sharedMemBytes, stream);
-        hipStreamSynchronize(stream);
+        HIP_ASSERT(hipStreamSynchronize(stream));
         auto t2 = Clock::now();
         //std::chrono::duration<double> elapsed_seconds = t2 - t1;
         int clock_rate = 0;
-        hipDeviceGetAttribute (&clock_rate, hipDeviceAttributeClockRate, 0 );
+        HIP_ASSERT(hipDeviceGetAttribute (&clock_rate, hipDeviceAttributeClockRate, 0 ));
         cout << "Elapsed duration = " << std::chrono::duration_cast<std::chrono::microseconds>(t2-t1).count() << " clockRate = " <<  clock_rate << "\n";
-        fprintf(fdebug,"copying to 0x%llx from 0x%llx\n", klt_ptr->data_h,klt_ptr->data);
+        fprintf(fdebug,"copying to 0x%p from 0x%p\n", klt_ptr->data_h,klt_ptr->data);
 
-        hipMemcpy(klt_ptr->data_h,klt_ptr->data,klt_ptr->data_size,hipMemcpyDeviceToHost);
+        HIP_ASSERT(hipMemcpy(klt_ptr->data_h,klt_ptr->data,klt_ptr->data_size,hipMemcpyDeviceToHost));
         //fprintf(fdata,"%s\n",c->name.c_str());
         //print_result (klt_ptr->data_h, klt_ptr->kid , klt_ptr -> num_records, klt_ptr->num_branches);
         print_result_v2 (klt_ptr->data_h, c->name.c_str() , no_warps, klt_ptr->num_branches);
@@ -374,7 +361,7 @@ __attribute__((destructor)) static void fini(void){
     for(std::vector<kernel_launch_tracker*>::iterator it = mempool.begin(); it != mempool.end(); ){
         klt = *it;
         if(klt->status == 1){
-            hipFree(klt->data);
+            HIP_ASSERT(hipFree(klt->data));
             free(klt->data_h);
             klt->status = 0;
         }

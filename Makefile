@@ -1,23 +1,33 @@
 HIPCC=/opt/rocm/hip/bin/hipcc
 
-srcs=expand_args update_note_phdr report_args_loc disassemble bd_base split_kernel merge_kernel bd_inplace bd_inplace_global update_text_phdr update_dynamic debug update_kd pure_bd
+srcs=thread_id expand_args update_note_phdr report_args_loc disassemble split_kernel merge_kernel bd_inplace bd_inplace_global update_text_phdr update_dynamic debug update_kd pure_bd
+special=bd_base
 libs=kernel_elf_helper.o
 
-BINS=$(addprefix bin/,$(srcs))
-LIBS=$(addprefix lib/,$(libs))
+EXES := $(foreach item,$(srcs),bin/$(item).exe)
+all: bin/kernel_elf_helper.o $(EXES)
 
-all : $(BINS) $(LIBS)
-
-DYNINST_ROOT=/home/wuxx1279/bin/dyninst-amdgpu-codegen
+DYNINST_ROOT=/home/wuxx1279/bin/dyninst-liveness
 ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
 endif
 
 TBB=/opt/spack/opt/spack/linux-centos8-zen2/gcc-10.2.0/intel-tbb-2020.3-zbj2dajg6q53hhsfd7kglxwqhyc7ie3v/include
-TBB=/opt/intel-tbb/include
 lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_filesystem -lboost_system  -ldynElf
+iLib= -I$(DYNINST_ROOT)/include -I$(TBB) -I ELFIO -I amdgpu-tooling -I msgpack-c -Iinclude -I/opt/rocm/include -Ilib/ -Ilib/inih -Ilib/amdgpu-tooling
+lLib= -L$(DYNINST_ROOT)/lib -L/opt/rocm/lib/
+options= -std=c++17 -g -Wall -Wextra -Wno-class-memaccess
+loptions= -Wl,--demangle -Wl,-rpath,/opt/rocm/lib
+links= $(lDyninst) -lamd_comgr
+bin/%.exe: src/%.cpp $(CURDIR)/bin/kernel_elf_helper.o src/helper.h
+	g++ $(options) $(iLib) $^ $(iLib) $(lLib) $(links) $(loptions) -o $@
 
+bin/kernel_elf_helper.o: src/kernel_elf_helper.h src/kernel_elf_helper.cpp 
+	g++ -g -Wall  -c src/kernel_elf_helper.cpp -o $@ -I msgpack-c/include/  -I/opt/intel-tbb/include
+clean:
+	rm -f *.bundle *.hsaco *.isa src/*.o lib/*.o bin/*.o bin/*.exe
 
+ifeq ("x","y")
 lib/kernel_elf_helper.o: lib/kernel_elf_helper.h lib/kernel_elf_helper.cpp 
 	g++ -g -Wall  -c lib/kernel_elf_helper.cpp -o lib/kernel_elf_helper.o -I msgpack-c/include/  -I/opt/intel-tbb/include
 
@@ -69,4 +79,4 @@ bin/disassemble: src/disassemble.cpp
 	g++ $< -o $@ -I$(DYNINST_ROOT)/include -I/opt/intel-tbb/include -L$(DYNINST_ROOT)/lib $(lDyninst)
 clean:
 	rm -f *.bundle *.hsaco *.isa src/*.o lib/*.o bin/*
-
+endif

@@ -6,36 +6,12 @@
 #include <cassert>
 #include <cstdlib>
 #include "../lib/AMDHSAKernelDescriptor.h"
-
+#include "kernel_elf_helper.h"
 #define ElfW Elf64_Ehdr
 #define Shdr Elf64_Shdr
 #define Phdr Elf64_Phdr
 using namespace std;
 
-void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
-    fread(shdr,sizeof(Shdr),1,f);
-}
-
-void read_phdr(Phdr * phdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_phoff + sizeof(Phdr) * offset ,SEEK_SET);
-    fread(phdr,sizeof(Phdr),1,f);
-}
-
-char * read_section(FILE * f, Shdr * shdr) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    char * ret = (char * ) malloc(size) ;
-    fread(ret,size,1,f);
-    return ret;
-}
-void write_section(FILE * f, Shdr * shdr, char * data) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    fwrite(data,size,1,f);
-}
 
 
 /* Update the symbol of labels that is after the insertion point such that llvm-objdump works correctly
@@ -100,7 +76,7 @@ void update_kd_symbols(FILE * f){
         char * symbol_name = strtab_content + symbol -> st_name;
         if(strstr(symbol_name,".kd")!=0){
             uint32_t kd_offset = symbol->st_value;
-            printf("KD AT OFFSET : 0x%llx\n", kd_offset);
+            printf("KD AT OFFSET : 0x%x\n", kd_offset);
             llvm::amdhsa::kernel_descriptor_t fkd;
             fseek(f,kd_offset,SEEK_SET);
             fread(&fkd,sizeof(fkd),1,f);
@@ -116,6 +92,7 @@ void update_kd_symbols(FILE * f){
 }
 
 int main(int argc, char * argv[]){
+    assert(argc > 1);
     FILE * fp = fopen(argv[1],"rw+");
     update_kd_symbols(fp);
     fclose(fp);

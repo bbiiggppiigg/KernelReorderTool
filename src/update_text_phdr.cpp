@@ -1,40 +1,14 @@
-
 #include <elf.h>
 #include <vector>
 #include <iostream>
 #include <cstring>
 #include <cassert>
 #include <cstdlib>
-
+#include "kernel_elf_helper.h"
 #define ElfW Elf64_Ehdr
 #define Shdr Elf64_Shdr
 #define Phdr Elf64_Phdr
 using namespace std;
-
-void read_shdr(Shdr * shdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_shoff + sizeof(Shdr) * offset ,SEEK_SET);
-    fread(shdr,sizeof(Shdr),1,f);
-}
-
-void read_phdr(Phdr * phdr,FILE * f,  ElfW* hdr, int offset){
-    fseek(f,hdr->e_phoff + sizeof(Phdr) * offset ,SEEK_SET);
-    fread(phdr,sizeof(Phdr),1,f);
-}
-
-char * read_section(FILE * f, Shdr * shdr) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    char * ret = (char * ) malloc(size) ;
-    fread(ret,size,1,f);
-    return ret;
-}
-void write_section(FILE * f, Shdr * shdr, char * data) {
-    int offset = shdr->sh_offset;
-    int size = shdr->sh_size;
-    fseek(f,offset,SEEK_SET);
-    fwrite(data,size,1,f);
-}
 
 
 void update_text_phdr(FILE * f){
@@ -58,7 +32,7 @@ void update_text_phdr(FILE * f){
     uint32_t new_size;
     int text_index = -1, dynamic_index = -1;
     uint32_t new_dynamic_offset = -1;
-    uint32_t old_text_addr = -1, old_dynamic_addr = -1;
+    //uint32_t old_text_addr = -1, old_dynamic_addr = -1;
     for (unsigned int i = 1; i < header.e_shnum ; i ++){
         read_shdr(&tmp_shdr,f,&header,i);
         char * sh_name = shstrtable+tmp_shdr.sh_name;
@@ -118,7 +92,7 @@ void update_text_phdr(FILE * f){
         unsigned char bind = ELF64_ST_BIND(symbol->st_info);
         unsigned char type = ELF64_ST_TYPE(symbol->st_info);
         if(type == STT_FUNC){
-            printf(" Found STT_FUNC , VALUE = 0x%x, size = %u\n",symbol->st_value, symbol->st_size);
+            printf(" Found STT_FUNC , VALUE = 0x%lx, size = %lu\n",symbol->st_value, symbol->st_size);
             symbol->st_value = symbol->st_value - old_offset + new_offset;
             fseek(f,symtab_shdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
             fwrite(symbol,sizeof(Elf64_Sym),1,f);
@@ -132,7 +106,7 @@ void update_text_phdr(FILE * f){
         unsigned char bind = ELF64_ST_BIND(symbol->st_info);
         unsigned char type = ELF64_ST_TYPE(symbol->st_info);
         if(type == STT_FUNC){
-            printf(" Found STT_FUNC , VALUE = 0x%x, size = %u\n",symbol->st_value, symbol->st_size);
+            printf(" Found STT_FUNC , VALUE = 0x%lx, size = %lu\n",symbol->st_value, symbol->st_size);
             symbol->st_value = symbol->st_value - old_offset + new_offset;
             fseek(f,dynsym_shdr.sh_offset + i * sizeof(Elf64_Sym),SEEK_SET);
             fwrite(symbol,sizeof(Elf64_Sym),1,f);
@@ -156,7 +130,7 @@ void update_text_phdr(FILE * f){
     printf("new offset = %u, new size = %u\n", new_offset , new_size); 
     Phdr tmp_phdr;
     uint32_t load_count = 0;
-    int32_t load_1 , load_2 , load_3;
+    long load_1 , load_2 , load_3;
     load_1 = load_2 = load_3 = -1;
     for (unsigned int i = 0; i < header.e_phnum ;i ++){
         read_phdr(&tmp_phdr,f,&header,i);
@@ -181,7 +155,7 @@ void update_text_phdr(FILE * f){
     if(load_count != 3){
         printf("ERR : load _count = %d\n",load_count);
     }
-    printf("load addrs = %x %x %x\n",load_1,load_2,load_3);
+    printf("load addrs = %lx %lx %lx\n",load_1,load_2,load_3);
     printf("new text addr = %x, new dynamic addr = %x\n",new_offset, new_dynamic_offset);
     for (unsigned int i = 0; i < header.e_phnum ;i ++){
         read_phdr(&tmp_phdr,f,&header,i);
@@ -224,6 +198,7 @@ void update_text_phdr(FILE * f){
 
 
 int main(int argc, char * argv[]){
+    assert(argc > 1);
     FILE * fp = fopen(argv[1],"rw+");
     update_text_phdr(fp);
     fclose(fp);
