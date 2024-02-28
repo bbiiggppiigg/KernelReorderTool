@@ -98,8 +98,8 @@ void setup_initailization2(vector<MyInsn> & ret , config &c , vector<char *> & i
   uint32_t V_ADDR1 = 7;
   uint32_t V_DEBUG1 = 8;
   uint32_t V_DEBUG2 = 9;
-
-  c.vgpr_max = 10;
+  if(c.vgpr_max < 10)
+    c.vgpr_max = 10;
 
   uint32_t S_PERWF_OFFSET;
   if (c.vgpr_spill ){
@@ -117,7 +117,7 @@ void setup_initailization2(vector<MyInsn> & ret , config &c , vector<char *> & i
     ret.push_back(InsnFactory::create_s_load_dwordx4(FIRST_FREE_SGPR,S_KERNARG, c.old_kernarg_size+12 ,insn_pool));
   }else{
     ret.push_back(InsnFactory::create_s_load_dwordx2(FIRST_FREE_SGPR,S_KERNARG, c.old_kernarg_size+12 ,insn_pool));
-    ret.push_back(InsnFactory::create_s_load_dwordx2(FIRST_FREE_SGPR+2,S_KERNARG, c.old_kernarg_size+28 ,insn_pool));
+    ret.push_back(InsnFactory::create_s_load_dwordx2(FIRST_FREE_SGPR+2,S_KERNARG, c.old_kernarg_size+20 ,insn_pool));
   }
 
   ret.push_back(InsnFactory::create_s_load_dwordx2(S_WBADDR,S_KERNARG , c.old_kernarg_size ,insn_pool));
