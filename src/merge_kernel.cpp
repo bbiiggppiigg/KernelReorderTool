@@ -54,7 +54,7 @@ int main(int argc, char ** argv){
         int my_size = 24 + 8+8*3 * bundle_size[i];
         for(int j =0 ; j < bundle_size[i]; j++){
             puts(names[x]);
-            my_size + strlen(names[x]);
+            my_size += strlen(names[x]);
             x++;
         }
         meta_size.push_back(my_size);
