@@ -158,7 +158,7 @@ void setup_initailization2(vector<MyInsn> & ret , config &c , vector<char *> & i
   { // Calculate Flattend Thread ID // in V_TMP
     ret.push_back(InsnFactory::create_s_mul_i32(S_TMP,S_BLOCKDIM_X,S_GRIDDIM_X,insn_pool)); // 128 * 512 = 65536  
     ret.push_back(InsnFactory::create_v_mul_lo_u32(V_TMP1,V_TMP1+256,S_TMP,insn_pool)); 
-    ret.push_back(InsnFactory::create_v_add_co_u32(V_TMP , V_TMP+256, V_TMP1+256, insn_pool)); 
+    ret.push_back(InsnFactory::create_v_add_co_u32(V_TMP , V_TMP, V_TMP1+256, insn_pool)); 
     ret.push_back(InsnFactory::create_v_mov_b32(V_DEBUG2 , V_TMP+256, insn_pool)); 
 
   }

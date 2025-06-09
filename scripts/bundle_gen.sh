@@ -29,8 +29,8 @@ for ff in *; do
     llvm-objdump -d $ff | sed 's/\/\/.*//g'> orig_clean.s
     cat $ff.config.ini >> tmp.config.ini
     LD_LIBRARY_PATH=$NEW_LIBRARY_PATH $BIN/update_kd.exe $ff
-    #LD_LIBRARY_PATH=$NEW_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 KR_DEBUG=1 $BIN/bd_inplace.exe $ff $ff.config.ini  
-    LD_LIBRARY_PATH=$NEW_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 KR_DEBUG=1 $BIN/thread_id.exe $ff $ff.config.ini  
+    #LD_LIBRARY_PATH=$NEW_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 KR_DEBUG=1 $BIN/thread_id.exe $ff $ff.config.ini  
+    LD_LIBRARY_PATH=$NEW_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 KR_DEBUG=1 $BIN/thread_bb_counter.exe $ff $ff.config.ini  
     #LD_LIBRARY_PATH=/home/wuxx1279/bin/dyninst-main/lib:$LD_LIBRARY_PATH DYNINST_DEBUG_PARSING=1 OMP_NUM_THREADS=1 KR_DEBUG=1 $BIN/debug $ff $ff.config.ini  
     cp $ff $ff.tmp1
     llvm-objcopy --rename-section=.text=.old.text $ff # rename old text section
@@ -50,6 +50,7 @@ for ff in *; do
 
     cp $ff $ff.tmp5
     LD_LIBRARY_PATH=$NEW_LIBRARY_PATH    $BIN/expand_args.exe $ff.note &> expand_args.log
+    #LD_LIBRARY_PATH=$NEW_LIBRARY_PATH    $BIN/update_msgpack_gpr_usage.exe $ff.note  40 40
     llvm-objcopy --add-section=.note=$ff.note.expanded.new $ff # add a new section 
 
     cp $ff $ff.tmp6

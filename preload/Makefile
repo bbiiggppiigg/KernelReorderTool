@@ -1,4 +1,4 @@
-srcs := preload.so #preload2.so preload3.so purebd_preload.so base_preload.so
+srcs := preload.so bb_preload.so #preload2.so preload3.so purebd_preload.so base_preload.so
 all: $(srcs)
 
 %.so: %.cpp

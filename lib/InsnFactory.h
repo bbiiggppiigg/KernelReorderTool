@@ -824,6 +824,22 @@ class InsnFactory {
 			return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x2 "));
 
 		}
+		static MyInsn create_global_atomic_inc_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
+			uint32_t cmd_low = 0xde000000;
+			uint32_t cmd_high = 0x0;
+			uint32_t op = 107;
+			char * cmd_ptr = (char *   ) malloc(sizeof(char) * 8 );
+			cmd_low = (cmd_low | (op<< 18 )  | (2 << 14) | offset );
+
+			cmd_high = ( cmd_high | (0x7f << 16) |s_data_pair << 8 | s_base_pair );
+			memcpy( cmd_ptr ,&cmd_low,  4 );
+			memcpy( cmd_ptr +4 ,&cmd_high,  4 );
+			insn_pool.push_back(cmd_ptr);
+
+            printf("Creating atomic_inc instr, cmd = %lx\n",*(uint64_t *)cmd_ptr);
+			return MyInsn(cmd_ptr,8,std::string("flat_store_dword_x2 "));
+
+		}
 
 		static MyInsn create_flat_store_dword_x2( uint32_t s_data_pair, uint32_t s_base_pair  ,  uint32_t offset,vector<char *> & insn_pool ){
 			uint32_t cmd_low = 0xdc000000;
