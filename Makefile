@@ -5,20 +5,24 @@ special=bd_base
 libs=kernel_elf_helper.o
 
 EXES := $(foreach item,$(srcs),bin/$(item).exe)
-all: bin/kernel_elf_helper.o $(EXES)
+all: bin/unbundle.exe bin/kernel_elf_helper.o $(EXES)
 
 DYNINST_ROOT=/home/wuxx1279/bin/dynmaster
 ifeq ($(DYNINST_ROOT),)
 $(error DYNINST_ROOT is not set)
 endif
 
-lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_filesystem -lboost_system  -ldynElf
-iLib= -I$(DYNINST_ROOT)/include -I$(TBB) -I -I amdgpu-tooling -I msgpack-c -Iinclude -I/opt/rocm/include -Ilib/ -Ilib/inih -Ilib/amdgpu-tooling
-lLib= -L$(DYNINST_ROOT)/lib64 -L/opt/rocm/lib/
+lDyninst= -ldyninstAPI -lsymtabAPI -lparseAPI -linstructionAPI -lcommon -lboost_filesystem -lboost_system
+BOOST_PATH=/opt/boost-1.84.0/
+iLib= -I$(DYNINST_ROOT)/include -I$(TBB) -I -I amdgpu-tooling -I msgpack-c -Iinclude -I$(ROCM_PATH)/include -Ilib/ -Ilib/inih -Ilib/amdgpu-tooling -I$(BOOST_PATH)/include
+lLib= -L$(DYNINST_ROOT)/lib64 -L$(ROCM_PATH)/lib/ -L$(BOOST_PATH)/lib/
 options= -std=c++17 -g -Wall -Wextra -Wno-class-memaccess
 loptions= -Wl,--demangle -Wl,-rpath,/opt/rocm/lib
 links= $(lDyninst) -lamd_comgr
 
+bin/unbundle.exe: src/unbundle.cpp
+	g++ $^ -o $@
+	
 bin/parse_kernel.exe: src/parse_kernel.cpp $(CURDIR)/bin/kernel_elf_helper.o
 	g++ $(options) $(iLib) $^ $(iLib) $(lLib) $(links) $(loptions) -o $@
 
